@@ -44,6 +44,7 @@ public class CameraController : MonoBehaviour
     private CinemachineOrbitalFollow orbitalFollow;
     private CinemachinePanTilt firstPersonPanTilt;
 
+    private Transform _playerTransform; // Thêm dòng này để lưu transform của player
     public bool IsFirstPerson => isFirstPerson;
     public bool IsShiftLock => isShiftLock;
 
@@ -62,8 +63,10 @@ public class CameraController : MonoBehaviour
         }
 
         // 2. Gán Target cho Camera là chính bản thân Player (biến transform của script này)
-        if (thirdPersonCamera != null) thirdPersonCamera.Follow = this.transform;
-        if (firstPersonCamera != null) firstPersonCamera.Follow = this.transform; // Component HardLockToTarget cũng sẽ tự dùng target này
+        _playerTransform = this.transform; // Lưu lại transform của player
+
+        if (thirdPersonCamera != null) thirdPersonCamera.Follow = _playerTransform;
+        if (firstPersonCamera != null) firstPersonCamera.Follow = _playerTransform; // Component HardLockToTarget cũng sẽ tự dùng target này
 
         // 3. Tìm các component điều khiển
         if (thirdPersonCamera != null)
@@ -79,7 +82,7 @@ public class CameraController : MonoBehaviour
 
         // Tạo động điểm Follow lệch sang bên (dùng cho Shift Lock)
         var offsetObj = new GameObject("[ShiftLockFollowPoint]");
-        offsetObj.transform.SetParent(this.transform);
+        offsetObj.transform.SetParent(_playerTransform);
         offsetObj.transform.localPosition = new Vector3(shiftLockSideOffset, 0f, 0f);
         _shiftLockFollowTarget = offsetObj.transform;
         _defaultFollowTarget = this.transform;

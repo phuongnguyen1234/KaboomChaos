@@ -28,6 +28,11 @@ namespace Core.Interfaces
         /// </summary>
         bool IsMoving { get; }
         
+        /// <summary>
+        /// Vận tốc hiện tại theo trục Y của người chơi.
+        /// </summary>
+        float VerticalVelocity { get; }
+        
         // Bạn có thể thêm các phương thức hoặc thuộc tính khác vào đây
         // Ví dụ: Vector3 GetPosition();
         // Ví dụ: void TakeDamage(float amount);
