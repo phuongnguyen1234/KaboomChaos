@@ -96,10 +96,13 @@ namespace Player
             currentControllerState = ControllerState.Rising;
         }
 
-        // Sử dụng Update để xử lý logic không liên quan đến vật lý, như xoay nhân vật.
-        // LateUpdate cũng là một lựa chọn tốt để đảm bảo nó chạy sau khi camera đã cập nhật.
-        private void LateUpdate()
+        /// <summary>
+        /// Ghi đè FixedUpdate của lớp cha để thêm logic xoay nhân vật.
+        /// Luôn phải gọi base.FixedUpdate() để đảm bảo logic di chuyển và vật lý gốc được thực thi.
+        /// </summary>
+        protected override void FixedUpdate()
         {
+            base.FixedUpdate(); // Rất quan trọng! Gọi hàm của lớp cha để xử lý di chuyển.
             HandleCharacterRotation();
         }
 
@@ -110,29 +113,31 @@ namespace Player
         /// </summary>
         private void HandleCharacterRotation()
         {
-            bool isAiming = _cameraController != null && (_cameraController.IsFirstPerson || _cameraController.IsShiftLock);
+            if (_cameraController == null) return;
 
-            if (isAiming)
+            bool isShiftLocked = _cameraController.IsShiftLock;
+
+            // Khi bật Shift Lock hoặc ở góc nhìn thứ nhất, nhân vật sẽ xoay theo camera.
+            // Logic này được xử lý trong CameraController để đảm bảo thứ tự thực thi đúng.
+            if (isShiftLocked || _cameraController.IsFirstPerson)
             {
-                // Ở chế độ First Person hoặc Shift Lock, xoay nhân vật tức thì theo hướng camera.
-                if (Camera.main != null)
-                {
-                    transform.rotation = Quaternion.Euler(0f, Camera.main.transform.eulerAngles.y, 0f);
-                }
                 // Reset vận tốc xoay mượt để không bị giật khi chuyển về góc nhìn thứ 3.
                 _rotationVelocity = 0f;
+                // Xử lý xoay nhân vật theo camera đã được chuyển sang CameraController.
             }
             else
             {
-                // Ở góc nhìn thứ 3, xoay nhân vật mượt mà theo hướng di chuyển.
+                // Ở góc nhìn thứ 3 (không Shift Lock), xoay nhân vật mượt mà theo hướng di chuyển.
                 Vector3 horizontalVelocity = GetMovementVelocity();
                 horizontalVelocity.y = 0;
 
+                // Chỉ xoay khi có di chuyển
                 if (horizontalVelocity.magnitude < 0.1f) return;
 
+                // Tính toán góc xoay dựa trên hướng di chuyển
                 float targetAngle = Mathf.Atan2(horizontalVelocity.x, horizontalVelocity.z) * Mathf.Rad2Deg;
                 float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref _rotationVelocity, _rotationSmoothTime);
-
+                
                 transform.rotation = Quaternion.Euler(0f, angle, 0f);
             }
         }

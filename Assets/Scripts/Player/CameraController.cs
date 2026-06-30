@@ -2,6 +2,7 @@ using UnityEngine;
 using Unity.Cinemachine;
 using UnityEngine.InputSystem;
 
+namespace Player{
 public class CameraController : MonoBehaviour
 {
     [Header("Cameras")]
@@ -44,6 +45,7 @@ public class CameraController : MonoBehaviour
     private CinemachineOrbitalFollow orbitalFollow;
     private CinemachinePanTilt firstPersonPanTilt;
 
+    private PlayerController _playerController; // Thêm tham chiếu đến PlayerController
     private Transform _playerTransform; // Thêm dòng này để lưu transform của player
     public bool IsFirstPerson => isFirstPerson;
     public bool IsShiftLock => isShiftLock;
@@ -64,6 +66,7 @@ public class CameraController : MonoBehaviour
 
         // 2. Gán Target cho Camera là chính bản thân Player (biến transform của script này)
         _playerTransform = this.transform; // Lưu lại transform của player
+        _playerController = GetComponent<PlayerController>(); // Lấy PlayerController
 
         if (thirdPersonCamera != null) thirdPersonCamera.Follow = _playerTransform;
         if (firstPersonCamera != null) firstPersonCamera.Follow = _playerTransform; // Component HardLockToTarget cũng sẽ tự dùng target này
@@ -119,6 +122,13 @@ public class CameraController : MonoBehaviour
         HandleRotation();
         HandleZoom();
     }
+    
+    // Sử dụng LateUpdate để xoay nhân vật theo camera sau khi tất cả các tính toán di chuyển đã hoàn tất.
+    // Điều này đảm bảo camera và nhân vật luôn đồng bộ.
+    void LateUpdate()
+    {
+        HandleCharacterRotationWithCamera();
+    }
 
 
     /// <summary>
@@ -135,14 +145,14 @@ public class CameraController : MonoBehaviour
     {
         bool shouldRotateCamera = false;
 
-        if (isFirstPerson || isShiftLock)
+        if (isFirstPerson)
         {
-            // Góc nhìn thứ nhất HOẶC Shift Lock: luôn khóa con trỏ ở giữa và xoay camera
+            // Góc nhìn thứ nhất: luôn khóa con trỏ ở giữa và xoay camera
             shouldRotateCamera = true;
         }
         else
         {
-            // Góc nhìn thứ ba thông thường: khóa con trỏ khi giữ chuột phải
+            // Góc nhìn thứ ba (cả shift-lock và bình thường): khóa con trỏ khi giữ chuột phải hoặc khi shift-lock
             if (Mouse.current.rightButton.wasPressedThisFrame)
             {
                 savedMousePos = Mouse.current.position.ReadValue();
@@ -156,7 +166,7 @@ public class CameraController : MonoBehaviour
                 Cursor.visible = true;
             }
 
-            if (Mouse.current.rightButton.isPressed)
+            if (Mouse.current.rightButton.isPressed || isShiftLock)
             {
                 shouldRotateCamera = true;
             }
@@ -191,6 +201,21 @@ public class CameraController : MonoBehaviour
                     orbitalFollow.VerticalAxis.Value = Mathf.Clamp(orbitalFollow.VerticalAxis.Value, -89f, 89f);
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// Xoay nhân vật theo hướng camera khi ở chế độ First Person hoặc Shift Lock.
+    /// Hàm này được gọi trong LateUpdate để đảm bảo nó chạy sau khi camera đã được cập nhật.
+    /// </summary>
+    private void HandleCharacterRotationWithCamera()
+    {
+        if (_playerController == null || Camera.main == null) return;
+
+        // Chỉ xoay nhân vật khi ở chế độ First Person hoặc Shift Lock.
+        if (isFirstPerson || isShiftLock)
+        {
+            _playerTransform.rotation = Quaternion.Euler(0f, Camera.main.transform.eulerAngles.y, 0f);
         }
     }
 
@@ -292,4 +317,4 @@ public class CameraController : MonoBehaviour
             }
         }
     }
-}
+}}

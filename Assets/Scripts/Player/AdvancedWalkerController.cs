@@ -130,7 +130,11 @@ namespace Player
             jumpKeyIsPressed = _newJumpKeyPressedState;
         }
 
-        void FixedUpdate()
+        /// <summary>
+        /// Cập nhật controller trong vòng lặp vật lý.
+        /// Được đánh dấu là 'protected virtual' để các lớp con có thể ghi đè và thêm logic mà không làm mất đi chức năng gốc.
+        /// </summary>
+        protected virtual void FixedUpdate()
 		{
 			ControllerUpdate();
 		}
