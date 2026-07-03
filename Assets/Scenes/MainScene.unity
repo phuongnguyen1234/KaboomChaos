@@ -206,8 +206,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.15212347, y: -0.0000003438774, z: 0.00000005292783, w: 0.98836154}
-  m_LocalPosition: {x: 0, y: 5, z: 0}
+  m_LocalRotation: {x: 0.2856884, y: -0.000000019382657, z: 0.0000000057782206, w: 0.9583226}
+  m_LocalPosition: {x: 0.97833174, y: 3.7902915, z: -9.055194}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -324,7 +324,7 @@ Light:
   m_InnerSpotAngle: 21.80208
   m_CookieSize2D: {x: 10, y: 10}
   m_Shadows:
-    m_Type: 2
+    m_Type: 0
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -1130,8 +1130,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1895581343}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.15212347, y: -0.0000003438774, z: 0.00000005292783, w: 0.98836154}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 0.2856884, y: -0.000000019382657, z: 0.0000000057782206, w: 0.9583226}
+  m_LocalPosition: {x: 0.97833174, y: -1.2097085, z: -9.055194}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1186,7 +1186,7 @@ MonoBehaviour:
     RotationDamping: {x: 1, y: 1, z: 1}
     QuaternionDamping: 1
   OrbitStyle: 0
-  Radius: 5
+  Radius: 4
   Orbits:
     Top:
       Radius: 2
@@ -1210,7 +1210,7 @@ MonoBehaviour:
       Time: 2
     Restrictions: 0
   VerticalAxis:
-    Value: 17.5
+    Value: 33.2
     Center: 17.5
     Range: {x: -89, y: 89}
     Wrap: 0
@@ -1251,7 +1251,7 @@ MonoBehaviour:
   Target:
     TrackingTarget: {fileID: 0}
     LookAtTarget: {fileID: 0}
-    CustomLookAtTarget: 0
+    CustomLookAtTarget: 1
   Lens:
     FieldOfView: 60.000004
     OrthographicSize: 5

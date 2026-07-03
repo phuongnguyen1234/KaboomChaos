@@ -20,6 +20,9 @@ namespace Player
 
         private CameraController _cameraController;
         private PlayerAnimator _playerAnimator; // Tham chiếu đến PlayerAnimator
+
+        private bool _justLanded; // Cờ báo cho sự kiện tiếp đất
+
         #endregion
 
         #region IPlayer Implementation
@@ -49,6 +52,23 @@ namespace Player
         /// </summary>
         public float VerticalVelocity => GetVelocity().y;
 
+        /// <summary>
+        /// Tốc độ di chuyển ngang hiện tại của người chơi.
+        /// </summary>
+        public float HorizontalSpeed => GetMovementVelocity().magnitude;
+
+        /// <summary>
+        /// Triển khai thuộc tính JustLanded từ IPlayer.
+        /// </summary>
+        public bool JustLanded
+        {
+            get
+            {
+                if (!_justLanded) return false;
+                _justLanded = false; // Tự động reset sau khi được đọc
+                return true;
+            }
+        }
         #endregion
 
         /// <summary>
@@ -86,15 +106,26 @@ namespace Player
 
             OnJump?.Invoke(momentum);
 
-            // Kích hoạt animation nhảy
-            _playerAnimator?.TriggerJump();
-
             if (_useLocalMomentum)
                 momentum = tr.worldToLocalMatrix * momentum;
 
-            // Ngay lập tức chuyển sang trạng thái Rising để bỏ qua logic giữ nút nhảy.
-            currentControllerState = ControllerState.Rising;
+            // Thay vì ép trạng thái thành 'Rising', hãy để lớp cha xử lý việc chuyển sang 'Jumping'.
+            // Điều này cho phép trạng thái 'Grounded' được thiết lập đúng cách trong một frame trước khi nhảy lại.
+            // Bằng cách không gọi base.OnJumpStart(), chúng ta vẫn bỏ qua được việc khóa input ('jumpInputIsLocked = true'),
+            // cho phép thực hiện bunny hop.
+            // Dòng dưới đây không còn cần thiết và là nguyên nhân gây ra vấn đề.
+            // currentControllerState = ControllerState.Rising;
         }
+
+        /// <summary>
+        /// Ghi đè hàm OnGroundContactRegained để bật cờ _justLanded.
+        /// </summary>
+        protected override void OnGroundContactRegained()
+        {
+            base.OnGroundContactRegained();
+            _justLanded = true;
+        }
+
 
         /// <summary>
         /// Ghi đè FixedUpdate của lớp cha để thêm logic xoay nhân vật.

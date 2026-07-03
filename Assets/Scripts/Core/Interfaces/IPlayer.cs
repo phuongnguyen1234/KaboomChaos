@@ -33,6 +33,17 @@ namespace Core.Interfaces
         /// </summary>
         float VerticalVelocity { get; }
         
+        /// <summary>
+        /// Tốc độ di chuyển ngang hiện tại của người chơi (không bao gồm vận tốc theo trục Y).
+        /// </summary>
+        float HorizontalSpeed { get; }
+
+        /// <summary>
+        /// Trả về 'true' trong một frame duy nhất ngay sau khi người chơi tiếp đất.
+        /// Hữu ích cho các sự kiện animation hoặc âm thanh cần kích hoạt một lần.
+        /// </summary>
+        bool JustLanded { get; }
+
         // Bạn có thể thêm các phương thức hoặc thuộc tính khác vào đây
         // Ví dụ: Vector3 GetPosition();
         // Ví dụ: void TakeDamage(float amount);

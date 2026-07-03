@@ -9,9 +9,9 @@ namespace Player
 	public class Mover : MonoBehaviour {
 
 		//Collider variables;
-		[Header("Mover Options :")]
+		[Header("Mover Options")]
 		[Range(0f, 1f)][SerializeField] float stepHeightRatio = 0.25f;
-		[Header("Collider Options :")]
+		[Header("Collider Options")]
 		[SerializeField] float colliderHeight = 2f;
 		[SerializeField] float colliderThickness = 1f;
 		[SerializeField] Vector3 colliderOffset = Vector3.zero;
@@ -22,12 +22,12 @@ namespace Player
 		CapsuleCollider capsuleCollider;
 
 		//Sensor variables;
-		[Header("Sensor Options :")]
+		[Header("Sensor Options")]
 		[SerializeField] public Sensor.CastType sensorType = Sensor.CastType.Raycast;
 		private float sensorRadiusModifier = 0.8f;
 		private int currentLayer;
 		[SerializeField] bool isInDebugMode = false;
-		[Header("Sensor Array Options :")]
+		[Header("Sensor Array Options")]
 		[SerializeField] [Range(1, 5)] int sensorArrayRows = 1;
 		[SerializeField] [Range(3, 10)] int sensorArrayRayCount = 6;
 		[SerializeField] bool sensorArrayRowsAreOffset = false;
@@ -55,7 +55,7 @@ namespace Player
 			Setup();
 
 			//Initialize sensor;
-			sensor = new Sensor(this.tr, col);
+			sensor = new Sensor(tr, col);
 			RecalculateColliderDimensions();
 			RecalibrateSensor();
 		}
@@ -67,7 +67,7 @@ namespace Player
 		void OnValidate()
 		{
 			//Recalculate collider dimensions;
-			if(this.gameObject.activeInHierarchy)
+			if(gameObject.activeInHierarchy)
 				RecalculateColliderDimensions();
 
 			//Recalculate raycast array preview positions;
@@ -126,7 +126,7 @@ namespace Player
 				//Check again;
 				if(col == null)
 				{
-					Debug.LogWarning("There is no collider attached to " + this.gameObject.name + "!");
+					Debug.LogWarning("There is no collider attached to " + gameObject.name + "!");
 					return;
 				}				
 			}
@@ -143,15 +143,15 @@ namespace Player
 				_size.y = colliderHeight * (1f - stepHeightRatio);
 				boxCollider.size = _size;
 
-				boxCollider.center = boxCollider.center + new Vector3(0f, stepHeightRatio * colliderHeight/2f, 0f);
+				boxCollider.center += new Vector3(0f, stepHeightRatio * colliderHeight/2f, 0f);
 			}
 			else if(sphereCollider)
 			{
 				sphereCollider.radius = colliderHeight/2f;
 				sphereCollider.center = colliderOffset * colliderHeight;
 
-				sphereCollider.center = sphereCollider.center + new Vector3(0f, stepHeightRatio * sphereCollider.radius, 0f);
-				sphereCollider.radius *= (1f - stepHeightRatio);
+				sphereCollider.center += new Vector3(0f, stepHeightRatio * sphereCollider.radius, 0f);
+				sphereCollider.radius *= 1f - stepHeightRatio;
 			}
 			else if(capsuleCollider)
 			{
@@ -159,8 +159,8 @@ namespace Player
 				capsuleCollider.center = colliderOffset * colliderHeight;
 				capsuleCollider.radius = colliderThickness/2f;
 
-				capsuleCollider.center = capsuleCollider.center + new Vector3(0f, stepHeightRatio * capsuleCollider.height/2f, 0f);
-				capsuleCollider.height *= (1f - stepHeightRatio);
+				capsuleCollider.center += new Vector3(0f, stepHeightRatio * capsuleCollider.height/2f, 0f);
+				capsuleCollider.height *= 1f - stepHeightRatio;
 
 				if(capsuleCollider.height/2f < capsuleCollider.radius)
 					capsuleCollider.radius = capsuleCollider.height/2f;
@@ -192,11 +192,11 @@ namespace Player
 
 			//Fit collider height to sensor radius;
 			if(boxCollider)
-				_radius = Mathf.Clamp(_radius, _safetyDistanceFactor, (boxCollider.size.y/2f) * (1f - _safetyDistanceFactor));
+				_radius = Mathf.Clamp(_radius, _safetyDistanceFactor, boxCollider.size.y/2f * (1f - _safetyDistanceFactor));
 			else if(sphereCollider)
 				_radius = Mathf.Clamp(_radius, _safetyDistanceFactor, sphereCollider.radius * (1f - _safetyDistanceFactor));
 			else if(capsuleCollider)
-				_radius = Mathf.Clamp(_radius, _safetyDistanceFactor, (capsuleCollider.height/2f) * (1f - _safetyDistanceFactor));
+				_radius = Mathf.Clamp(_radius, _safetyDistanceFactor, capsuleCollider.height/2f * (1f - _safetyDistanceFactor));
 
 			//Set sensor variables;
 
@@ -205,7 +205,7 @@ namespace Player
 
 			//Calculate and set sensor length;
 			float _length = 0f;
-			_length += (colliderHeight * (1f - stepHeightRatio)) * 0.5f;
+			_length += colliderHeight * (1f - stepHeightRatio) * 0.5f;
 			_length += colliderHeight * stepHeightRatio;
 			baseSensorRange = _length * (1f + _safetyDistanceFactor) * tr.localScale.x;
 			sensor.castLength = _length * tr.localScale.x;
@@ -228,19 +228,19 @@ namespace Player
 		void RecalculateSensorLayerMask()
 		{
 			int _layerMask = 0;
-			int _objectLayer = this.gameObject.layer;
+			int _objectLayer = gameObject.layer;
  
 			//Calculate layermask;
             for (int i = 0; i < 32; i++)
             {
                 if (!Physics.GetIgnoreLayerCollision(_objectLayer, i)) 
-					_layerMask = _layerMask | (1 << i);
+					_layerMask |= 1 << i;
 			}
 
 			//Make sure that the calculated layermask does not include the 'Ignore Raycast' layer;
 			if(_layerMask == (_layerMask | (1 << LayerMask.NameToLayer("Ignore Raycast"))))
 			{
-				_layerMask ^= (1 << LayerMask.NameToLayer("Ignore Raycast"));
+				_layerMask ^= 1 << LayerMask.NameToLayer("Ignore Raycast");
 			}
  
 			//Set sensor layermask;
@@ -269,7 +269,7 @@ namespace Player
 
 			//Set sensor length;
 			if(IsUsingExtendedSensorRange)
-				sensor.castLength = baseSensorRange + (colliderHeight * tr.localScale.x) * stepHeightRatio;
+				sensor.castLength = baseSensorRange + colliderHeight * tr.localScale.x * stepHeightRatio;
 			else
 				sensor.castLength = baseSensorRange;
 			
@@ -289,8 +289,8 @@ namespace Player
 			float _distance = sensor.GetDistance();
 
 			//Calculate how much mover needs to be moved up or down;
-			float _upperLimit = ((colliderHeight * tr.localScale.x) * (1f - stepHeightRatio)) * 0.5f;
-			float _middle = _upperLimit + (colliderHeight * tr.localScale.x) * stepHeightRatio;
+			float _upperLimit = colliderHeight * tr.localScale.x * (1f - stepHeightRatio) * 0.5f;
+			float _middle = _upperLimit + colliderHeight * tr.localScale.x * stepHeightRatio;
 			float _distanceToGo = _middle - _distance;
 
 			//Set new ground adjustment velocity for the next frame;
@@ -302,7 +302,7 @@ namespace Player
 		{
 			//Check if object layer has been changed since last frame;
 			//If so, recalculate sensor layer mask;
-			if(currentLayer != this.gameObject.layer)
+			if(currentLayer != gameObject.layer)
 				RecalculateSensorLayerMask();
 
 			Check();

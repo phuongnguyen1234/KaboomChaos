@@ -18,8 +18,9 @@ namespace Player
         // Sử dụng StringToHash để tối ưu hiệu suất khi truy cập tham số Animator
         private static readonly int IsMovingHash = Animator.StringToHash("IsMoving");
         private static readonly int IsGroundedHash = Animator.StringToHash("IsGrounded");
-        private static readonly int JumpTriggerHash = Animator.StringToHash("Jump");
         private static readonly int VerticalVelocityHash = Animator.StringToHash("VerticalVelocity");
+        private static readonly int SpeedHash = Animator.StringToHash("Speed");
+        private static readonly int ResetTriggerHash = Animator.StringToHash("Reset"); // Thêm trigger cho Reset
 
         #endregion
 
@@ -60,15 +61,15 @@ namespace Player
             
             // Lấy vận tốc theo trục Y từ interface IPlayer để xử lý animation rơi (Fall)
             _animator.SetFloat(VerticalVelocityHash, _player.VerticalVelocity);
-        }
+            
+            // Cập nhật tốc độ di chuyển để điều khiển tốc độ animation
+            _animator.SetFloat(SpeedHash, _player.HorizontalSpeed);
 
-        /// <summary>
-        /// Kích hoạt trigger cho animation nhảy.
-        /// Phương thức này nên được gọi từ bên ngoài (ví dụ: từ PlayerController) khi nhân vật thực hiện nhảy.
-        /// </summary>
-        public void TriggerJump()
-        {
-            _animator.SetTrigger(JumpTriggerHash);
+            // Sử dụng cờ 'JustLanded' để kích hoạt trigger Reset một cách đáng tin cậy,
+            // ngay cả khi trạng thái Grounded chỉ tồn tại trong một khoảnh khắc.
+            if (_player.JustLanded) {
+                _animator.SetTrigger(ResetTriggerHash);
+            }
         }
 
         #endregion

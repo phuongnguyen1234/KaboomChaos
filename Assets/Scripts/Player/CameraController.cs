@@ -11,6 +11,12 @@ public class CameraController : MonoBehaviour
     [Tooltip("Kéo Camera Góc nhìn thứ nhất (Pan Tilt) vào đây. Nếu bỏ trống, script sẽ tự tìm theo tên 'FirstPersonCamera'")]
     public CinemachineCamera firstPersonCamera;
 
+    [Header("Camera Targets")]
+    [Tooltip("Điểm camera góc nhìn thứ 3 sẽ nhìn vào (LookAt). Nếu bỏ trống, sẽ dùng Follow target.")]
+    public Transform thirdPersonLookAtTarget;
+    [Tooltip("Điểm camera góc nhìn thứ 1 sẽ được đặt tại đó (Follow). Nếu bỏ trống, sẽ dùng transform của Player.")]
+    public Transform firstPersonFollowTarget;
+
     [Header("Rotation Settings")]
     public float lookSpeed = 0.5f;
     public bool invertY = true;
@@ -28,11 +34,9 @@ public class CameraController : MonoBehaviour
     
     [Header("Shift Lock Settings")]
     public bool enableShiftLock = true;
-    [Tooltip("Camera dịch sang phải Player bao nhiêu khi bật Shift Lock (theo local right của Player)")]
-    public float shiftLockSideOffset = 0.75f;
+    [Tooltip("Điểm neo cho camera khi bật Shift Lock. Camera sẽ Follow và LookAt điểm này.")]
+    public Transform shiftLockTarget;
     private bool isShiftLock = false;
-    private Transform _shiftLockFollowTarget; // Điểm Follow offset sang bên được tạo động
-    private Transform _defaultFollowTarget;   // Điểm Follow mặc định (chính Player)
 
     [Header("Input Settings")]
     [Tooltip("Kéo Action tương ứng với nút Shift Lock vào đây")]
@@ -68,8 +72,20 @@ public class CameraController : MonoBehaviour
         _playerTransform = this.transform; // Lưu lại transform của player
         _playerController = GetComponent<PlayerController>(); // Lấy PlayerController
 
-        if (thirdPersonCamera != null) thirdPersonCamera.Follow = _playerTransform;
-        if (firstPersonCamera != null) firstPersonCamera.Follow = _playerTransform; // Component HardLockToTarget cũng sẽ tự dùng target này
+        // Gán target mặc định cho LookAt là chính player, phòng trường hợp không có target nào được gán
+        Transform thirdPersonTarget = thirdPersonLookAtTarget != null ? thirdPersonLookAtTarget : _playerTransform;
+        Transform followTarget = firstPersonFollowTarget != null ? firstPersonFollowTarget : _playerTransform;
+
+        // 3. Gán Target cho Camera
+        if (thirdPersonCamera != null)
+        {
+            thirdPersonCamera.Follow = thirdPersonTarget;
+            thirdPersonCamera.LookAt = thirdPersonTarget;
+        }
+        if (firstPersonCamera != null)
+        {
+            firstPersonCamera.Follow = followTarget;
+        }
 
         // 3. Tìm các component điều khiển
         if (thirdPersonCamera != null)
@@ -83,13 +99,6 @@ public class CameraController : MonoBehaviour
             firstPersonPanTilt = firstPersonCamera.GetComponent<CinemachinePanTilt>();
         }
 
-        // Tạo động điểm Follow lệch sang bên (dùng cho Shift Lock)
-        var offsetObj = new GameObject("[ShiftLockFollowPoint]");
-        offsetObj.transform.SetParent(_playerTransform);
-        offsetObj.transform.localPosition = new Vector3(shiftLockSideOffset, 0f, 0f);
-        _shiftLockFollowTarget = offsetObj.transform;
-        _defaultFollowTarget = this.transform;
-
         // Cài đặt ưu tiên ban đầu
         SetFirstPersonMode(false);
     }
@@ -98,7 +107,7 @@ public class CameraController : MonoBehaviour
     {
         if (Mouse.current == null) return;
 
-        // Bật/tắt Shift Lock (chỉ khi không ở First Person)
+        // Bật/tắt Shift Lock (chỉ khi không ở First Person và đã gán shiftLockTarget)
         if (enableShiftLock && !isFirstPerson && shiftLockAction != null && shiftLockAction.action.WasPressedThisFrame())
         {
             isShiftLock = !isShiftLock;
@@ -138,7 +147,19 @@ public class CameraController : MonoBehaviour
     {
         if (thirdPersonCamera == null) return;
 
-        thirdPersonCamera.Follow = isShiftLock ? _shiftLockFollowTarget : _defaultFollowTarget;
+        // Xác định target mặc định cho góc nhìn thứ 3
+        Transform defaultTarget = thirdPersonLookAtTarget != null ? thirdPersonLookAtTarget : _playerTransform;
+
+        if (isShiftLock && shiftLockTarget != null)
+        {
+            thirdPersonCamera.Follow = shiftLockTarget;
+            thirdPersonCamera.LookAt = shiftLockTarget;
+        }
+        else
+        {
+            thirdPersonCamera.Follow = defaultTarget;
+            thirdPersonCamera.LookAt = defaultTarget;
+        }
     }
 
     private void HandleRotation()
