@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6389088593756549642}
   m_Layer: 6
-  m_Name: PivotR_Leg
+  m_Name: PivotL_Leg
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -73,7 +73,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6327533637506297728}
   m_Layer: 6
-  m_Name: PivotL_Arm
+  m_Name: PivotR_Arm
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -126,10 +126,10 @@ Transform:
   m_Children:
   - {fileID: 1980381318284513624}
   - {fileID: 6415730543822700039}
-  - {fileID: 6327533637506297728}
   - {fileID: 6662133148822328906}
-  - {fileID: 4894884321513673382}
+  - {fileID: 6327533637506297728}
   - {fileID: 6389088593756549642}
+  - {fileID: 4894884321513673382}
   m_Father: {fileID: 5295162767847564109}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5972301456437702894
@@ -338,6 +338,14 @@ MonoBehaviour:
   _slopeLimit: 80
   _useLocalMomentum: 0
   cameraTransform: {fileID: 0}
+  _climbableTag: Climbable
+  _climbSpeed: 4
+  _maxClimbAngle: 45
+  _climbJumpForce: 5
+  _climbCapsuleHeight: 0.7
+  _climbCapsuleCenterY: 1
+  _climbDetectionDistance: 0.2
+  _climbDetectionRadius: 0.24
   _rotationSmoothTime: 0.08
 --- !u!114 &-3142878197026154125
 MonoBehaviour:
@@ -376,7 +384,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4894884321513673382}
   m_Layer: 6
-  m_Name: PivotL_Leg
+  m_Name: PivotR_Leg
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -439,7 +447,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6662133148822328906}
   m_Layer: 6
-  m_Name: PivotR_Arm
+  m_Name: PivotL_Arm
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

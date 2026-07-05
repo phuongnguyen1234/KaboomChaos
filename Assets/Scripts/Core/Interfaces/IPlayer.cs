@@ -44,6 +44,16 @@ namespace Core.Interfaces
         /// </summary>
         bool JustLanded { get; }
 
+        /// <summary>
+        /// Cho biết người chơi có đang leo trèo hay không.
+        /// </summary>
+        bool IsClimbing { get; }
+
+        /// <summary>
+        /// Tốc độ leo trèo hiện tại (từ -1 đến 1, dương là lên, âm là xuống).
+        /// </summary>
+        float ClimbingSpeed { get; }
+
         // Bạn có thể thêm các phương thức hoặc thuộc tính khác vào đây
         // Ví dụ: Vector3 GetPosition();
         // Ví dụ: void TakeDamage(float amount);

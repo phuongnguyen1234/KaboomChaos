@@ -18,9 +18,10 @@ namespace Player
         // Sử dụng StringToHash để tối ưu hiệu suất khi truy cập tham số Animator
         private static readonly int IsMovingHash = Animator.StringToHash("IsMoving");
         private static readonly int IsGroundedHash = Animator.StringToHash("IsGrounded");
-        private static readonly int VerticalVelocityHash = Animator.StringToHash("VerticalVelocity");
         private static readonly int SpeedHash = Animator.StringToHash("Speed");
-        private static readonly int ResetTriggerHash = Animator.StringToHash("Reset"); // Thêm trigger cho Reset
+        private static readonly int ResetTriggerHash = Animator.StringToHash("Reset");
+        private static readonly int IsClimbingHash = Animator.StringToHash("IsClimbing");
+        private static readonly int ClimbingSpeedHash = Animator.StringToHash("ClimbingSpeed");
 
         #endregion
 
@@ -59,9 +60,6 @@ namespace Player
             _animator.SetBool(IsMovingHash, _player.IsMoving);
             _animator.SetBool(IsGroundedHash, _player.IsGrounded);
             
-            // Lấy vận tốc theo trục Y từ interface IPlayer để xử lý animation rơi (Fall)
-            _animator.SetFloat(VerticalVelocityHash, _player.VerticalVelocity);
-            
             // Cập nhật tốc độ di chuyển để điều khiển tốc độ animation
             _animator.SetFloat(SpeedHash, _player.HorizontalSpeed);
 
@@ -70,6 +68,10 @@ namespace Player
             if (_player.JustLanded) {
                 _animator.SetTrigger(ResetTriggerHash);
             }
+
+            // Cập nhật các tham số liên quan đến leo trèo
+            _animator.SetBool(IsClimbingHash, _player.IsClimbing);
+            _animator.SetFloat(ClimbingSpeedHash, _player.ClimbingSpeed);
         }
 
         #endregion

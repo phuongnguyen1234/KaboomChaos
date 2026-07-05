@@ -9,7 +9,7 @@ namespace Player
     /// </summary>
     [RequireComponent(typeof(Mover))]
     [RequireComponent(typeof(PlayerInputAdapter))] // Thay đổi RequireComponent
-    public class PlayerController : AdvancedWalkerController, IPlayer
+    public partial class PlayerController : AdvancedWalkerController, IPlayer
     {
         #region Fields
         [Header("Adapter Settings")]
@@ -69,6 +69,17 @@ namespace Player
                 return true;
             }
         }
+
+        /// <summary>
+        /// Triển khai thuộc tính IsClimbing từ IPlayer.
+        /// </summary>
+        public bool IsClimbing => currentControllerState == ControllerState.Climbing;
+
+        /// <summary>
+        /// Triển khai thuộc tính ClimbingSpeed từ IPlayer.
+        /// Giá trị này được tính toán trong partial class PlayerController.Climbing.
+        /// </summary>
+        public float ClimbingSpeed => _climbingDirection;
         #endregion
 
         /// <summary>
@@ -85,6 +96,9 @@ namespace Player
             
             // Lấy component PlayerAnimator
             _playerAnimator = GetComponent<PlayerAnimator>();
+
+            // Lấy component Collider chính của player để dùng cho các phép tính vật lý
+            _mainCollider = GetComponent<Collider>();
         }
 
         /// <summary>
@@ -133,6 +147,7 @@ namespace Player
         /// </summary>
         protected override void FixedUpdate()
         {
+            ClimbingUpdate(); // Gọi logic cập nhật của phần leo trèo.
             base.FixedUpdate(); // Rất quan trọng! Gọi hàm của lớp cha để xử lý di chuyển.
             HandleCharacterRotation();
         }
@@ -158,6 +173,12 @@ namespace Player
             }
             else
             {
+                // Khi đang leo và không bật Shift Lock, không xoay nhân vật theo hướng di chuyển.
+                if (currentControllerState == ControllerState.Climbing)
+                {
+                    return;
+                }
+
                 // Ở góc nhìn thứ 3 (không Shift Lock), xoay nhân vật mượt mà theo hướng di chuyển.
                 Vector3 horizontalVelocity = GetMovementVelocity();
                 horizontalVelocity.y = 0;

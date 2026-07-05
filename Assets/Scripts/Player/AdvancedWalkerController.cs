@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -17,7 +17,7 @@ namespace Player
 
         //Jump key variables;
         protected bool jumpInputIsLocked = false;
-        bool jumpKeyWasPressed = false;
+        protected bool jumpKeyWasPressed = false;
 		bool jumpKeyWasLetGo = false;
 		bool jumpKeyIsPressed = false;
 
@@ -73,6 +73,7 @@ namespace Player
 			Falling,
 			Rising,
 			Jumping
+			,Climbing // Thêm trạng thái Climbing
 		}
 		
 		protected ControllerState currentControllerState = ControllerState.Falling;
@@ -245,7 +246,7 @@ namespace Player
 
 		//Determine current controller state based on current momentum and whether the controller is grounded (or not);
 		//Handle state transitions;
-		ControllerState DetermineControllerState()
+		protected virtual ControllerState DetermineControllerState()
 		{
 			//Check if vertical momentum is pointing upwards;
 			bool _isRising = IsRisingOrFalling() && (VectorMath.GetDotProduct(GetMomentum(), tr.up) > 0f);
@@ -377,7 +378,7 @@ namespace Player
         //Apply friction to both vertical and horizontal momentum based on 'friction' and 'gravity';
 		//Handle movement in the air;
         //Handle sliding down steep slopes;
-        void HandleMomentum()
+        protected virtual void HandleMomentum()
 		{
 			//If local momentum is used, transform momentum into world coordinates first;
 			if(_useLocalMomentum)
