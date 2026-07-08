@@ -1,3 +1,5 @@
+using System;
+
 namespace KaboomChaos
 {
     /// <summary>
@@ -6,6 +8,11 @@ namespace KaboomChaos
     /// </summary>
     public static class GameEvents
     {
-        // Các event sẽ được định nghĩa tại đây
+        /// <summary>
+        /// Được gọi khi một người chơi chết.
+        /// </summary>
+        public static event Action OnPlayerDied;
+
+        public static void TriggerPlayerDied() => OnPlayerDied?.Invoke();
     }
 }

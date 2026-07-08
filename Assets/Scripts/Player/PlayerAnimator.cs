@@ -50,6 +50,20 @@ namespace Player
 
         #endregion
 
+        #region Public Methods
+
+        /// <summary>
+        /// Kích hoạt trigger 'Reset' trên Animator.
+        /// Hữu ích để buộc Animator thoát khỏi các trạng thái hiện tại (như leo trèo)
+        /// và quay về trạng thái mặc định một cách sạch sẽ, ví dụ như khi đứng dậy từ ragdoll.
+        /// </summary>
+        public void TriggerReset()
+        {
+            if (_animator != null) _animator.SetTrigger(ResetTriggerHash);
+        }
+
+        #endregion
+
         #region Private Methods
 
         /// <summary>

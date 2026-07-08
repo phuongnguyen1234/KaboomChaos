@@ -1,5 +1,6 @@
 using UnityEngine;
 using Core;
+using System.Collections;
 using Core.Interfaces;
 
 namespace Managers
@@ -10,6 +11,59 @@ namespace Managers
     /// </summary>
     public partial class GameplayManager
     {
+        #region Player Lifecycle Management
+
+        /// <summary>
+        /// Tìm một điểm spawn và sinh ra người chơi tại đó.
+        /// </summary>
+        private void SpawnPlayer()
+        {
+            PlayerSpawn spawnPoint = GetRandomSpawnPoint();
+            if (spawnPoint == null)
+            {
+                Debug.LogError("No PlayerSpawn found in the scene! Cannot spawn player.", this);
+                return;
+            }
+
+            _currentPlayer = HandlePlayerSpawn(_playerPrefab, spawnPoint);
+        }
+
+        /// <summary>
+        /// Được gọi khi sự kiện GameEvents.OnPlayerDied được kích hoạt.
+        /// Hủy đối tượng người chơi cũ và bắt đầu coroutine hồi sinh.
+        /// </summary>
+        private void HandlePlayerDeath()
+        {
+            if (_currentPlayer == null) return;
+
+            Debug.Log("Player died. Starting respawn timer...");
+
+            // Bắt đầu coroutine để xử lý việc xóa và hồi sinh.
+            // Truyền vào đối tượng player hiện tại để xóa sau 3 giây.
+            StartCoroutine(RespawnPlayerCoroutine(3f, _currentPlayer));
+
+            // Đặt _currentPlayer thành null ngay lập tức để các hệ thống khác
+            // không cố gắng tương tác với người chơi đã "chết".
+            _currentPlayer = null;
+        }
+
+        private IEnumerator RespawnPlayerCoroutine(float delay, IPlayer playerToDestroy)
+        {
+            // Chờ một khoảng thời gian. Trong lúc này, các mảnh vỡ của người chơi cũ vẫn còn trên scene.
+            yield return new WaitForSeconds(delay);
+
+            // 1. Sau khi chờ, xóa đối tượng người chơi cũ.
+            if (playerToDestroy != null && playerToDestroy.gameObject != null)
+            {
+                Debug.Log("Respawn timer finished. Destroying old player object.");
+                Destroy(playerToDestroy.gameObject);
+            }
+
+            // 2. Sinh ra người chơi mới.
+            Debug.Log("Spawning new player...");
+            SpawnPlayer();
+        }
+
         /// <summary>
         /// Xử lý việc sinh ra đối tượng người chơi tại một điểm spawn được chỉ định.
         /// </summary>
@@ -31,13 +85,14 @@ namespace Managers
 
             Vector3 finalSpawnPosition = spawnPoint.SpawnPoint;
 
-            // Cố gắng lấy CharacterController từ prefab để tính toán vị trí spawn chính xác
-            if (playerPrefab.TryGetComponent<CharacterController>(out var controller))
+            // Cố gắng lấy CapsuleCollider từ prefab để tính toán vị trí spawn chính xác.
+            // Điều này sẽ đặt phần đáy của collider vật lý của người chơi ngay tại điểm spawn.
+            if (playerPrefab.TryGetComponent<CapsuleCollider>(out var capsule))
             {
-                // Tính toán độ dời theo chiều dọc để đảm bảo chân của CharacterController (điểm thấp nhất)
+                // Tính toán độ dời theo chiều dọc để đảm bảo chân của CapsuleCollider (điểm thấp nhất)
                 // được đặt chính xác trên SpawnPoint, thay vì pivot của GameObject.
-                // Công thức: độ dời = (nửa chiều cao) - (vị trí tâm của controller theo trục y).
-                float verticalOffset = (controller.height / 2f) - controller.center.y;
+                // Công thức: pivot.y = ground.y + (nửa chiều cao - vị trí tâm của collider theo trục y).
+                float verticalOffset = (capsule.height / 2f) - capsule.center.y;
                 // Áp dụng độ dời vào vị trí spawn cuối cùng.
                 finalSpawnPosition += new Vector3(0, verticalOffset, 0);
             }
@@ -92,5 +147,7 @@ namespace Managers
             // Di chuyển người chơi đến vị trí của điểm spawn.
             player.gameObject.transform.position = spawnPoint.SpawnPoint;
         }
+
+        #endregion
     }
 }

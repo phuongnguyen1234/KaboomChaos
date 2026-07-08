@@ -82,6 +82,21 @@ namespace Player
         public float ClimbingSpeed => _climbingDirection;
         #endregion
 
+        #region Public API
+
+        /// <summary>
+        /// Tính toán và trả về hướng di chuyển hiện tại dựa trên input của người chơi và hướng camera.
+        /// Phương thức này public để các component khác (như RagdollController) có thể sử dụng lại logic này.
+        /// </summary>
+        /// <returns>Vector3 đã được chuẩn hóa của hướng di chuyển.</returns>
+        public Vector3 GetMovementDirection()
+        {
+            // Gọi phương thức được kế thừa từ AdvancedWalkerController
+            return CalculateMovementDirection();
+        }
+
+        #endregion
+
         /// <summary>
         /// Ghi đè hàm Setup để lấy các component và thiết lập Input Actions.
         /// </summary>
@@ -99,6 +114,25 @@ namespace Player
 
             // Lấy component Collider chính của player để dùng cho các phép tính vật lý
             _mainCollider = GetComponent<Collider>();
+        }
+
+        /// <summary>
+        /// Được gọi khi component được bật.
+        /// Chúng ta sử dụng nó để đảm bảo trạng thái của controller được reset sạch sẽ
+        /// mỗi khi nó được kích hoạt lại (ví dụ: sau khi đứng dậy từ ragdoll).
+        /// Điều này ngăn chặn các trạng thái cũ (như 'Climbing') gây ra lỗi.
+        /// </summary>
+        protected virtual void OnEnable()
+        {
+            // ĐỒNG BỘ HÓA VẬT LÝ:
+            // Khi đứng dậy từ ragdoll, RagdollController đã di chuyển transform đến vị trí mới.
+            // Tuy nhiên, Rigidbody có thể vẫn "nhớ" vị trí vật lý cũ của nó trước khi bị kinematic.
+            // Dòng code này buộc Rigidbody phải cập nhật trạng thái vật lý của nó theo vị trí và góc xoay
+            // hiện tại của transform, ngăn chặn việc bị teleport về vị trí cũ.
+            mover.GetComponent<Rigidbody>().position = transform.position;
+
+            ResetStateToFalling();
+            SetMomentum(Vector3.zero);
         }
 
         /// <summary>

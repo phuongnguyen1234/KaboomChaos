@@ -49,8 +49,16 @@ public class CameraController : MonoBehaviour
     private CinemachineOrbitalFollow orbitalFollow;
     private CinemachinePanTilt firstPersonPanTilt;
 
-    private PlayerController _playerController; // Thêm tham chiếu đến PlayerController
-    private Transform _playerTransform; // Thêm dòng này để lưu transform của player
+    private PlayerController _playerController;
+    private RagdollController _ragdollController;
+    private Transform _playerTransform;
+
+    // Lưu target mặc định để có thể reset sau khi ragdoll
+    private Transform _defaultFollowTarget;
+    private Transform _defaultLookAtTarget;
+    private Transform _defaultFirstPersonFollowTarget;
+    private Transform _overrideFollowTarget; // Mục tiêu tạm thời, ví dụ như khi ragdoll
+
     public bool IsFirstPerson => isFirstPerson;
     public bool IsShiftLock => isShiftLock;
 
@@ -71,6 +79,7 @@ public class CameraController : MonoBehaviour
         // 2. Gán Target cho Camera là chính bản thân Player (biến transform của script này)
         _playerTransform = this.transform; // Lưu lại transform của player
         _playerController = GetComponent<PlayerController>(); // Lấy PlayerController
+        _ragdollController = GetComponent<RagdollController>(); // Lấy RagdollController
 
         // Gán target mặc định cho LookAt là chính player, phòng trường hợp không có target nào được gán
         Transform thirdPersonTarget = thirdPersonLookAtTarget != null ? thirdPersonLookAtTarget : _playerTransform;
@@ -81,10 +90,15 @@ public class CameraController : MonoBehaviour
         {
             thirdPersonCamera.Follow = thirdPersonTarget;
             thirdPersonCamera.LookAt = thirdPersonTarget;
+
+            // Lưu lại target mặc định để có thể reset sau khi ragdoll
+            _defaultFollowTarget = thirdPersonCamera.Follow;
+            _defaultLookAtTarget = thirdPersonCamera.LookAt;
         }
         if (firstPersonCamera != null)
         {
             firstPersonCamera.Follow = followTarget;
+            _defaultFirstPersonFollowTarget = firstPersonCamera.Follow;
         }
 
         // 3. Tìm các component điều khiển
@@ -125,7 +139,7 @@ public class CameraController : MonoBehaviour
             }
 
             // Chuyển điểm Follow ngay khi toggle
-            ApplyShiftLockFollowTarget();
+            UpdateCameraTargets();
         }
 
         HandleRotation();
@@ -139,26 +153,64 @@ public class CameraController : MonoBehaviour
         HandleCharacterRotationWithCamera();
     }
 
+    #region Public Methods for Ragdoll
 
     /// <summary>
-    /// Chuyển điểm Follow của ThirdPersonCamera sang offset khi bật Shift Lock.
+    /// Chuyển mục tiêu theo dõi của camera sang một transform khác (ví dụ: hông hoặc đầu của ragdoll).
     /// </summary>
-    private void ApplyShiftLockFollowTarget()
+    /// <param name="newTarget">Transform mới để camera theo dõi và nhìn vào.</param>
+    public void SetFollowTarget(Transform newTarget)
+    {
+        _overrideFollowTarget = newTarget;
+        UpdateCameraTargets();
+    }
+
+    /// <summary>
+    /// Xóa mục tiêu tạm thời và yêu cầu camera cập nhật lại mục tiêu của nó.
+    /// Được gọi khi trạng thái ragdoll kết thúc.
+    /// </summary>
+    public void ResetFollowTarget()
+    {
+        _overrideFollowTarget = null;
+        UpdateCameraTargets();
+    }
+
+    #endregion
+
+
+    /// <summary>
+    /// Cập nhật mục tiêu camera chính xác dựa trên các trạng thái hiện tại (FirstPerson, Shift Lock, Ragdoll).
+    /// </summary>
+    private void UpdateCameraTargets()
     {
         if (thirdPersonCamera == null) return;
 
-        // Xác định target mặc định cho góc nhìn thứ 3
-        Transform defaultTarget = thirdPersonLookAtTarget != null ? thirdPersonLookAtTarget : _playerTransform;
-
+        // Ưu tiên 1: Shift Lock
         if (isShiftLock && shiftLockTarget != null)
         {
             thirdPersonCamera.Follow = shiftLockTarget;
             thirdPersonCamera.LookAt = shiftLockTarget;
         }
+        // Ưu tiên 2: Mục tiêu tạm thời (Ragdoll)
+        else if (_overrideFollowTarget != null)
+        {
+            thirdPersonCamera.Follow = _overrideFollowTarget;
+            thirdPersonCamera.LookAt = _overrideFollowTarget;
+        }
+        // Mặc định: Mục tiêu ban đầu
         else
         {
-            thirdPersonCamera.Follow = defaultTarget;
-            thirdPersonCamera.LookAt = defaultTarget;
+            thirdPersonCamera.Follow = _defaultFollowTarget;
+            thirdPersonCamera.LookAt = _defaultLookAtTarget;
+        }
+
+        // Handle First Person Camera
+        if (firstPersonCamera != null)
+        {
+            // In first person, the only override is ragdoll.
+            firstPersonCamera.Follow = _overrideFollowTarget != null 
+                ? _overrideFollowTarget 
+                : _defaultFirstPersonFollowTarget;
         }
     }
 
@@ -231,7 +283,10 @@ public class CameraController : MonoBehaviour
     /// </summary>
     private void HandleCharacterRotationWithCamera()
     {
-        if (_playerController == null || Camera.main == null) return;
+        // Không xoay nhân vật nếu đang trong trạng thái ragdoll.
+        if ((_ragdollController != null && _ragdollController.IsRagdollActive) 
+            || _playerController == null 
+            || Camera.main == null) return;
 
         // Chỉ xoay nhân vật khi ở chế độ First Person hoặc Shift Lock.
         if (isFirstPerson || isShiftLock)
@@ -314,7 +369,7 @@ public class CameraController : MonoBehaviour
         }
         else
         {
-            ApplyShiftLockFollowTarget();
+            UpdateCameraTargets();
             
             // Khi thoát First Person, kiểm tra xem có đang giữ chuột không
             if (Mouse.current != null && Mouse.current.rightButton.isPressed)

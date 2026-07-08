@@ -236,6 +236,20 @@ namespace Player
 
         #endregion
 
+        #region Public State Control
+
+        /// <summary>
+        /// Resets internal controller states to a neutral 'Falling' state.
+        /// This is crucial for recovering from ragdoll to prevent leftover states (like 'Climbing') from causing issues.
+        /// </summary>
+        public void ResetStateToFalling()
+        {
+            currentControllerState = ControllerState.Falling;
+            _climbableSurfaceNormal = Vector3.zero;
+        }
+
+        #endregion
+
         #region Gizmos
 
         /// <summary>

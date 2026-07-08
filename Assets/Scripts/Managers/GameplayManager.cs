@@ -7,6 +7,7 @@ namespace Managers
 {
     /// <summary>
     /// Quản lý luồng chơi chính, bao gồm việc khởi tạo game, sinh người chơi và quản lý vòng lặp game.
+    /// Chứa logic respawn và xử lý sự kiện người chơi chết.
     /// Đây là một lớp partial, với logic xử lý người chơi được tách ra trong file GameplayManager.PlayerHandler.cs.
     /// </summary>
     public partial class GameplayManager : MonoBehaviour, IGameplayManager
@@ -48,11 +49,23 @@ namespace Managers
                 DontDestroyOnLoad(gameObject); // Giữ Manager tồn tại khi chuyển đổi giữa các scene.
             }
         }
+        
+        private void OnEnable()
+        {
+            // Đăng ký lắng nghe sự kiện người chơi chết
+            KaboomChaos.GameEvents.OnPlayerDied += HandlePlayerDeath;
+        }
+
+        private void OnDisable()
+        {
+            // Hủy đăng ký để tránh memory leak
+            KaboomChaos.GameEvents.OnPlayerDied -= HandlePlayerDeath;
+        }
 
         private void Start()
         {
             InitializeGame();
-            StartGameLoop();
+            StartGameLoop(); // Bắt đầu vòng lặp game, sinh người chơi lần đầu.
         }
 
         #endregion
@@ -75,16 +88,7 @@ namespace Managers
         public void StartGameLoop()
         {
             Debug.Log("GameplayManager: Starting game loop...");
-
-            PlayerSpawn spawnPoint = GetRandomSpawnPoint();
-            if (spawnPoint == null)
-            {
-                Debug.LogError("No PlayerSpawn found in the scene! Cannot spawn player.", this);
-                return;
-            }
-
-            // Gọi phương thức partial từ file GameplayManager.PlayerHandler.cs để xử lý việc sinh người chơi.
-            _currentPlayer = HandlePlayerSpawn(_playerPrefab, spawnPoint);
+            SpawnPlayer();
         }
 
         /// <summary>
@@ -147,7 +151,7 @@ namespace Managers
             }
             Debug.Log($"Found and registered {foundSpawnPoints.Length} spawn points.");
         }
-    }
 
-    #endregion
+        #endregion
+    }
 }
