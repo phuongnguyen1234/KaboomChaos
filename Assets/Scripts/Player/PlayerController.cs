@@ -40,7 +40,7 @@ namespace Player
         /// <summary>
         /// Nhân vật đang di chuyển hay không.
         /// </summary>
-        public bool IsMoving => GetMovementVelocity().magnitude > 0.1f;
+        public bool IsMoving => HorizontalSpeed > 0.1f;
 
         /// <summary>
         /// Nhân vật có đang ở trên mặt đất hay không.
@@ -55,7 +55,29 @@ namespace Player
         /// <summary>
         /// Tốc độ di chuyển ngang hiện tại của người chơi.
         /// </summary>
-        public float HorizontalSpeed => GetMovementVelocity().magnitude;
+        public float HorizontalSpeed
+        {
+            get
+            {
+                // TÍNH TOÁN TỐC ĐỘ TƯƠNG ĐỐI CHO ANIMATION
+                // Logic này giải quyết cả hai vấn đề:
+                // 1. Nhân vật không chạy animation khi bị kẹt vào tường (world velocity ~ 0).
+                // 2. Nhân vật không chạy animation khi đứng yên trên một platform di động (relative velocity ~ 0).
+
+                // Vận tốc của player trong world space.
+                Vector3 playerWorldVelocity = mover.GetVelocity();
+
+                // Vận tốc của mặt đất trong world space (được tính trong AdvancedWalkerController).
+                Vector3 groundWorldVelocity = groundMomentum;
+
+                // Vận tốc tương đối của player so với mặt đất.
+                Vector3 relativeVelocity = playerWorldVelocity - groundWorldVelocity;
+
+                // Chỉ quan tâm đến tốc độ trên mặt phẳng ngang và trả về độ lớn của nó.
+                relativeVelocity.y = 0;
+                return relativeVelocity.magnitude;
+            }
+        }
 
         /// <summary>
         /// Triển khai thuộc tính JustLanded từ IPlayer.

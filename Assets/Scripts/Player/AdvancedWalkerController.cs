@@ -52,6 +52,9 @@ namespace Player
 		//Current momentum;
 		protected Vector3 momentum = Vector3.zero;
 
+		//Momentum of the ground object the character is standing on;
+		protected Vector3 groundMomentum = Vector3.zero;
+
 		//Amount of downward gravity;
 		[Tooltip("Lực hấp dẫn hướng xuống tác dụng lên nhân vật.")]
 		[SerializeField] private float _gravity = 30f;
@@ -72,8 +75,8 @@ namespace Player
 			Sliding,
 			Falling,
 			Rising,
-			Jumping
-			,Climbing // Thêm trạng thái Climbing
+			Jumping,
+			Climbing // Thêm trạng thái Climbing
 		}
 		
 		protected ControllerState currentControllerState = ControllerState.Falling;
@@ -146,6 +149,30 @@ namespace Player
 		{
 			//Check if mover is grounded;
 			mover.CheckForGround();
+
+			//If mover is grounded, calculate ground momentum;
+			//This is the velocity of the ground object at the point of contact;
+			if(mover.IsGrounded())
+			{
+				//Get ground collider;
+				Collider _groundCollider = mover.GetGroundCollider();
+
+				if(_groundCollider != null)
+				{
+					//If ground object has a rigidbody, get its velocity;
+					Rigidbody _groundRigidbody = _groundCollider.attachedRigidbody;
+					if(_groundRigidbody != null)
+					{
+						groundMomentum = _groundRigidbody.GetPointVelocity(mover.GetGroundPoint());
+					}
+					else
+						groundMomentum = Vector3.zero;
+				}
+				else
+					groundMomentum = Vector3.zero;
+			}
+			else
+				groundMomentum = Vector3.zero;
 
 			//Determine controller state;
 			currentControllerState = DetermineControllerState();
@@ -443,7 +470,10 @@ namespace Player
 
 			//Apply friction to horizontal momentum based on whether the controller is grounded;
 			if(currentControllerState == ControllerState.Grounded)
-				_horizontalMomentum = VectorMath.IncrementVectorTowardTargetVector(_horizontalMomentum, _groundFriction, Time.deltaTime, Vector3.zero);
+			{
+				Vector3 _horizontalGroundMomentum = VectorMath.RemoveDotVector(groundMomentum, tr.up);
+				_horizontalMomentum = VectorMath.IncrementVectorTowardTargetVector(_horizontalMomentum, _groundFriction, Time.deltaTime, _horizontalGroundMomentum);
+			}
 			else
 				_horizontalMomentum = VectorMath.IncrementVectorTowardTargetVector(_horizontalMomentum, _airFriction, Time.deltaTime, Vector3.zero); 
 

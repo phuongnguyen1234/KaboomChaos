@@ -1,6 +1,7 @@
 using UnityEngine;
 using Core.Interfaces;
 using System;
+using Core;
 
 namespace Player
 {
@@ -90,7 +91,7 @@ namespace Player
             
             // Kích hoạt các sự kiện chết
             OnDied?.Invoke();
-            KaboomChaos.GameEvents.TriggerPlayerDied();
+            GameEvents.TriggerPlayerDied();
         }
         #endregion
     }

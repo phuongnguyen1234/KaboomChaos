@@ -231,6 +231,45 @@ namespace Player
             {
                 // Nếu không leo, sử dụng logic của lớp cha
                 base.HandleMomentum();
+
+                 // --- LOGIC CHỐNG DÍNH TƯỜNG (WALL STICK PREVENTION) ---
+                // Khi người chơi nhảy vào tường và giữ input di chuyển, họ có thể bị "dính" lại do ma sát.
+                // Logic này sẽ loại bỏ phần vận tốc hướng vào tường khi người chơi ở trên không,
+                // cho phép họ trượt dọc theo tường một cách tự nhiên.
+
+                // Chỉ áp dụng khi ở trên không.
+                if (!IsGrounded)
+                {
+                    Vector3 horizontalMomentum = momentum;
+                    horizontalMomentum.y = 0;
+
+                    // Chỉ kiểm tra khi có vận tốc ngang (người chơi đang cố di chuyển trên không).
+                    if (horizontalMomentum.magnitude > 0.01f)
+                    {
+                        var capsule = _mainCollider as CapsuleCollider; // Lấy capsule collider chính.
+                        if (capsule != null) // Đảm bảo có collider để lấy thông số.
+                        {
+                            // CẢI TIẾN: Sử dụng SphereCast thay vì Raycast.
+                            // Raycast quá chính xác và có thể "trượt" ở các góc nhọn, gây ra lỗi ma sát mà bạn gặp phải.
+                            // SphereCast có thể tích, đại diện cho chiều rộng của người chơi tốt hơn, giúp phát hiện va chạm đáng tin cậy ở mọi góc độ.
+                            float castRadius = capsule.radius * 0.9f; // Dùng bán kính nhỏ hơn một chút để tránh dương tính giả với mặt đất.
+                            float castDistance = 0.2f; // Một khoảng cách ngắn là đủ để phát hiện tường đang tiếp xúc.
+                            Vector3 castOrigin = transform.position + capsule.center;
+
+                            // Bắn một SphereCast theo hướng di chuyển ngang.
+                            if (Physics.SphereCast(castOrigin, castRadius, horizontalMomentum.normalized, out RaycastHit hit, castDistance, ~0, QueryTriggerInteraction.Ignore))
+                            {
+                                // Chỉ xử lý nếu va chạm với một bức tường (bề mặt gần như thẳng đứng).
+                                if (Mathf.Abs(hit.normal.y) < 0.707f) // Ngưỡng 45 độ.
+                                {
+                                    // Chiếu vận tốc ngang lên mặt phẳng của tường để loại bỏ lực đẩy vào tường.
+                                    Vector3 projectedHorizontal = Vector3.ProjectOnPlane(horizontalMomentum, hit.normal);
+                                    momentum = new Vector3(projectedHorizontal.x, momentum.y, projectedHorizontal.z);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 

@@ -36,6 +36,10 @@ namespace Player
         [Tooltip("Lực để 'lê lết' khi đang ở trạng thái ragdoll. Đặt là 0 để vô hiệu hóa. Hoạt động tốt nhất khi các Rigidbody của ragdoll có giá trị Drag > 0 (ví dụ: 1 hoặc 2).")]
         [SerializeField] private float _ragdollMoveSpeed = 50f;
 
+        [Header("Ragdoll Physics")]
+        [Tooltip("Lực hấp dẫn bổ sung tác dụng lên ragdoll để rơi nhanh hơn. Đặt là 0 để dùng trọng lực mặc định.")]
+        [SerializeField] private float _extraGravityForce = 20f;
+
         // Components to disable when ragdoll is active
         private PlayerController _playerController;
         private Animator _animator;
@@ -112,6 +116,7 @@ namespace Player
             if (IsRagdollActive)
             {
                 HandleRagdollMovement();
+                HandleRagdollGravity();
             }
         }
 
@@ -273,6 +278,25 @@ namespace Player
         #endregion
 
         #region Private Methods
+
+        /// <summary>
+        /// Áp dụng một lực hấp dẫn bổ sung để ragdoll rơi nhanh hơn.
+        /// </summary>
+        private void HandleRagdollGravity()
+        {
+            if (_extraGravityForce <= 0f) return;
+
+            foreach (var rb in _ragdollRigidbodies)
+            {
+                // Chỉ áp dụng lực nếu Rigidbody đang hoạt động (không phải kinematic)
+                if (!rb.isKinematic)
+                {
+                    // Sử dụng ForceMode.Acceleration để không bị ảnh hưởng bởi khối lượng (mass) của bộ phận.
+                    // Điều này đảm bảo tất cả các bộ phận rơi với cùng một gia tốc bổ sung.
+                    rb.AddForce(Vector3.down * _extraGravityForce, ForceMode.Acceleration);
+                }
+            }
+        }
 
         /// <summary>
         /// Xử lý di chuyển của nhân vật khi đang ở trạng thái ragdoll (lê lết).

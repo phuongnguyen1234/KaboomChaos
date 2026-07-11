@@ -361,6 +361,17 @@ namespace Player
 
 		//Getters;
 
+		/// <summary>
+		/// Trả về vận tốc tuyến tính hiện tại của Rigidbody mà Mover đang điều khiển.
+		/// Đây là vận tốc thực tế trong thế giới vật lý, đã bao gồm các va chạm.
+		/// </summary>
+		/// <returns>Vận tốc của Rigidbody.</returns>
+		public Vector3 GetVelocity()
+		{
+			if (rig == null) return Vector3.zero;
+			return rig.linearVelocity;
+		}
+
 		public Vector3 GetGroundNormal()
 		{
 			return sensor.GetNormal();
