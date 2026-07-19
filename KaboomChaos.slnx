@@ -1,5 +1,7 @@
 ﻿<Solution>
   <Project Path="Player.csproj" />
   <Project Path="Core.csproj" />
+  <Project Path="DOTween.Modules.csproj" />
   <Project Path="Managers.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
 </Solution>

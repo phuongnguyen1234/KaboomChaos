@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using Core.Interfaces;
 
 namespace Player
 {
@@ -13,7 +14,7 @@ namespace Player
     [RequireComponent(typeof(PlayerInputAdapter))]
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(CapsuleCollider))]
-    public class RagdollController : MonoBehaviour
+    public class RagdollController : MonoBehaviour, IExplosionReactable
     {
         #region Fields
 
@@ -27,6 +28,10 @@ namespace Player
         [Header("Recovery Settings")]
         [Tooltip("Thời gian (giây) người chơi bị khóa trước khi có thể đứng dậy.")]
         [SerializeField] private float _recoveryDelay = 3.0f;
+        [Tooltip("Lực tối thiểu của vụ nổ để kích hoạt ragdoll. Nếu lực tác động nhỏ hơn giá trị này, người chơi sẽ chỉ bị đẩy đi thay vì ngã.")]
+        [SerializeField] private float _ragdollForceThreshold = 500f;
+        [Tooltip("Bật/tắt tính năng ragdoll khi bị trúng đòn (nhưng chưa chết). Nếu tắt, người chơi sẽ chỉ bị đẩy đi. Hiệu ứng 'vỡ ra' khi chết vẫn hoạt động.")]
+        [SerializeField] private bool _enableRagdollOnHit = false;
 
         [Header("Death Settings")]
         [Tooltip("Vật liệu vật lý để áp dụng cho các bộ phận khi chết, tạo độ nảy. Nếu bỏ trống, sẽ không có hiệu ứng nảy.")]
@@ -57,6 +62,7 @@ namespace Player
         public bool IsRagdollActive { get; private set; } = false;
         private bool _isRecoverable = false;
         private Coroutine _recoveryCoroutine;
+        private Coroutine _shatterCoroutine;
 
         // Transform của camera để tính toán hướng di chuyển
         private Transform _cameraTransform;
@@ -117,6 +123,35 @@ namespace Player
             {
                 HandleRagdollMovement();
                 HandleRagdollGravity();
+            }
+        }
+
+        #endregion
+
+        #region IExplosionReactable Implementation
+
+        /// <summary>
+        /// Xử lý khi bị tác động bởi một vụ nổ.
+        /// Quyết định xem có nên kích hoạt ragdoll hay chỉ thêm momentum.
+        /// </summary>
+        public void OnExplosionHit(Vector3 force, Vector3 point)
+        {
+            // Nếu tính năng ragdoll khi bị đánh trúng bị tắt, chỉ thêm momentum và bỏ qua.
+            if (!_enableRagdollOnHit)
+            {
+                _playerController.AddMomentum(force);
+                return;
+            }
+
+            // Nếu lực đủ mạnh, kích hoạt ragdoll.
+            if (force.magnitude >= _ragdollForceThreshold)
+            {
+                EnableRagdollWithForce(force, point);
+            }
+            // Nếu không, chỉ thêm momentum để đẩy người chơi đi.
+            else
+            {
+                _playerController.AddMomentum(force);
             }
         }
 
@@ -209,7 +244,9 @@ namespace Player
         /// <summary>
         /// Kích hoạt trạng thái ragdoll và phá hủy tất cả các khớp để tạo hiệu ứng "vỡ ra" như Roblox.
         /// </summary>
-        public void ShatterAndDie()
+        /// <param name="killingForce">Lực tùy chọn để áp dụng cho ragdoll khi chết.</param>
+        /// <param name="hitPoint">Điểm tác động của lực.</param>
+        public void ShatterAndDie(Vector3 killingForce = default, Vector3 hitPoint = default)
         {
             // 1. Kích hoạt trạng thái ragdoll cơ bản.
             if (!IsRagdollActive)
@@ -217,23 +254,37 @@ namespace Player
                 SetRagdollState(true);
             }
 
+            // CẢI TIẾN: Áp dụng lực khai tử (nếu có) cho TẤT CẢ các bộ phận của ragdoll.
+            // Điều này giải quyết vấn đề thi thoảng chỉ có phần thân bị văng đi,
+            // tạo ra một hiệu ứng "vỡ tung" mạnh mẽ và đảm bảo tất cả các bộ phận đều nhận lực.
+            if (killingForce != default && _ragdollRigidbodies != null)
+            {
+                foreach (var rb in _ragdollRigidbodies)
+                {
+                    if (rb != null)
+                    {
+                        // Sử dụng AddForce để áp dụng lực vào tâm của mỗi bộ phận, tạo ra hiệu ứng văng ra đồng đều.
+                        rb.AddForce(killingForce, ForceMode.Impulse);
+                    }
+                }
+            }
+
             // 2. Áp dụng vật liệu vật lý nảy cho tất cả các collider của ragdoll.
             if (_deathBouncyMaterial != null && _ragdollColliders != null)
             {
                 foreach (var col in _ragdollColliders)
                 {
+                    if (col == null) continue;
                     col.material = _deathBouncyMaterial;
                 }
             }
 
-            // 3. Tìm và phá hủy tất cả các khớp (Joints) trong hệ thống ragdoll.
-            if (_ragdollRoot != null)
-            {
-                foreach (var joint in _ragdollRoot.GetComponentsInChildren<Joint>())
-                {
-                    Destroy(joint);
-                }
-            }
+            // 3. Bắt đầu một coroutine để phá hủy các khớp sau một khoảng trễ nhỏ, cho phép lực lan truyền.
+            // Mặc dù bây giờ tất cả các bộ phận đều nhận lực trực tiếp, việc giữ lại một frame trễ
+            // trước khi phá khớp là một biện pháp an toàn để tránh các xung đột vật lý không mong muốn
+            // có thể xảy ra trong cùng một frame.
+            if (_shatterCoroutine != null) StopCoroutine(_shatterCoroutine);
+            _shatterCoroutine = StartCoroutine(DelayedShatter());
         }
 
         /// <summary>
@@ -273,6 +324,26 @@ namespace Player
             yield return new WaitForSeconds(_recoveryDelay);
             _isRecoverable = true;
             // Tại đây có thể thêm hiệu ứng âm thanh/hình ảnh để báo cho người chơi biết họ có thể đứng dậy.
+        }
+
+        /// <summary>
+        /// Phá hủy các khớp của ragdoll sau một khoảng trễ ngắn.
+        /// Điều này cho phép lực tác động ban đầu được truyền qua các khớp đến toàn bộ cơ thể
+        /// trước khi các bộ phận bị tách rời, tạo ra hiệu ứng "văng" tự nhiên hơn.
+        /// </summary>
+        private IEnumerator DelayedShatter()
+        {
+            // Chờ đến frame vật lý tiếp theo để đảm bảo lực ban đầu đã được xử lý.
+            yield return new WaitForFixedUpdate();
+
+            if (_ragdollRoot != null)
+            {
+                foreach (var joint in _ragdollRoot.GetComponentsInChildren<Joint>())
+                {
+                    if (joint != null) // Kiểm tra để chắc chắn khớp chưa bị phá hủy
+                        Destroy(joint);
+                }
+            }
         }
 
         #endregion

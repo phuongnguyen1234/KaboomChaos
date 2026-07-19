@@ -19,7 +19,6 @@ namespace Player
         private float _rotationVelocity;
 
         private CameraController _cameraController;
-        private PlayerAnimator _playerAnimator; // Tham chiếu đến PlayerAnimator
 
         private bool _justLanded; // Cờ báo cho sự kiện tiếp đất
 
@@ -30,7 +29,7 @@ namespace Player
         /// <summary>
         /// Tham chiếu đến GameObject của người chơi.
         /// </summary>
-        public new GameObject gameObject => base.gameObject;
+        public GameObject GameObject => gameObject;
 
         /// <summary>
         /// Tốc độ di chuyển hiện tại.
@@ -131,9 +130,6 @@ namespace Player
             if (_cameraController != null && Camera.main != null)
                 cameraTransform = Camera.main.transform;
             
-            // Lấy component PlayerAnimator
-            _playerAnimator = GetComponent<PlayerAnimator>();
-
             // Lấy component Collider chính của player để dùng cho các phép tính vật lý
             _mainCollider = GetComponent<Collider>();
         }

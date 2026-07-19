@@ -10,11 +10,11 @@ Material:
   m_Name: Grass
   m_Shader: {fileID: -6465566751694194690, guid: 5a1094c5455cf924493af3ef106903c0, type: 3}
   m_Parent: {fileID: 2100000, guid: c06739f5729b1804f990f8f6463e22fb, type: 2}
-  m_ModifiedSerializedProperties: 0
+  m_ModifiedSerializedProperties: 4
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
+  m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
@@ -32,7 +32,8 @@ Material:
     m_Floats:
     - _TextureScale: 1
     m_Colors:
-    - _Tint: {r: 0.4660377, g: 1, b: 0.4722928, a: 1}
+    - _BaseColor: {r: 0.2087083, g: 1, b: 0.20188677, a: 1}
+    - _Tint: {r: 0.22921322, g: 0.82641506, b: 0.23360437, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &5518421730035543654

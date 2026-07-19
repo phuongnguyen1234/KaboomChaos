@@ -11,7 +11,7 @@ namespace Core.Interfaces
         /// <summary>
         /// Tham chiếu đến GameObject của người chơi.
         /// </summary>
-        GameObject gameObject { get; }
+        GameObject GameObject { get; }
 
         /// <summary>
         /// Lấy tốc độ di chuyển hiện tại của người chơi.

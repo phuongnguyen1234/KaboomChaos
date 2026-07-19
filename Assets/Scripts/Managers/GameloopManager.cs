@@ -24,6 +24,7 @@ namespace Managers
         // Tham chiếu đến các manager khác sẽ được lấy thông qua Singleton hoặc Service Locator.
         private IPlayerManager _playerManager;
         private IMapManager _mapManager;
+        private IBombSpawnerManager _bombSpawnerManager;
 
         #endregion
 
@@ -43,6 +44,7 @@ namespace Managers
                 // Giả định rằng các manager này cũng là Singleton và đã được khởi tạo.
                 _playerManager = PlayerManager.Instance;
                 _mapManager = MapManager.Instance;
+                _bombSpawnerManager = BombSpawnerManager.Instance;
             }
         }
         
@@ -72,7 +74,7 @@ namespace Managers
 
             // Lấy số lượng map và underground có sẵn
             int mapCount = _mapManager.GetMapCount();
-            int undergroundCount = _mapManager.GetUndergroundProfileCount();
+            int undergroundCount = _mapManager.GetUndergroundDataCount();
 
             if (mapCount > 0 && undergroundCount > 0)
             {
@@ -97,6 +99,7 @@ namespace Managers
             Debug.Log("[GameloopManager] Starting game loop...");
             // Ra lệnh cho PlayerManager sinh người chơi ban đầu.
             _playerManager?.SpawnInitialPlayer();
+            _bombSpawnerManager?.StartSpawning();
         }
 
         /// <summary>
@@ -106,6 +109,7 @@ namespace Managers
         {
             Debug.Log("[GameloopManager] Ending game loop...");
             // Logic dọn dẹp hoặc chuyển đổi trạng thái game sẽ được thêm vào đây.
+            _bombSpawnerManager?.StopSpawning();
         }
 
         #endregion

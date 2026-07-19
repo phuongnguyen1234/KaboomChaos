@@ -60,30 +60,12 @@ PrefabInstance:
       propertyPath: m_Name
       value: GrassLight
       objectReference: {fileID: 0}
+    - target: {fileID: 6036855656442103476, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 4140916983989288273, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 5876443134477625924}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
---- !u!1 &2547820793640041109 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4140916983989288273, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
-  m_PrefabInstance: {fileID: 1886114950788974532}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &5876443134477625924
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2547820793640041109}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d32f934f0591ee540bdaf682b8cb2d48, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Core::ColorTint
-  overrideColor: 0
-  customColor: {r: 0.24261302, g: 0.5471698, b: 0.2448524, a: 1}

@@ -52,10 +52,18 @@ PrefabInstance:
       propertyPath: m_VersionIndex
       value: 2028
       objectReference: {fileID: 0}
+    - target: {fileID: 6226117529890685089, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
+      propertyPath: toughness
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 6422829287474631470, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: ff522a92184d1e7429f96a8d29a5ba92, type: 2}
+    - target: {fileID: 6764974227769156945, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
+      propertyPath: toughness
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 7756762216282166330, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
       propertyPath: m_Name
       value: Terrain_Deepslate

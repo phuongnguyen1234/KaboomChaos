@@ -54,36 +54,38 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3686409572372748408, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
       propertyPath: m_VersionIndex
-      value: 2031
+      value: 2037
       objectReference: {fileID: 0}
     - target: {fileID: 4140916983989288273, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
       propertyPath: m_Name
       value: GrassDark
       objectReference: {fileID: 0}
+    - target: {fileID: 6036855656442103476, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
+      propertyPath: _customColor.b
+      value: 0.27657214
+      objectReference: {fileID: 0}
+    - target: {fileID: 6036855656442103476, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
+      propertyPath: _customColor.g
+      value: 0.6528301
+      objectReference: {fileID: 0}
+    - target: {fileID: 6036855656442103476, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
+      propertyPath: _customColor.r
+      value: 0.21063009
+      objectReference: {fileID: 0}
+    - target: {fileID: 6036855656442103476, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
+      propertyPath: _customBaseColor.b
+      value: 0.2728729
+      objectReference: {fileID: 0}
+    - target: {fileID: 6036855656442103476, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
+      propertyPath: _customBaseColor.g
+      value: 0.6603774
+      objectReference: {fileID: 0}
+    - target: {fileID: 6036855656442103476, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
+      propertyPath: _customBaseColor.r
+      value: 0.30230522
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 4140916983989288273, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 5876443134477625924}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
---- !u!1 &2547820793640041109 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4140916983989288273, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
-  m_PrefabInstance: {fileID: 1886114950788974532}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &5876443134477625924
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2547820793640041109}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d32f934f0591ee540bdaf682b8cb2d48, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Core::ColorTint
-  overrideColor: 1
-  customColor: {r: 0.29438946, g: 0.6528301, b: 0.29438946, a: 1}

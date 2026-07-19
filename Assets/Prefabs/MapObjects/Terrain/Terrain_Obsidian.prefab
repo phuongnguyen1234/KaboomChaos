@@ -8,6 +8,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1383965444989790091, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
+      propertyPath: _customColor.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1383965444989790091, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
+      propertyPath: _customColor.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1383965444989790091, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
+      propertyPath: _customColor.r
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1383965444989790091, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
+      propertyPath: _customBaseColor.b
+      value: 0.09433961
+      objectReference: {fileID: 0}
+    - target: {fileID: 1383965444989790091, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
+      propertyPath: _customBaseColor.g
+      value: 0.09433961
+      objectReference: {fileID: 0}
+    - target: {fileID: 1383965444989790091, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
+      propertyPath: _customBaseColor.r
+      value: 0.09433961
+      objectReference: {fileID: 0}
     - target: {fileID: 3536681037913576558, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -52,10 +76,18 @@ PrefabInstance:
       propertyPath: m_VersionIndex
       value: 2055
       objectReference: {fileID: 0}
+    - target: {fileID: 6226117529890685089, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
+      propertyPath: toughness
+      value: 999
+      objectReference: {fileID: 0}
     - target: {fileID: 6422829287474631470, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 50f7cd5a8c65349419030a9865c98256, type: 2}
+    - target: {fileID: 6764974227769156945, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
+      propertyPath: toughness
+      value: 999
+      objectReference: {fileID: 0}
     - target: {fileID: 7756762216282166330, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
       propertyPath: m_Name
       value: Terrain_Obsidian
@@ -63,27 +95,5 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 7756762216282166330, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 480279749129133236}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
---- !u!1 &1146903277956279930 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7756762216282166330, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
-  m_PrefabInstance: {fileID: 7228013893186697792}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &480279749129133236
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1146903277956279930}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d32f934f0591ee540bdaf682b8cb2d48, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Core::MaterialPropertyTinter
-  overrideColor: 1
-  customColor: {r: 0.17735851, g: 0.17735851, b: 0.17735851, a: 1}

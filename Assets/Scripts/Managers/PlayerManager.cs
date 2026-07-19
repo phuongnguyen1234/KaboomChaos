@@ -124,10 +124,10 @@ namespace Managers
             yield return new WaitForSeconds(delay);
 
             // 1. Sau khi chờ, xóa đối tượng GameObject của người chơi cũ.
-            if (playerToDestroy != null && playerToDestroy.gameObject != null)
+            if (playerToDestroy != null && playerToDestroy.GameObject != null)
             {
                 Debug.Log("[PlayerManager] Respawn timer finished. Destroying old player object.");
-                Destroy(playerToDestroy.gameObject);
+                Destroy(playerToDestroy.GameObject);
             }
 
             // 2. Sinh ra người chơi mới.
@@ -217,7 +217,7 @@ namespace Managers
             }
 
             // Di chuyển người chơi đến vị trí của điểm spawn.
-            player.gameObject.transform.position = spawnPoint.SpawnPoint;
+            player.GameObject.transform.position = spawnPoint.SpawnPoint;
         }
         #endregion
     }

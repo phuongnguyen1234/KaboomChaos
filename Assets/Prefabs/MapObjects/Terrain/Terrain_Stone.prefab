@@ -52,6 +52,10 @@ PrefabInstance:
       propertyPath: m_VersionIndex
       value: 2034
       objectReference: {fileID: 0}
+    - target: {fileID: 6226117529890685089, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
+      propertyPath: toughness
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 6422829287474631470, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 

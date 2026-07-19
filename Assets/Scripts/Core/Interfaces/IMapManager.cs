@@ -27,6 +27,6 @@ namespace Core.Interfaces
         /// Lấy tổng số cấu hình underground có sẵn trong database.
         /// </summary>
         /// <returns>Số lượng cấu hình underground.</returns>
-        int GetUndergroundProfileCount();
+        int GetUndergroundDataCount();
     }
 }

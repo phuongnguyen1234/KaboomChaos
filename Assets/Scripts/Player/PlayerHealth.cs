@@ -12,7 +12,7 @@ namespace Player
     [RequireComponent(typeof(PlayerAnimator))]
     [RequireComponent(typeof(RagdollController))] // Phụ thuộc vào RagdollController để kích hoạt hiệu ứng
     [RequireComponent(typeof(AudioSource))]
-    public class PlayerHealth : MonoBehaviour, IDamageable
+public class PlayerHealth : MonoBehaviour, IExplosionDamageable
     {
         #region Fields
 
@@ -52,6 +52,28 @@ namespace Player
         #endregion
 
         #region Public Methods
+
+        /// <summary>
+        /// Xử lý sát thương và lực từ một vụ nổ.
+        /// </summary>
+        public void TakeExplosionDamage(float amount, Vector3 force, Vector3 point)
+        {
+            if (!IsAlive) return;
+
+            // Nếu sát thương này sẽ gây chết, hãy truyền thông tin về lực cho phương thức Die.
+            if (_currentHealth - amount <= 0)
+            {
+                _currentHealth = 0;
+                Die(force, point);
+            }
+            else // Nếu không, xử lý sát thương và lực một cách riêng biệt.
+            {
+                TakeDamage(amount);
+                // Yêu cầu RagdollController xử lý lực tác động.
+                _ragdollController?.OnExplosionHit(force, point);
+            }
+        }
+
         /// <summary>
         /// Nhận sát thương và kiểm tra nếu người chơi đã chết.
         /// </summary>
@@ -60,6 +82,8 @@ namespace Player
             if (!IsAlive) return;
 
             _currentHealth -= amount;
+            Debug.Log($"[PlayerHealth] Player took {amount} damage. Current HP: {_currentHealth}/{_maxHealth}", this);
+
             if (_currentHealth <= 0)
             {
                 Die();
@@ -73,9 +97,13 @@ namespace Player
         /// <summary>
         /// Xử lý khi người chơi chết, kích hoạt ragdoll.
         /// </summary>
-        private void Die()
+        /// <param name="killingForce">Lực đã gây ra cái chết, để áp dụng cho ragdoll.</param>
+        /// <param name="hitPoint">Điểm tác động của lực.</param>
+        private void Die(Vector3 killingForce = default, Vector3 hitPoint = default)
         {
             if (!IsAlive) return; // Đảm bảo Die() chỉ chạy một lần
+
+            Debug.Log("[PlayerHealth] Player has died.", this);
 
             // Phát âm thanh chết, nếu có
             if (_audioSource != null && _deathSfx != null)
@@ -87,7 +115,7 @@ namespace Player
             _currentHealth = 0;
             
             // Kích hoạt hiệu ứng chết "vỡ ra" bằng cách phá hủy các khớp.
-            _ragdollController?.ShatterAndDie();
+            _ragdollController?.ShatterAndDie(killingForce, hitPoint);
             
             // Kích hoạt các sự kiện chết
             OnDied?.Invoke();

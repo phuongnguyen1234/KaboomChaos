@@ -1,0 +1,5 @@
+:root{
+    --color-primary: #3B82F6;
+    --color-danger:  #EF4444;
+    --color-bg:      #101418;
+}

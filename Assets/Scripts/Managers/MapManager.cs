@@ -26,12 +26,16 @@ namespace Managers
         [SerializeField] private MapDatabase _mapDatabase;
 
         [Header("Scene Containers")]
-        [Tooltip("Đối tượng cha để chứa các khối underground được tạo ra.")]
-        [SerializeField] private GameObject _undergroundLoader;
         [Tooltip("Đối tượng cha để chứa prefab map được tạo ra.")]
         [SerializeField] private GameObject _mapLoader;
         [Tooltip("Đối tượng cha để chứa dung nham được tạo ra.")]
         [SerializeField] private GameObject _lavaLoader;
+        [Tooltip("Đối tượng cha để chứa các khối của thế giới ngầm.")]
+        [SerializeField] private Transform _undergroundContainer;
+
+        [Header("Generators")]
+        [Tooltip("Component chịu trách nhiệm sinh ra thế giới ngầm. Nếu bỏ trống, sẽ tự tìm trong scene.")]
+        [SerializeField] private UndergroundGenerator _undergroundGenerator;
 
         [Header("Prefabs")]
         [Tooltip("Prefab của dung nham (lava).")]
@@ -50,6 +54,12 @@ namespace Managers
                 Instance = this;
                 DontDestroyOnLoad(gameObject);
             }
+
+            if (_undergroundGenerator == null)
+            {
+                _undergroundGenerator = FindAnyObjectByType<UndergroundGenerator>();
+                if (_undergroundGenerator == null) Debug.LogWarning("[MapManager] UndergroundGenerator not found in scene. Underground will not be built.", this);
+            }
         }
         #endregion
 
@@ -65,7 +75,7 @@ namespace Managers
                 Debug.LogError("[MapManager] MapDatabase is not assigned or is empty.", this);
                 return;
             }
-            if (_undergroundDatabase == null || _undergroundDatabase.undergroundProfiles.Count == 0)
+            if (_undergroundDatabase == null || _undergroundDatabase.UndergroundDatas.Count == 0)
             {
                 Debug.LogError("[MapManager] UndergroundDatabase is not assigned or is empty.", this);
                 return;
@@ -75,7 +85,7 @@ namespace Managers
                 Debug.LogError($"[MapManager] Invalid mapIndex: {mapIndex}. It's out of range for MapDatabase.", this);
                 return;
             }
-            if (undergroundIndex < 0 || undergroundIndex >= _undergroundDatabase.undergroundProfiles.Count)
+            if (undergroundIndex < 0 || undergroundIndex >= _undergroundDatabase.UndergroundDatas.Count)
             {
                 Debug.LogError($"[MapManager] Invalid undergroundIndex: {undergroundIndex}. It's out of range for UndergroundDatabase.", this);
                 return;
@@ -90,10 +100,10 @@ namespace Managers
             }
 
             var mapPrefab = mapData.MapPrefab;
-            var undergroundProfile = _undergroundDatabase.undergroundProfiles[undergroundIndex];
+            var undergroundData = _undergroundDatabase.UndergroundDatas[undergroundIndex];
 
             BuildMap(mapPrefab);
-            BuildUnderground(undergroundProfile);
+            BuildUnderground(undergroundData);
             CreateLava();
         }
 
@@ -102,8 +112,8 @@ namespace Managers
         {
             Debug.Log("[MapManager] Clearing current map objects.");
             ClearChildren(_mapLoader);
-            ClearChildren(_undergroundLoader);
             ClearChildren(_lavaLoader);
+            if (_undergroundContainer != null) ClearChildren(_undergroundContainer.gameObject);
         }
 
         /// <inheritdoc/>
@@ -114,10 +124,10 @@ namespace Managers
         }
 
         /// <inheritdoc/>
-        public int GetUndergroundProfileCount()
+        public int GetUndergroundDataCount()
         {
             // Trả về số lượng profile nếu database tồn tại, ngược lại trả về 0.
-            return _undergroundDatabase != null ? _undergroundDatabase.undergroundProfiles.Count : 0;
+            return _undergroundDatabase != null ? _undergroundDatabase.UndergroundDatas.Count : 0;
         }
         #endregion
 
@@ -164,129 +174,18 @@ namespace Managers
         /// Tạo các tầng địa chất dựa trên profile được cung cấp.
         /// Logic được chuyển từ UndergroundGenerator.cs.
         /// </summary>
-        private void BuildUnderground(UndergroundProfile profile)
+        private void BuildUnderground(UndergroundData profile)
         {
-            if (profile == null)
+            if (_undergroundGenerator == null)
             {
-                Debug.LogError("[MapManager] UndergroundProfile is null. Cannot build underground.", this);
+                Debug.LogError("[MapManager] UndergroundGenerator is not assigned and could not be found. Cannot build underground.", this);
                 return;
             }
-            if (_undergroundLoader == null)
-            {
-                Debug.LogError("[MapManager] UndergroundLoader container is not assigned. Cannot build underground.", this);
-                return;
-            }
-
-            Transform parent = _undergroundLoader.transform;
-            var spawnedBlocks = new List<GameObject>();
-
-            // Logic tạo underground được chuyển từ UndergroundGenerator
-            Vector3 horizontalCellSize = Vector3.one;
-            bool horizontalSizeDetermined = false;
-            foreach (var layer in profile.layers)
-            {
-                if (layer.blockPrefab != null)
-                {
-                    horizontalCellSize = GetPrefabSize(layer.blockPrefab);
-                    horizontalSizeDetermined = true;
-                    break;
-                }
-            }
-            if (!horizontalSizeDetermined)
-            {
-                Debug.LogWarning("[MapManager] Could not find a renderer on any prefab to determine grid size. Using default (1,1,1).", this);
-            }
-
-            var targetBlockData = new List<(Vector3 position, GameObject prefab, string name)>();
-            var random = new System.Random(profile.randomSeed);
-
-            float totalDisplacement = 0f;
-            var layerBlockSizes = new List<Vector3>();
-            foreach (var layer in profile.layers)
-            {
-                var size = GetPrefabSize(layer.blockPrefab);
-                layerBlockSizes.Add(size);
-                totalDisplacement += layer.height * (size.y + profile.spacing.y);
-            }
-
-            float currentY = -totalDisplacement;
-            float offsetX = (profile.gridSize.x - 1) / 2.0f;
-            float offsetZ = (profile.gridSize.y - 1) / 2.0f;
-
-            for (int i = profile.layers.Count - 1; i >= 0; i--)
-            {
-                var layer = profile.layers[i];
-                if (layer.blockPrefab == null) continue;
-
-                Vector3 layerBlockSize = layerBlockSizes[i];
-
-                for (int h = 0; h < layer.height; h++)
-                {
-                    float rowCenterY = currentY + profile.spacing.y + (layerBlockSize.y / 2f);
-
-                    for (int x = 0; x < profile.gridSize.x; x++)
-                    {
-                        for (int z = 0; z < profile.gridSize.y; z++)
-                        {
-                            GameObject chosenPrefab = layer.blockPrefab;
-                            if (layer.enableScattering && layer.scatterPrefab != null)
-                            {
-                                if (random.NextDouble() * 100.0 < layer.scatterPercentage)
-                                    chosenPrefab = layer.scatterPrefab;
-                            }
-
-                            Vector3 position = new(
-                                (x - offsetX) * (horizontalCellSize.x + profile.spacing.x),
-                                rowCenterY,
-                                (z - offsetZ) * (horizontalCellSize.z + profile.spacing.z)
-                            );
-                            string name = $"{chosenPrefab.name} ({x},{h},{z})";
-                            targetBlockData.Add((position, chosenPrefab, name));
-                        }
-                    }
-                    currentY += layerBlockSize.y + profile.spacing.y;
-                }
-            }
-
-            for (int i = 0; i < targetBlockData.Count; i++)
-            {
-                var (position, prefab, name) = targetBlockData[i];
-                var newBlock = Instantiate(prefab, parent);
-                spawnedBlocks.Add(newBlock);
-                newBlock.transform.localPosition = position;
-                newBlock.name = name;
-                newBlock.transform.SetSiblingIndex(i);
-            }
-            Debug.Log($"[MapManager] Built underground with {spawnedBlocks.Count} blocks.");
+            _undergroundGenerator.Build(profile, _undergroundContainer);
         }
         #endregion
 
         #region Utility Methods
-        /// <summary>
-        /// Tính toán kích thước thực tế của một prefab bằng cách tạo một instance tạm thời.
-        /// </summary>
-        private Vector3 GetPrefabSize(GameObject prefab)
-        {
-            if (prefab == null) return Vector3.one;
-
-            GameObject tempInstance = null;
-            try
-            {
-                tempInstance = Instantiate(prefab, new Vector3(10000, 10000, 10000), Quaternion.identity);
-                var renderer = tempInstance.GetComponentInChildren<Renderer>(true);
-                if (renderer != null)
-                {
-                    return renderer.bounds.size;
-                }
-            }
-            finally
-            {
-                if (tempInstance != null)
-                    Destroy(tempInstance);
-            }
-            return Vector3.one;
-        }
-
         /// <summary>
         /// Xóa tất cả các đối tượng con của một đối tượng cha.
         /// </summary>

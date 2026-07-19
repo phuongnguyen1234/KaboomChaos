@@ -8,6 +8,46 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2715364628785566377, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
+      propertyPath: _customColor.b
+      value: 0.101960786
+      objectReference: {fileID: 0}
+    - target: {fileID: 2715364628785566377, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
+      propertyPath: _customColor.g
+      value: 0.101960786
+      objectReference: {fileID: 0}
+    - target: {fileID: 2715364628785566377, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
+      propertyPath: _customColor.r
+      value: 0.101960786
+      objectReference: {fileID: 0}
+    - target: {fileID: 2715364628785566377, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
+      propertyPath: _overrideColor
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3272842351782950456, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
+      propertyPath: _customColor.b
+      value: 0.10188681
+      objectReference: {fileID: 0}
+    - target: {fileID: 3272842351782950456, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
+      propertyPath: _customColor.g
+      value: 0.10188681
+      objectReference: {fileID: 0}
+    - target: {fileID: 3272842351782950456, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
+      propertyPath: _customColor.r
+      value: 0.10188681
+      objectReference: {fileID: 0}
+    - target: {fileID: 3272842351782950456, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
+      propertyPath: _overrideColor
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3373753859608059963, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
+      propertyPath: m_Mass
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3373753859608059963, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
+      propertyPath: m_AngularDamping
+      value: 0.1
+      objectReference: {fileID: 0}
     - target: {fileID: 5009107141749666984, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
       propertyPath: m_Name
       value: NormalBomb
@@ -66,54 +106,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6087511444701415969, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
       propertyPath: m_ConstrainProportionsScale
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7504134495120266603, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
+      propertyPath: _bombData
+      value: 
+      objectReference: {fileID: 11400000, guid: 63bed31c7c4bb494180f4aa54c03b1b1, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 5694078953490251949, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 5142344938723409060}
-    - targetCorrespondingSourceObject: {fileID: 8704065047588684978, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1586891860021332310}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
---- !u!1 &6553854300191157128 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8704065047588684978, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
-  m_PrefabInstance: {fileID: 2465996534226202426}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1586891860021332310
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6553854300191157128}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d32f934f0591ee540bdaf682b8cb2d48, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Core::MaterialPropertyTinter
-  overrideColor: 1
-  customColor: {r: 0.14117648, g: 0.21568628, b: 0.6666667, a: 1}
---- !u!1 &7871610913381756823 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5694078953490251949, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
-  m_PrefabInstance: {fileID: 2465996534226202426}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &5142344938723409060
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7871610913381756823}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d32f934f0591ee540bdaf682b8cb2d48, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Core::MaterialPropertyTinter
-  overrideColor: 1
-  customColor: {r: 0.14117648, g: 0.21568628, b: 0.6666667, a: 1}

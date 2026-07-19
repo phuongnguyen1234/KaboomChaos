@@ -346,8 +346,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d32f934f0591ee540bdaf682b8cb2d48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Core::ColorTint
-  overrideColor: 1
-  customColor: {r: 0.2603773, g: 0.2603773, b: 0.2603773, a: 1}
+  _customBaseColor: {r: 0.4716981, g: 0.4716981, b: 0.4716981, a: 1}
+  _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
+  _customAlpha: 1
+  _customEmissionIntensity: 0
 --- !u!1 &4951549250114925828
 GameObject:
   m_ObjectHideFlags: 0
@@ -694,8 +696,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d32f934f0591ee540bdaf682b8cb2d48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Core::ColorTint
-  overrideColor: 1
-  customColor: {r: 0.2603773, g: 0.2603773, b: 0.2603773, a: 1}
+  _customBaseColor: {r: 0.4716981, g: 0.4716981, b: 0.4716981, a: 1}
+  _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
+  _customAlpha: 1
+  _customEmissionIntensity: 0
 --- !u!1 &6364517139673830022
 GameObject:
   m_ObjectHideFlags: 0
@@ -709,6 +713,7 @@ GameObject:
   - component: {fileID: 2304540619131890701}
   - component: {fileID: 8185443477615194824}
   - component: {fileID: 4111569568530909525}
+  - component: {fileID: 1908645217973924544}
   m_Layer: 12
   m_Name: Glass
   m_TagString: Untagged
@@ -1029,6 +1034,22 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6364517139673830022}
   m_Mesh: {fileID: 0}
+--- !u!114 &1908645217973924544
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6364517139673830022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d32f934f0591ee540bdaf682b8cb2d48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Core::MaterialEffectController
+  _customBaseColor: {r: 1, g: 1, b: 1, a: 1}
+  _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
+  _customAlpha: 0.1
+  _customEmissionIntensity: 0
 --- !u!1 &8211778878265343602
 GameObject:
   m_ObjectHideFlags: 0
@@ -1432,5 +1453,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d32f934f0591ee540bdaf682b8cb2d48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Core::ColorTint
-  overrideColor: 1
-  customColor: {r: 0.2603773, g: 0.2603773, b: 0.2603773, a: 1}
+  _customBaseColor: {r: 0.4716981, g: 0.4716981, b: 0.4716981, a: 1}
+  _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
+  _customAlpha: 1
+  _customEmissionIntensity: 0
