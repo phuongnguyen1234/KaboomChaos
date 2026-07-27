@@ -11,7 +11,7 @@ namespace Managers
     /// <summary>
     /// Quản lý việc sinh các loại bom ngẫu nhiên trong một khu vực được chỉ định.
     /// </summary>
-    public class BombSpawnerManager : MonoBehaviour, IBombSpawnerManager, IGameObjectPoolManager
+    public class BombSpawnerManager : BaseGameObjectPoolManager, IBombSpawnerManager
     {
         public static IBombSpawnerManager Instance { get; private set; }
 
@@ -21,24 +21,17 @@ namespace Managers
         [Tooltip("Khu vực (dạng BoxCollider) nơi bom sẽ được sinh ra. Bom sẽ xuất hiện trên bề mặt trên cùng của box này.")]
         [SerializeField] private BoxCollider _spawnArea;
 
-        [Header("Settings")]
+        [Header("Spawning Settings")]
         [Tooltip("Thời gian (giây) giữa mỗi lần sinh bom.")]
         [SerializeField] private float _spawnInterval = 3f;
-        [Tooltip("Số lượng bom mỗi loại được tạo sẵn trong pool.")]
-        [SerializeField] private int _poolInitialSize = 5;
-        [Tooltip("Số lượng bom sẽ được tạo thêm mỗi khi pool hết và cần mở rộng.")]
-        [SerializeField] private int _poolExpansionChunkSize = 3;
         [Tooltip("Độ khó hiện tại của game, dùng để tính toán xác suất xuất hiện của bom.")]
         [SerializeField] private float _currentDifficulty = 1f; // Giá trị này có thể được cập nhật bởi GameloopManager
 
         private Coroutine _spawnCoroutine;
 
-        // Object Pooling
-        private Dictionary<string, (Queue<GameObject> queue, Transform container)> _bombPools = new();
-        private Dictionary<GameObject, string> _activeBombInstances = new();
-
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake(); // Gọi Awake của lớp cơ sở
             if (Instance != null && Instance as MonoBehaviour != this)
             {
                 Destroy(gameObject);
@@ -52,7 +45,7 @@ namespace Managers
 
         private void Start()
         {
-            CreatePools();
+            PrewarmPools();
         }
 
         private void OnEnable()
@@ -63,6 +56,16 @@ namespace Managers
         private void OnDisable()
         {
             GameEvents.OnBombDespawnRequest -= ReturnToPool;
+        }
+
+        /// <summary>
+        /// Cập nhật độ khó hiện tại của game, ảnh hưởng đến xác suất sinh bom.
+        /// </summary>
+        /// <param name="difficulty">Giá trị độ khó mới.</param>
+        public void SetDifficulty(float difficulty)
+        {
+            _currentDifficulty = difficulty;
+            Debug.Log($"[BombSpawnerManager] Difficulty set to {difficulty}.");
         }
 
         public void StartSpawning()
@@ -116,86 +119,25 @@ namespace Managers
             }
         }
 
-        private void CreatePools()
+        /// <summary>
+        /// Khởi tạo và làm đầy sẵn các pool bom dựa trên BombDatabase.
+        /// </summary>
+        private void PrewarmPools()
         {
             if (_bombDatabase == null) return;
 
             foreach (var bombData in _bombDatabase.bombs.Where(b => b.bombPrefab != null))
             {
-                string key = bombData.bombPrefab.name;
-                if (_bombPools.ContainsKey(key)) continue;
-
-                var queue = new Queue<GameObject>();
-                var poolContainer = new GameObject($"Pool - {key}");
-                poolContainer.transform.SetParent(transform);
-
-                for (int i = 0; i < _poolInitialSize; i++)
+                // Lấy ra và trả lại ngay lập tức để khởi tạo pool với số lượng ban đầu.
+                var instances = new List<GameObject>();
+                for (int i = 0; i < _initialPoolSize; i++)
                 {
-                    var bombInstance = Instantiate(bombData.bombPrefab, poolContainer.transform);
-                    bombInstance.SetActive(false);
-                    queue.Enqueue(bombInstance);
+                    instances.Add(GetFromPool(bombData.bombPrefab, Vector3.zero, Quaternion.identity));
                 }
-                _bombPools.Add(key, (queue, poolContainer.transform));
-            }
-        }
-
-        /// <summary>
-        /// Lấy một đối tượng bom từ pool. Triển khai từ IGameObjectPoolManager.
-        /// </summary>
-        public GameObject GetFromPool(GameObject prefab, Vector3 position, Quaternion rotation)
-        {
-            if (prefab == null)
-            {
-                Debug.LogError("[BombSpawnerManager] Yêu cầu lấy đối tượng từ pool với prefab null.", this);
-                return null;
-            }
-
-            string key = prefab.name;
-            if (!_bombPools.TryGetValue(key, out var pool))
-            {
-                Debug.LogError($"[BombSpawnerManager] Pool for '{key}' does not exist.", this);
-                return null;
-            }
-
-            // Nếu pool hết, nới rộng nó ra.
-            if (pool.queue.Count == 0)
-            {
-                int amountToCreate = _poolExpansionChunkSize > 0 ? _poolExpansionChunkSize : 1;
-                Debug.LogWarning($"[BombSpawnerManager] Pool for '{key}' is empty. Expanding by {amountToCreate} instance(s).", this);
-                for (int i = 0; i < amountToCreate; i++)
+                foreach (var instance in instances)
                 {
-                    var newInstance = Instantiate(prefab, pool.container);
-                    newInstance.SetActive(false);
-                    pool.queue.Enqueue(newInstance);
+                    ReturnToPool(instance);
                 }
-            }
-
-            // Bây giờ, lấy một instance ra khỏi pool.
-            GameObject bombInstance = pool.queue.Dequeue();
-            bombInstance.transform.SetParent(null); // Lấy ra khỏi container
-            bombInstance.transform.SetPositionAndRotation(position, rotation);
-            bombInstance.SetActive(true);
-            bombInstance.GetComponent<IBombController>()?.ResetState();
-            _activeBombInstances.Add(bombInstance, key);
-            return bombInstance;
-        }
-
-        /// <summary>
-        /// Trả một đối tượng bom về lại pool. Triển khai từ IGameObjectPoolManager.
-        /// </summary>
-        public void ReturnToPool(GameObject bombInstance)
-        {
-            if (_activeBombInstances.TryGetValue(bombInstance, out string key) && _bombPools.TryGetValue(key, out var pool))
-            {
-                bombInstance.SetActive(false);
-                bombInstance.transform.SetParent(pool.container);
-                pool.queue.Enqueue(bombInstance);
-                _activeBombInstances.Remove(bombInstance);
-            }
-            else
-            {
-                Debug.LogWarning($"[BombSpawnerManager] Received a despawn request for an untracked or unknown bomb '{bombInstance.name}'. Destroying it.", bombInstance);
-                Destroy(bombInstance);
             }
         }
 
@@ -233,6 +175,29 @@ namespace Managers
             float randomX = Random.Range(bounds.min.x, bounds.max.x);
             float randomZ = Random.Range(bounds.min.z, bounds.max.z);
             return new Vector3(randomX, bounds.max.y, randomZ);
+        }
+
+        /// <summary>
+        /// Trả tất cả các quả bom đang hoạt động về lại pool.
+        /// </summary>
+        public void ClearAllBombs()
+        {
+            // Lớp cơ sở theo dõi các instance đang hoạt động thông qua _instanceToPrefabMap.
+            // Chúng ta có thể lặp qua nó để trả về pool.
+            Debug.Log($"[BombSpawnerManager] Clearing all {_instanceToPrefabMap.Count} active bombs.");
+            // Tạo một bản sao của danh sách keys để tránh lỗi "Collection was modified" khi ReturnToPool sửa đổi nó.
+            var activeInstances = new List<GameObject>(_instanceToPrefabMap.Keys);
+            foreach (var bombInstance in activeInstances)
+            {
+                ReturnToPool(bombInstance);
+            }
+        }
+
+        protected override void OnGetInstance(GameObject instance)
+        {
+            base.OnGetInstance(instance);
+            // Reset trạng thái của bom khi nó được lấy ra từ pool.
+            instance.GetComponent<IBombController>()?.ResetState();
         }
     }
 }

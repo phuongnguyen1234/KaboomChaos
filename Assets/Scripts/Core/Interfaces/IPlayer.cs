@@ -54,6 +54,11 @@ namespace Core.Interfaces
         /// </summary>
         float ClimbingSpeed { get; }
 
+        /// <summary>
+        /// Di chuyển người chơi đến một vị trí mới một cách an toàn, đồng thời reset lại các lực tác động.
+        /// </summary>
+        /// <param name="position">Vị trí thế giới mới.</param>
+        void Teleport(Vector3 position);
         // Bạn có thể thêm các phương thức hoặc thuộc tính khác vào đây
         // Ví dụ: Vector3 GetPosition();
         // Ví dụ: void TakeDamage(float amount);

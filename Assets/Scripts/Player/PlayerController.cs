@@ -101,6 +101,26 @@ namespace Player
         /// Giá trị này được tính toán trong partial class PlayerController.Climbing.
         /// </summary>
         public float ClimbingSpeed => _climbingDirection;
+
+        /// <summary>
+        /// Di chuyển người chơi đến một vị trí mới một cách an toàn.
+        /// </summary>
+        /// <param name="position">Vị trí thế giới mới.</param>
+        public void Teleport(Vector3 position)
+        {
+            // Đối với controller CMF, việc thay đổi vị trí phải được thực hiện thông qua component 'Mover'.
+            // Việc đặt 'transform.position' trực tiếp sẽ bị ghi đè trong lần cập nhật vật lý tiếp theo.
+            if (mover != null)
+            {
+                mover.SetPosition(position);
+                // Reset lại tất cả các lực đang tác động để người chơi không bị "bay" đi sau khi dịch chuyển.
+                SetMomentum(Vector3.zero);
+            }
+            else
+            {
+                transform.position = position;
+            }
+        }
         #endregion
 
         #region Public API

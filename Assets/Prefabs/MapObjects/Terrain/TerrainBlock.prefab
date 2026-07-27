@@ -343,7 +343,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7756762216282166330}
-  m_Material: {fileID: 13400000, guid: 92d11dc6c4ce50b4d8529dee959aa88c, type: 2}
+  m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -369,7 +369,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d32f934f0591ee540bdaf682b8cb2d48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Managers::World.DestructibleBlock
-  _customColor: {r: 1, g: 1, b: 1, a: 1}
+  _customBaseColor: {r: 1, g: 1, b: 1, a: 1}
+  _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
 --- !u!114 &6226117529890685089

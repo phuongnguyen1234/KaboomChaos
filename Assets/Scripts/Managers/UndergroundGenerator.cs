@@ -3,6 +3,8 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using Core;
+using System.Collections;
+using Core.Interfaces;
 
 namespace Managers
 {
@@ -13,26 +15,28 @@ namespace Managers
     public class UndergroundGenerator : MonoBehaviour
     {
         /// <summary>
-        /// Tạo các tầng địa chất dựa trên profile được cung cấp.
-        /// PHIÊN BẢN TRUYỀN THỐNG: Phương thức này sẽ tạo GameObject cho mỗi khối.
+        /// Tạo các tầng địa chất một cách bất đồng bộ để tránh giật lag.
         /// </summary>
         /// <param name="profile">Dữ liệu cấu hình cho thế giới ngầm.</param>
-        public void Build(UndergroundData profile, Transform container)
+        /// <param name="container">Đối tượng cha để chứa các khối.</param>
+        /// <param name="blocksPerFrame">Số lượng khối được tạo mỗi frame.</param>
+        /// <returns>IEnumerator để chạy như một coroutine.</returns>
+        public IEnumerator BuildAsync(UndergroundData profile, Transform container, int blocksPerFrame = 50)
         {
             if (profile == null)
             {
                 Debug.LogError("[UndergroundGenerator] UndergroundData is null. Cannot build.", this);
-                return;
+                yield break;
             }
             if (container == null)
             {
                 Debug.LogError("[UndergroundGenerator] Container is null. Cannot build underground.", this);
-                return;
+                yield break;
             }
             if (profile.layers.Count == 0 || profile.layers[0].blockPrefab == null)
             {
                 Debug.LogWarning("[UndergroundGenerator] UndergroundData has no layers or the first layer is missing a prefab. Cannot build.", this);
-                return;
+                yield break;
             }
 
             // --- Helper: Đo kích thước Prefab ---
@@ -81,6 +85,8 @@ namespace Managers
             // Điều này sẽ dịch chuyển toàn bộ cấu trúc lên trên 2 đơn vị.
             float currentYPosition = 2.0f; // Dùng float để có vị trí chính xác.
 
+            int blockCounter = 0;
+
             // --- Bước 2: Xây dựng các tầng từ dưới lên ---
             for (int i = profile.layers.Count - 1; i >= 0; i--)
             {
@@ -108,13 +114,34 @@ namespace Managers
                             );
 
                             // Tạo instance của prefab và đặt vị trí
-                            GameObject blockInstance = Instantiate(prefabToSpawn, container);
-                            blockInstance.transform.SetLocalPositionAndRotation(localPos, Quaternion.identity);
+                            GameObject blockInstance;
+                            // Yêu cầu một khối từ pool thông qua hệ thống event.
+                            blockInstance = GameEvents.TriggerBlockSpawnRequest(prefabToSpawn, Vector3.zero, Quaternion.identity);
+
+                            if (blockInstance != null)
+                            {
+                                blockInstance.transform.SetParent(container);
+                                blockInstance.transform.SetLocalPositionAndRotation(localPos, Quaternion.identity);
+                            }
+                            else
+                            {
+                                // Fallback: Nếu không có pool manager nào đang lắng nghe, tự tạo bằng Instantiate.
+                                Debug.LogWarning($"[UndergroundGenerator] BlockPoolManager không hoạt động hoặc không thể sinh khối. Tự tạo instance cho '{prefabToSpawn.name}'. Hiệu năng sẽ bị ảnh hưởng.", this);
+                                blockInstance = Instantiate(prefabToSpawn, container);
+                                blockInstance.transform.SetLocalPositionAndRotation(localPos, Quaternion.identity);
+                            }
                             blockInstance.name = $"{prefabToSpawn.name} ({x},{currentYPosition:F1},{z})";
 
                             // Đảm bảo khối có component DestructibleBlock để có thể bị phá hủy
                             if (blockInstance.GetComponent<DestructibleBlock>() == null)
                                 Debug.LogWarning($"Prefab '{prefabToSpawn.name}' không có component 'DestructibleBlock'. Sẽ không thể bị phá hủy.", blockInstance);
+
+                            blockCounter++;
+                            if (blockCounter >= blocksPerFrame)
+                            {
+                                blockCounter = 0;
+                                yield return null; // Tạm dừng đến frame tiếp theo
+                            }
                         }
                     }
                     // Tăng vị trí Y lên theo chiều cao của khối trong tầng này.

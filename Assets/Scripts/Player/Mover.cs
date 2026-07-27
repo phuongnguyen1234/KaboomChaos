@@ -328,6 +328,16 @@ namespace Player
 			IsUsingExtendedSensorRange = _isExtended;
 		}
 
+		/// <summary>
+		/// Di chuyển Rigidbody đến một vị trí mới ngay lập tức.
+		/// Hữu ích cho việc dịch chuyển (teleport).
+		/// </summary>
+		/// <param name="newPosition">Vị trí thế giới mới.</param>
+		public void SetPosition(Vector3 newPosition)
+		{
+			rig.position = newPosition;
+		}
+
 		//Set height of collider;
 		public void SetColliderHeight(float _newColliderHeight)
 		{

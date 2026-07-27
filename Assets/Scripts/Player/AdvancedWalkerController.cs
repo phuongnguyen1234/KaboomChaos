@@ -1,6 +1,4 @@
-﻿﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿﻿using UnityEngine;
 
 namespace Player
 {
@@ -36,10 +34,15 @@ namespace Player
 		[Tooltip("Lực nhảy ban đầu của nhân vật.")]
 		[SerializeField] protected float _jumpSpeed = 10f;
 
+		[Tooltip("Khoảng thời gian ngắn (tính bằng giây) sau khi rời khỏi mặt đất mà người chơi vẫn có thể nhảy. Giúp tăng 'game feel' khi nhảy ở rìa.")]
+		[SerializeField] private float _coyoteTimeDuration = 0.1f;
+
 		//Jump duration variables;
 		[Tooltip("Thời gian tối đa có thể giữ nút nhảy để đạt chiều cao tối đa. Cho phép thay đổi chiều cao nhảy.")]
 		[SerializeField] protected float _jumpDuration = 0.2f;
 		float currentJumpStartTime = 0f;
+
+		private float _groundContactLostTime;
 
 		//'AirFriction' determines how fast the controller loses its momentum while in the air;
 		//'GroundFriction' is used instead, if the controller is grounded;
@@ -386,22 +389,35 @@ namespace Player
 			return ControllerState.Falling;
 		}
 
-        //Check if player has initiated a jump;
-        void HandleJumping()
-        {
-            if (currentControllerState == ControllerState.Grounded)
-            {
-                if ((jumpKeyIsPressed == true || jumpKeyWasPressed) && !jumpInputIsLocked)
-                {
-                    //Call events;
-                    OnGroundContactLost();
-                    OnJumpStart();
+		/// <summary>
+		/// Kiểm tra xem người chơi có thực hiện nhảy không.
+		/// Bao gồm logic "coyote time" để cho phép nhảy một khoảng thời gian ngắn sau khi rời khỏi mặt đất.
+		/// </summary>
+		private void HandleJumping()
+		{
+			// Điều kiện để có thể nhảy: đang ở trên mặt đất, HOẶC vừa mới rời khỏi mặt đất trong khoảng thời gian cho phép (coyote time).
+			bool isGrounded = currentControllerState == ControllerState.Grounded;
+			bool isCoyoteTimeActive = _groundContactLostTime > 0f && Time.time < _groundContactLostTime + _coyoteTimeDuration;
 
-                    currentControllerState = ControllerState.Jumping;
-                }
-            }
-        }
+			if ((jumpKeyIsPressed || jumpKeyWasPressed) && !jumpInputIsLocked)
+			{
+				if (isGrounded || isCoyoteTimeActive)
+				{
+					// Nếu đang trên mặt đất, gọi OnGroundContactLost() để tính toán momentum cho cú nhảy.
+					// Nếu đang trong coyote time, hàm này đã được gọi khi rời khỏi mặt đất.
+					if (isGrounded)
+					{
+						OnGroundContactLost();
+					}
 
+					OnJumpStart();
+					currentControllerState = ControllerState.Jumping;
+
+					// Vô hiệu hóa coyote time để ngăn nhảy hai lần trên không.
+					_groundContactLostTime = 0f;
+				}
+			}
+		}
         //Apply friction to both vertical and horizontal momentum based on 'friction' and 'gravity';
 		//Handle movement in the air;
         //Handle sliding down steep slopes;
@@ -561,6 +577,9 @@ namespace Player
 			//Add movement velocity to momentum;
 			momentum += _velocity;
 
+			// Ghi lại thời điểm mất tiếp xúc với mặt đất để kích hoạt coyote time.
+			_groundContactLostTime = Time.time;
+
 			if(_useLocalMomentum)
 				momentum = tr.worldToLocalMatrix * momentum;
 		}
@@ -568,6 +587,9 @@ namespace Player
 		//This function is called when the controller has landed on a surface after being in the air;
 		protected virtual void OnGroundContactRegained()
 		{
+			// Reset lại bộ đếm coyote time khi tiếp đất.
+			_groundContactLostTime = 0f;
+
 			//Call 'OnLand' event;
 			if(OnLand != null)
 			{

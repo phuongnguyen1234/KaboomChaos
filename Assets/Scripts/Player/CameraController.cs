@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Cinemachine;
+using Core.Interfaces;
 using UnityEngine.InputSystem;
 
 namespace Player{
@@ -42,8 +43,6 @@ public class CameraController : MonoBehaviour
     [Tooltip("Kéo Action tương ứng với nút Shift Lock vào đây")]
     public InputActionReference shiftLockAction;
 
-    private Vector2 savedMousePos;
-    
     // Components
     private CinemachineThirdPersonFollow thirdPersonFollow;
     private CinemachineOrbitalFollow orbitalFollow;
@@ -57,6 +56,7 @@ public class CameraController : MonoBehaviour
     private Transform _defaultFollowTarget;
     private Transform _defaultLookAtTarget;
     private Transform _defaultFirstPersonFollowTarget;
+    private IUIManager _uiManager;
     private Transform _overrideFollowTarget; // Mục tiêu tạm thời, ví dụ như khi ragdoll
 
     public bool IsFirstPerson => isFirstPerson;
@@ -115,35 +115,37 @@ public class CameraController : MonoBehaviour
 
         // Cài đặt ưu tiên ban đầu
         SetFirstPersonMode(false);
+        UpdateCrosshairs();
+
+        // Lấy instance của UI Manager
+        _uiManager = IUIManager.Instance;
+
     }
 
     void Update()
     {
         if (Mouse.current == null) return;
 
-        // Bật/tắt Shift Lock (chỉ khi không ở First Person và đã gán shiftLockTarget)
-        if (enableShiftLock && !isFirstPerson && shiftLockAction != null && shiftLockAction.action.WasPressedThisFrame())
+        // Xử lý bật/tắt Shift Lock
+        if (enableShiftLock && shiftLockAction != null && shiftLockAction.action.WasPressedThisFrame())
         {
             isShiftLock = !isShiftLock;
-            
-            // Khóa/Mở khóa con trỏ ngay khi bật/tắt Shift Lock
-            if (isShiftLock)
-            {
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = true;
-            }
-            else
-            {
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
-            }
-
-            // Chuyển điểm Follow ngay khi toggle
+            UpdateCrosshairs();
             UpdateCameraTargets();
         }
 
         HandleRotation();
         HandleZoom();
+
+        // Luôn cập nhật trạng thái con trỏ ở cuối mỗi frame để đảm bảo tính nhất quán.
+        UpdateCursorState();
+    }
+
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        // Khi game lấy lại focus, buộc cập nhật lại trạng thái con trỏ để tránh bị kẹt.
+        if (hasFocus)
+            UpdateCursorState();
     }
     
     // Sử dụng LateUpdate để xoay nhân vật theo camera sau khi tất cả các tính toán di chuyển đã hoàn tất.
@@ -162,6 +164,9 @@ public class CameraController : MonoBehaviour
     public void SetFollowTarget(Transform newTarget)
     {
         _overrideFollowTarget = newTarget;
+        // Khi ragdoll, luôn ẩn crosshair
+        _uiManager?.SetShiftLockCrosshair(false); // Ẩn crosshair shift lock
+        _uiManager?.SetFirstPersonCrosshair(false); // Ẩn crosshair góc nhìn thứ nhất
         UpdateCameraTargets();
     }
 
@@ -172,6 +177,7 @@ public class CameraController : MonoBehaviour
     public void ResetFollowTarget()
     {
         _overrideFollowTarget = null;
+        UpdateCrosshairs();
         UpdateCameraTargets();
     }
 
@@ -214,66 +220,73 @@ public class CameraController : MonoBehaviour
         }
     }
 
-    private void HandleRotation()
+    /// <summary>
+    /// Cập nhật trạng thái hiển thị của các crosshair dựa trên chế độ camera hiện tại.
+    /// </summary>
+    private void UpdateCrosshairs()
     {
-        bool shouldRotateCamera = false;
+        if (_uiManager == null) return;
 
-        if (isFirstPerson)
+        // Logic mới:
+        // 1. Crosshair của Shift Lock có độ ưu tiên cao nhất. Nếu Shift Lock bật, nó sẽ luôn hiển thị.
+        _uiManager.SetShiftLockCrosshair(isShiftLock);
+
+        // 2. Crosshair của góc nhìn thứ nhất chỉ hiển thị khi:
+        //    - Đang ở góc nhìn thứ nhất (isFirstPerson = true)
+        //    - VÀ Shift Lock KHÔNG bật (isShiftLock = false)
+        _uiManager.SetFirstPersonCrosshair(isFirstPerson && !isShiftLock);
+    }
+
+    /// <summary>
+    /// Hàm trung tâm để quản lý trạng thái của con trỏ.
+    /// Quyết định xem con trỏ nên bị khóa hay không dựa trên các trạng thái của game.
+    /// </summary>
+    private void UpdateCursorState()
+    {
+        if (Mouse.current == null) return;
+
+        // Con trỏ sẽ bị khóa nếu: ở góc nhìn thứ nhất, HOẶC bật shift lock, HOẶC đang giữ chuột phải.
+        bool shouldBeLocked = isFirstPerson || isShiftLock || Mouse.current.rightButton.isPressed;
+
+        if (shouldBeLocked)
         {
-            // Góc nhìn thứ nhất: luôn khóa con trỏ ở giữa và xoay camera
-            shouldRotateCamera = true;
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
         }
         else
         {
-            // Góc nhìn thứ ba (cả shift-lock và bình thường): khóa con trỏ khi giữ chuột phải hoặc khi shift-lock
-            if (Mouse.current.rightButton.wasPressedThisFrame)
-            {
-                savedMousePos = Mouse.current.position.ReadValue();
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
-            }
-            else if (Mouse.current.rightButton.wasReleasedThisFrame)
-            {
-                Cursor.lockState = CursorLockMode.None;
-                Mouse.current.WarpCursorPosition(savedMousePos);
-                Cursor.visible = true;
-            }
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+    }
 
-            if (Mouse.current.rightButton.isPressed || isShiftLock)
+    private void HandleRotation()
+    {
+        // Hàm này xử lý việc xoay camera và trạng thái con trỏ khi giữ RMB hoặc ở FPS.
+        bool shouldRotateCamera = false;
+        
+        // Camera sẽ xoay khi ở chế độ First Person hoặc Shift Lock.
+        if (isFirstPerson || isShiftLock)
+        {
+            shouldRotateCamera = true;
+        }
+        // Hoặc khi giữ chuột phải ở góc nhìn thứ ba.
+        else
+        {
+            if (Mouse.current.rightButton.isPressed)
             {
                 shouldRotateCamera = true;
             }
         }
 
+        // --- Thực hiện xoay camera nếu cần ---
         if (shouldRotateCamera)
         {
             Vector2 mouseDelta = Mouse.current.delta.ReadValue();
             float yInput = invertY ? -mouseDelta.y : mouseDelta.y;
             
-            if (isFirstPerson)
-            {
-                // Xoay First Person Camera
-                if (firstPersonPanTilt != null)
-                {
-                    firstPersonPanTilt.PanAxis.Value += mouseDelta.x * lookSpeed;
-                    firstPersonPanTilt.TiltAxis.Value += yInput * lookSpeed * 0.7f;
-                    
-                    // Giới hạn trục Y (Tilt thường giới hạn từ -90 đến 90)
-                    firstPersonPanTilt.TiltAxis.Value = Mathf.Clamp(firstPersonPanTilt.TiltAxis.Value, -90f, 90f);
-                }
-            }
-            else
-            {
-                // Xoay Third Person Camera (bao gồm cả khi đang bật Shift Lock)
-                if (orbitalFollow != null)
-                {
-                    orbitalFollow.HorizontalAxis.Value += mouseDelta.x * lookSpeed;
-                    orbitalFollow.VerticalAxis.Value += yInput * lookSpeed * 0.7f;
-                    
-                    // Giới hạn trục Y
-                    orbitalFollow.VerticalAxis.Value = Mathf.Clamp(orbitalFollow.VerticalAxis.Value, -89f, 89f);
-                }
-            }
+            // Logic xoay camera được áp dụng chung cho cả hai góc nhìn
+            RotateCameras(mouseDelta.x, yInput);
         }
     }
 
@@ -338,9 +351,42 @@ public class CameraController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Xoay camera phù hợp dựa trên trạng thái hiện tại (First/Third Person).
+    /// </summary>
+    private void RotateCameras(float xInput, float yInput)
+    {
+        if (isFirstPerson)
+        {
+            // Xoay First Person Camera
+            if (firstPersonPanTilt != null)
+            {
+                firstPersonPanTilt.PanAxis.Value += xInput * lookSpeed;
+                firstPersonPanTilt.TiltAxis.Value += yInput * lookSpeed * 0.7f;
+                
+                // Giới hạn trục Y (Tilt thường giới hạn từ -90 đến 90)
+                firstPersonPanTilt.TiltAxis.Value = Mathf.Clamp(firstPersonPanTilt.TiltAxis.Value, -90f, 90f);
+            }
+        }
+        else
+        {
+            // Xoay Third Person Camera (bao gồm cả khi đang bật Shift Lock hoặc giữ RMB)
+            if (orbitalFollow != null)
+            {
+                orbitalFollow.HorizontalAxis.Value += xInput * lookSpeed;
+                orbitalFollow.VerticalAxis.Value += yInput * lookSpeed * 0.7f;
+                
+                // Giới hạn trục Y
+                orbitalFollow.VerticalAxis.Value = Mathf.Clamp(orbitalFollow.VerticalAxis.Value, -89f, 89f);
+            }
+        }
+    }
+
     private void SetFirstPersonMode(bool state)
     {
         isFirstPerson = state;
+        
+        UpdateCrosshairs();
 
         // Đồng bộ góc quay giữa 2 camera để không bị giật hướng nhìn
         if (orbitalFollow != null && firstPersonPanTilt != null)
@@ -361,27 +407,11 @@ public class CameraController : MonoBehaviour
         if (thirdPersonCamera != null) thirdPersonCamera.Priority = state ? 0 : 10;
         if (firstPersonCamera != null) firstPersonCamera.Priority = state ? 10 : 0;
 
-        // Cập nhật trạng thái con trỏ
-        if (state)
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = true; // Nên dùng ảnh UI thay vì con trỏ hệ thống
-        }
-        else
+        // Khi thoát khỏi chế độ người thứ nhất, cần cập nhật lại mục tiêu camera.
+        // Trạng thái con trỏ sẽ được xử lý bởi UpdateCursorState().
+        if (!state)
         {
             UpdateCameraTargets();
-            
-            // Khi thoát First Person, kiểm tra xem có đang giữ chuột không
-            if (Mouse.current != null && Mouse.current.rightButton.isPressed)
-            {
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
-            }
-            else if (!isShiftLock)
-            {
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
-            }
         }
 
         // Ẩn/Hiện nhân vật
@@ -393,4 +423,5 @@ public class CameraController : MonoBehaviour
             }
         }
     }
-}}
+}
+}

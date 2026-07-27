@@ -12,7 +12,6 @@ namespace Bombs
     /// It handles activation, behavior (fuse/missile), and explosion logic.
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
-    [RequireComponent(typeof(SphereCollider))]
     [RequireComponent(typeof(AudioSource))]
     public class BombController : MonoBehaviour, IBombController
     {
@@ -28,7 +27,7 @@ namespace Bombs
 
         // Cached components
         private Rigidbody _rb;
-        private SphereCollider _collider;
+        private Collider _collider;
         private AudioSource _audioSource;
 
         // State
@@ -58,7 +57,7 @@ namespace Bombs
         private void Awake()
         {
             _rb = GetComponent<Rigidbody>();
-            _collider = GetComponent<SphereCollider>();
+            _collider = GetComponent<Collider>(); // Get any Collider component
             _audioSource = GetComponent<AudioSource>();
 
             // Cache original scales of parts to pulse for scale pulsing effect.

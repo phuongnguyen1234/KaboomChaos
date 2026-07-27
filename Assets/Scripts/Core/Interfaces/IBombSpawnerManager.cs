@@ -9,5 +9,7 @@ namespace Core.Interfaces
         void StartSpawning();
         /// <summary> Dừng chu trình sinh bom. </summary>
         void StopSpawning();
+        /// <summary> Dọn dẹp tất cả bom đang hoạt động. </summary>
+        void ClearAllBombs();
     }
 }

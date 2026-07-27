@@ -8648,7 +8648,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d32f934f0591ee540bdaf682b8cb2d48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Core::MaterialEffectController
-  _customColor: {r: 1, g: 1, b: 1, a: 1}
+  _customBaseColor: {r: 1, g: 1, b: 1, a: 1}
+  _customDecalColor: {r: 1, g: 1, b: 1, a: 1}
   _customAlpha: 1
   _customEmissionIntensity: 0
 --- !u!1 &747627864793514714
@@ -8697,7 +8698,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5aec8863a42cf941aee99180952a48d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Core::Core.ExplosionEffectController
-  _animationType: 0
+  _animationStages: []
+  _initialScale: {x: 0.01, y: 0.01, z: 0.01}
+  _initialAlpha: 1
   _mainRenderer: {fileID: 8365981775348852892}
 --- !u!1 &4754107197624226471
 GameObject:
@@ -17347,6 +17350,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d32f934f0591ee540bdaf682b8cb2d48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Core::MaterialEffectController
-  _customColor: {r: 1, g: 1, b: 1, a: 1}
-  _customAlpha: 1
+  _customBaseColor: {r: 1, g: 1, b: 1, a: 1}
+  _customDecalColor: {r: 1, g: 1, b: 1, a: 0}
+  _customAlpha: 0.5
   _customEmissionIntensity: 0

@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Core.Interfaces;
 
 namespace Core
 {
@@ -9,40 +10,92 @@ namespace Core
     /// </summary>
     public static class GameEvents
     {
-        #region Action declaration
+        #region Event Declarations
+
+        #region Player Events
         /// <summary>
         /// Được gọi khi một người chơi chết.
         /// </summary>
-        public static event Action OnPlayerDied;
+        public static event Action<IPlayer> OnPlayerDied;
+        /// <summary>
+        /// Được gọi khi máu của người chơi thay đổi.
+        /// </summary>
+        public static event Action<IPlayer, float, float> OnPlayerHealthChanged;
+        #endregion
 
+        #region Bomb Events
         /// <summary>
         /// Được gọi khi một quả bom muốn được trả về pool.
         /// </summary>
         public static event Action<GameObject> OnBombDespawnRequest;
+        #endregion
 
+        #region VFX Events
         /// <summary>
         /// Yêu cầu sinh ra một hiệu ứng hình ảnh (VFX).
         /// Trả về instance của VFX đã được sinh ra.
         /// </summary>
         public static event Func<GameObject, Vector3, Quaternion, GameObject> OnVFXSpawnRequest;
-
         /// <summary>
         /// Được gọi khi một hiệu ứng hình ảnh (VFX) muốn được trả về pool.
         /// </summary>
         public static event Action<GameObject> OnVFXDespawnRequest;
+        #endregion
+
+        #region UI & Floating Text Events
+        /// <summary>
+        /// Yêu cầu hiển thị một text nổi.
+        /// Tham số: Transform (đối tượng cha để đi theo), Vector3 (vị trí offset cục bộ), string (nội dung), Color (màu sắc).
+        /// </summary>
+        public static event Action<Transform, Vector3, string, Color> OnFloatingTextRequested;
+        public static event Action<GameObject> OnFloatingTextDespawnRequest;
+        #endregion
+
+        #region Block & Terrain Events
+        /// <summary>
+        /// Được gọi khi một khối địa hình (DestructibleBlock) muốn được trả về pool.
+        /// </summary>
+        public static event Action<GameObject> OnBlockDespawnRequest;
+        /// <summary>
+        /// Yêu cầu sinh ra một khối địa hình (DestructibleBlock) từ pool.
+        /// Trả về instance của khối đã được sinh ra.
+        /// </summary>
+        public static event Func<GameObject, Vector3, Quaternion, GameObject> OnBlockSpawnRequest;
+        #endregion
 
         #endregion
 
-        #region Invoked methods
-        public static void TriggerPlayerDied() => OnPlayerDied?.Invoke();
+        #region Trigger Methods
 
+        #region Player Triggers
+        public static void TriggerPlayerDied(IPlayer player) => OnPlayerDied?.Invoke(player);
+        public static void TriggerPlayerHealthChanged(IPlayer player, float currentHealth, float maxHealth) => OnPlayerHealthChanged?.Invoke(player, currentHealth, maxHealth);
+        #endregion
+
+        #region Bomb Triggers
         public static void TriggerBombDespawnRequest(GameObject bombInstance) => OnBombDespawnRequest?.Invoke(bombInstance);
+        #endregion
 
+        #region VFX Triggers
         public static GameObject TriggerVFXSpawnRequest(GameObject prefab, Vector3 position, Quaternion rotation) => OnVFXSpawnRequest?.Invoke(prefab, position, rotation);
-
         public static void TriggerVFXDespawnRequest(GameObject vfxInstance) => OnVFXDespawnRequest?.Invoke(vfxInstance);
-
+        #endregion
+        
+        #region UI & Floating Text Triggers
+        public static void TriggerFloatingTextRequested(Transform parent, Vector3 offset, string text, Color color) => OnFloatingTextRequested?.Invoke(parent, offset, text, color);
+        public static void TriggerFloatingTextDespawnRequest(GameObject textObject) => OnFloatingTextDespawnRequest?.Invoke(textObject);
+        #endregion
+        
+        #region Block & Terrain Triggers
+        public static void TriggerBlockDespawnRequest(GameObject blockInstance) => OnBlockDespawnRequest?.Invoke(blockInstance);
+        public static GameObject TriggerBlockSpawnRequest(GameObject prefab, Vector3 position, Quaternion rotation) => OnBlockSpawnRequest?.Invoke(prefab, position, rotation);
+        #endregion
+        
+        #region Listener Checks
         public static bool IsVFXPoolListening() => OnVFXDespawnRequest != null;
+        public static bool IsBlockPoolListening() => OnBlockDespawnRequest != null;
+        #endregion
+        
         #endregion
     }
 }

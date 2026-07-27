@@ -2,6 +2,7 @@ using UnityEngine;
 using Core.Interfaces;
 using Core;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Managers
 {
@@ -26,8 +27,11 @@ namespace Managers
         // Phụ thuộc vào các manager khác
         private ISpawnManager _spawnManager;
 
-        // Tham chiếu đến đối tượng người chơi hiện tại đã được sinh ra.
-        private IPlayer _currentPlayer;
+        // Danh sách những người chơi đang hoạt động trong màn.
+        private readonly List<IPlayer> _activePlayers = new();
+        
+        // Danh sách những người chơi đang tham gia round đấu hiện tại.
+        private readonly List<IPlayer> _playersInRound = new();
         #endregion
 
         #region Unity Lifecycle
@@ -70,6 +74,66 @@ namespace Managers
         {
             SpawnPlayer();
         }
+
+        /// <inheritdoc/>
+        public List<IPlayer> GetAllPlayers()
+        {
+            // Trả về một bản sao của danh sách để tránh sửa đổi từ bên ngoài
+            return new List<IPlayer>(_activePlayers);
+        }
+
+        public int GetAlivePlayerCount() => _playersInRound.Count;
+
+        public void StartRound()
+        {
+            _playersInRound.Clear();
+            foreach (var player in _activePlayers)
+            {
+                if (player != null && player.GameObject != null)
+                {
+                    player.GameObject.SetActive(true); // Đảm bảo người chơi được kích hoạt
+                    _playersInRound.Add(player);
+                }
+            }
+            Debug.Log($"[PlayerManager] Started round with {_playersInRound.Count} players.");
+        }
+
+        /// <inheritdoc/>
+        public List<IPlayer> GetPlayersNotInCurrentRound()
+        {
+            List<IPlayer> notInRound = new List<IPlayer>();
+            foreach (var player in _activePlayers)
+            {
+                // Nếu người chơi đang hoạt động nhưng chưa có trong danh sách _playersInRound
+                if (player != null && player.GameObject != null && !_playersInRound.Contains(player))
+                {
+                    notInRound.Add(player);
+                }
+            }
+            return notInRound;
+        }
+
+        /// <inheritdoc/>
+        public void AddPlayerToCurrentRound(IPlayer player)
+        {
+            if (player != null && player.GameObject != null && !_playersInRound.Contains(player))
+            {
+                player.GameObject.SetActive(true); // Đảm bảo người chơi được kích hoạt
+                _playersInRound.Add(player);
+            }
+        }
+        public void EndRound()
+        {
+            _playersInRound.Clear();
+            // Kích hoạt lại tất cả người chơi (để họ xuất hiện ở lobby)
+            foreach (var player in _activePlayers)
+            {
+                if (player != null && player.GameObject != null && !player.GameObject.activeSelf)
+                {
+                    player.GameObject.SetActive(true);
+                }
+            }
+        }
         #endregion
 
         #region Private Methods
@@ -91,49 +155,59 @@ namespace Managers
                 return;
             }
 
-            _currentPlayer = HandlePlayerSpawn(_playerPrefab, spawnPoint);
+            IPlayer newPlayer = HandlePlayerSpawn(_playerPrefab, spawnPoint);
+            if (newPlayer != null)
+            {
+                _activePlayers.Add(newPlayer);
+                Debug.Log($"[PlayerManager] Player spawned and added to active list. Total players: {_activePlayers.Count}", newPlayer.GameObject);
+            }
         }
 
         /// <summary>
         /// Được gọi khi sự kiện GameEvents.OnPlayerDied được kích hoạt.
         /// Hủy đối tượng người chơi cũ và bắt đầu coroutine hồi sinh.
         /// </summary>
-        private void HandlePlayerDeath()
+        private void HandlePlayerDeath(IPlayer player)
         {
-            if (_currentPlayer == null) return;
+            if (player == null) return;
 
-            Debug.Log("[PlayerManager] Player died. Starting respawn timer...");
+            // Nếu người chơi đang trong round, loại họ ra khỏi danh sách người chơi còn sống của round đó.
+            if (_playersInRound.Contains(player))
+            {
+                Debug.Log($"[PlayerManager] Player {player.GameObject.name} eliminated from the round.", player.GameObject);
+                _playersInRound.Remove(player);
+                // KHÔNG vô hiệu hóa GameObject ngay lập tức để hiệu ứng ragdoll có thể diễn ra.
+            }
 
-            // Bắt đầu coroutine để xử lý việc xóa và hồi sinh.
-            // Truyền vào đối tượng player hiện tại để xóa sau một khoảng thời gian.
-            StartCoroutine(RespawnPlayerCoroutine(3f, _currentPlayer));
-
-            // Đặt _currentPlayer thành null ngay lập tức để các hệ thống khác
-            // không cố gắng tương tác với người chơi đã "chết".
-            _currentPlayer = null;
+            // Bất kể chết trong round hay ở lobby, bắt đầu cùng một quy trình hồi sinh.
+            // Quy trình này sẽ cho phép ragdoll hiển thị, sau đó phá hủy và tạo lại người chơi.
+            Debug.Log($"[PlayerManager] Player {player.GameObject.name} died. Starting universal respawn process...", player.GameObject);
+            StartCoroutine(UnifiedRespawnCoroutine(player, 3f)); // 3 giây là thời gian chờ hồi sinh
         }
 
         /// <summary>
-        /// Coroutine chờ một khoảng thời gian, sau đó phá hủy đối tượng người chơi cũ và sinh ra người chơi mới.
+        /// Coroutine xử lý việc hồi sinh người chơi: phá hủy người chơi cũ, đợi, và tạo người chơi mới.
         /// </summary>
-        /// <param name="delay">Thời gian chờ trước khi hồi sinh.</param>
-        /// <param name="playerToDestroy">Đối tượng người chơi cần phá hủy.</param>
-        private IEnumerator RespawnPlayerCoroutine(float delay, IPlayer playerToDestroy)
+        private IEnumerator UnifiedRespawnCoroutine(IPlayer playerToDestroy, float respawnDelay)
         {
-            // Chờ một khoảng thời gian. Trong lúc này, các mảnh vỡ của người chơi cũ (ragdoll) vẫn còn trên scene.
-            yield return new WaitForSeconds(delay);
+            // Xóa người chơi cũ khỏi danh sách quản lý chính.
+            if (playerToDestroy != null)
+            {
+                _activePlayers.Remove(playerToDestroy);
+            }
 
-            // 1. Sau khi chờ, xóa đối tượng GameObject của người chơi cũ.
+            // Đợi một khoảng thời gian để hiệu ứng "vỡ tung" (shatter) có thời gian diễn ra.
+            yield return new WaitForSeconds(respawnDelay);
+
+            // Sau khi đợi, phá hủy đối tượng người chơi cũ.
             if (playerToDestroy != null && playerToDestroy.GameObject != null)
             {
-                Debug.Log("[PlayerManager] Respawn timer finished. Destroying old player object.");
                 Destroy(playerToDestroy.GameObject);
             }
 
-            // 2. Sinh ra người chơi mới.
-            Debug.Log("[PlayerManager] Spawning new player...");
-            SpawnPlayer();
-            yield break; // Thêm dòng này để rõ ràng hơn
+            // Hồi sinh một người chơi hoàn toàn mới ngay lập tức tại một điểm spawn ở lobby.
+            Debug.Log("[PlayerManager] Respawning new player in lobby.");
+            SpawnPlayer(); // SpawnPlayer sẽ tự tìm điểm spawn ngẫu nhiên.
         }
 
         /// <summary>
@@ -190,7 +264,7 @@ namespace Managers
         /// <returns>Interface IPlayer của người chơi hiện tại, hoặc null nếu chưa có.</returns>
         public IPlayer GetCurrentPlayer()
         {
-            return _currentPlayer;
+            return _activePlayers.Count > 0 ? _activePlayers[0] : null;
         }
 
         /// <summary>
@@ -217,7 +291,33 @@ namespace Managers
             }
 
             // Di chuyển người chơi đến vị trí của điểm spawn.
-            player.GameObject.transform.position = spawnPoint.SpawnPoint;
+            player.Teleport(spawnPoint.SpawnPoint);
+        }
+
+        /// <summary>
+        /// Dịch chuyển những người chơi còn sống trong round về sảnh chờ.
+        /// </summary>
+        public void ReturnRoundSurvivorsToLobby()
+        {
+            foreach (var player in _playersInRound)
+            {
+                if (player != null && player.GameObject != null)
+                {
+                    // Người chơi còn sống thì đã active, chỉ cần dịch chuyển họ.
+                    RespawnPlayer(player); // Respawn sẽ tìm một điểm spawn ngẫu nhiên ở sảnh và dịch chuyển.
+                }
+            }
+        }
+
+        /// <summary>
+        /// Xóa tất cả các đối tượng người chơi đang hoạt động.
+        /// </summary>
+        public void ClearAllPlayers()
+        {
+            // Tạo một bản sao của danh sách để lặp qua, vì việc hủy đối tượng có thể kích hoạt OnDisable và sửa đổi danh sách gốc.
+            var playersToClear = new List<IPlayer>(_activePlayers);
+            foreach (var player in playersToClear) Destroy(player.GameObject);
+            _activePlayers.Clear();
         }
         #endregion
     }

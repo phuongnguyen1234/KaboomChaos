@@ -12,7 +12,7 @@ namespace Player
     [RequireComponent(typeof(PlayerAnimator))]
     [RequireComponent(typeof(RagdollController))] // Phụ thuộc vào RagdollController để kích hoạt hiệu ứng
     [RequireComponent(typeof(AudioSource))]
-public class PlayerHealth : MonoBehaviour, IExplosionDamageable
+    public class PlayerHealth : MonoBehaviour, IExplosionDamageable
     {
         #region Fields
 
@@ -23,10 +23,14 @@ public class PlayerHealth : MonoBehaviour, IExplosionDamageable
         [Header("SFX Settings")]
         [Tooltip("Âm thanh sẽ phát khi người chơi chết.")]
         [SerializeField] private AudioClip _deathSfx;
+        [Tooltip("Âm thanh sẽ phát khi người chơi nhận sát thương.")]
+        [SerializeField] private AudioClip _takeDamageSfx;
 
         // Component để kích hoạt ragdoll
         private RagdollController _ragdollController;
         private AudioSource _audioSource;
+        private IPlayer _player;
+        private Collider _collider; // Thêm để lấy vị trí hiển thị text sát thương
 
         #endregion
 
@@ -44,9 +48,14 @@ public class PlayerHealth : MonoBehaviour, IExplosionDamageable
         {
             _ragdollController = GetComponent<RagdollController>();
             _audioSource = GetComponent<AudioSource>();
+            _player = GetComponent<IPlayer>();
+            _collider = GetComponent<Collider>();
 
             _currentHealth = _maxHealth;
             IsAlive = true;
+
+            // Cập nhật UI lần đầu
+            GameEvents.TriggerPlayerHealthChanged(_player, _currentHealth, _maxHealth);
         }
 
         #endregion
@@ -63,6 +72,8 @@ public class PlayerHealth : MonoBehaviour, IExplosionDamageable
             // Nếu sát thương này sẽ gây chết, hãy truyền thông tin về lực cho phương thức Die.
             if (_currentHealth - amount <= 0)
             {
+                // Hiển thị số sát thương bay lên trước khi chết
+                ShowDamageNumber(amount);
                 _currentHealth = 0;
                 Die(force, point);
             }
@@ -81,8 +92,19 @@ public class PlayerHealth : MonoBehaviour, IExplosionDamageable
         {
             if (!IsAlive) return;
 
+            // Phát âm thanh nhận sát thương
+            if (_audioSource != null && _takeDamageSfx != null)
+            {
+                _audioSource.PlayOneShot(_takeDamageSfx);
+            }
+
+            // Hiển thị số sát thương bay lên
+            ShowDamageNumber(amount);
+
             _currentHealth -= amount;
-            Debug.Log($"[PlayerHealth] Player took {amount} damage. Current HP: {_currentHealth}/{_maxHealth}", this);
+
+            // Cập nhật UI
+            GameEvents.TriggerPlayerHealthChanged(_player, _currentHealth, _maxHealth);
 
             if (_currentHealth <= 0)
             {
@@ -114,12 +136,37 @@ public class PlayerHealth : MonoBehaviour, IExplosionDamageable
             IsAlive = false;
             _currentHealth = 0;
             
+            // Cập nhật UI lần cuối để đảm bảo nó hiển thị giá trị 0.
+            GameEvents.TriggerPlayerHealthChanged(_player, _currentHealth, _maxHealth);
+            
             // Kích hoạt hiệu ứng chết "vỡ ra" bằng cách phá hủy các khớp.
             _ragdollController?.ShatterAndDie(killingForce, hitPoint);
             
             // Kích hoạt các sự kiện chết
             OnDied?.Invoke();
-            GameEvents.TriggerPlayerDied();
+            GameEvents.TriggerPlayerDied(_player);
+        }
+
+        /// <summary>
+        /// Yêu cầu hệ thống hiển thị một text nổi cho biết lượng sát thương đã nhận.
+        /// </summary>
+        /// <param name="amount">Lượng sát thương.</param>
+        private void ShowDamageNumber(float amount)
+        {
+            if (amount <= 0) return;
+
+            // Tính toán vị trí offset cục bộ cho text, ở phía trên đầu của player.
+            Vector3 offset = Vector3.up * 1.5f; // Giá trị mặc định nếu không có collider
+            if (_collider != null)
+            {
+                // Vị trí trên đỉnh của collider, chuyển thành offset so với transform.position của player.
+                Vector3 topOfCollider = _collider.bounds.center + Vector3.up * _collider.bounds.extents.y;
+                offset = topOfCollider - transform.position;
+            }
+
+            // Gửi yêu cầu thông qua GameEvents.
+            // Giả định rằng có một FloatingTextManager đang lắng nghe sự kiện này.
+            GameEvents.TriggerFloatingTextRequested(transform, offset, $"-{Mathf.RoundToInt(amount)}", Color.red);
         }
         #endregion
     }

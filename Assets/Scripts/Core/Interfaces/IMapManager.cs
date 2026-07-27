@@ -1,3 +1,4 @@
+using System.Collections;
 namespace Core.Interfaces
 {
     /// <summary>
@@ -10,12 +11,12 @@ namespace Core.Interfaces
         /// </summary>
         /// <param name="mapIndex">Chỉ số của map trong MapDatabase.</param>
         /// <param name="undergroundIndex">Chỉ số của underground profile trong UndergroundDatabase.</param>
-        void LoadMapByIndex(int mapIndex, int undergroundIndex);
+        IEnumerator LoadMapByIndexAsync(int mapIndex, int undergroundIndex);
 
         /// <summary>
-        /// Dọn dẹp tất cả các đối tượng map đã được tạo (map, underground, lava).
+        /// Dọn dẹp tất cả các đối tượng map đã được tạo một cách bất đồng bộ.
         /// </summary>
-        void ClearCurrentMap();
+        IEnumerator ClearCurrentMapAsync();
 
         /// <summary>
         /// Lấy tổng số map có sẵn trong database.

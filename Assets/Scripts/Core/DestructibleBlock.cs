@@ -11,19 +11,37 @@ namespace Core
         /// Độ cứng của khối. Bom có 'destructionPower' lớn hơn hoặc bằng giá trị này mới có thể phá hủy nó.
         /// </summary>
         [SerializeField]
-        public int toughness = 1;
+        private int toughness = 1;
+
+        /// <summary>
+        /// Reset trạng thái của khối khi được lấy ra từ pool.
+        /// </summary>
+        public void ResetState()
+        {
+            // Hiện tại không có trạng thái nào cần reset (như máu),
+            // nhưng phương thức này cần tồn tại để tương thích với pool manager.
+        }
 
         /// <summary>
         /// Nhận một tác động từ một nguồn phá hủy (ví dụ: bom).
-        /// LƯU Ý: Trong hệ thống hiện tại, logic phá hủy bom sẽ gọi trực tiếp WorldGridManager.DamageBlock
-        /// để tra cứu và phá hủy khối một cách hiệu quả. Phương thức này được giữ lại để tương thích
-        /// với các hệ thống sát thương khác không thông qua grid (ví dụ: một loại đạn đặc biệt).
         /// </summary>
         /// <param name="destructionPower">Sức mạnh phá hủy của tác động.</param>
         public void ReceiveImpact(int destructionPower)
         {
             if (destructionPower < toughness) return;
-            Destroy(gameObject);
+
+            // Gửi yêu cầu trả về pool thông qua hệ thống event.
+            // Điều này giúp DestructibleBlock không cần biết về sự tồn tại của BlockPoolManager.
+            if (GameEvents.IsBlockPoolListening())
+            {
+                GameEvents.TriggerBlockDespawnRequest(gameObject);
+            }
+            else
+            {
+                // Fallback: Nếu không có pool manager nào đang lắng nghe, chỉ vô hiệu hóa đối tượng.
+                Debug.LogWarning($"Không tìm thấy BlockPoolManager đang lắng nghe. Vô hiệu hóa khối '{gameObject.name}' thay vì trả về pool.", this);
+                gameObject.SetActive(false);
+            }
         }
     }
 }

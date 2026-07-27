@@ -14,7 +14,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customAlpha
-      value: 0.5
+      value: 0.3
       objectReference: {fileID: 0}
     - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customColor.a
@@ -31,6 +31,34 @@ PrefabInstance:
     - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customColor.r
       value: 0.7490196
+      objectReference: {fileID: 0}
+    - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customBaseColor.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customBaseColor.g
+      value: 1.5348837
+      objectReference: {fileID: 0}
+    - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customBaseColor.r
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customDecalColor.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customDecalColor.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customDecalColor.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customDecalColor.r
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customEmissionIntensity
@@ -302,7 +330,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4968350108855374346, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: m_VersionIndex
-      value: 168
+      value: 201
       objectReference: {fileID: 0}
     - target: {fileID: 5488013012343082406, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: m_LocalScale.x
@@ -358,7 +386,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6358928997734191599, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: m_VersionIndex
-      value: 138
+      value: 171
       objectReference: {fileID: 0}
     - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customColor.b
@@ -370,6 +398,30 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customColor.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customBaseColor.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customBaseColor.g
+      value: 0.1592916
+      objectReference: {fileID: 0}
+    - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customBaseColor.r
+      value: 1.4980392
+      objectReference: {fileID: 0}
+    - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customDecalColor.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customDecalColor.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customDecalColor.r
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}

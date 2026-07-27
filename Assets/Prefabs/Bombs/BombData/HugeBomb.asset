@@ -49,7 +49,6 @@ MonoBehaviour:
     m_Bits: 0
   applyForce: 1
   force: 80
-  jointBreakForce: 400
   forceMode: 1
   forceFalloff:
     serializedVersion: 2
@@ -78,7 +77,7 @@ MonoBehaviour:
   upwardsModifier: 1
   affectedLayers:
     serializedVersion: 2
-    m_Bits: 1984
+    m_Bits: 34752
   canDestroyTerrain: 1
   terrainDestructionPowerFalloff:
     serializedVersion: 2
@@ -141,43 +140,79 @@ MonoBehaviour:
     visualEffect: {fileID: 5432491707936817209, guid: d7242b76d53eb67439a68fdc6d9b9440, type: 3}
     stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
     vfxRadius: 1.5
-    enableColorPulse: 1
-    pulseColor: {r: 0.6156863, g: 0.15686275, b: 0.15686275, a: 0}
-    pulseDuration: 0.5
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 0.735849, g: 0.0041651228, b: 0.0041651228, a: 1}
+    basePulseDuration: 0.4
+    enableDecalColorPulse: 0
+    decalPulseColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+    decalPulseDuration: 0.2
+    enableScalePulse: 0
+    pulseScaleMultiplier: 1.2
+    pulseScaleDuration: 0.2
   - startTime: 6
     visualEffect: {fileID: 5432491707936817209, guid: d7242b76d53eb67439a68fdc6d9b9440, type: 3}
     stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
     vfxRadius: 1.5
-    enableColorPulse: 1
-    pulseColor: {r: 0.6156863, g: 0.15686275, b: 0.15686275, a: 0}
-    pulseDuration: 0.5
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 0.735849, g: 0.0041651228, b: 0.0041651228, a: 1}
+    basePulseDuration: 0.4
+    enableDecalColorPulse: 0
+    decalPulseColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+    decalPulseDuration: 0.2
+    enableScalePulse: 0
+    pulseScaleMultiplier: 1.2
+    pulseScaleDuration: 0.2
   - startTime: 8.5
     visualEffect: {fileID: 5432491707936817209, guid: d7242b76d53eb67439a68fdc6d9b9440, type: 3}
     stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
     vfxRadius: 1.5
-    enableColorPulse: 1
-    pulseColor: {r: 0.6156863, g: 0.15686275, b: 0.15686275, a: 0}
-    pulseDuration: 0.5
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 0.735849, g: 0.0041651228, b: 0.0041651228, a: 1}
+    basePulseDuration: 0.4
+    enableDecalColorPulse: 0
+    decalPulseColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+    decalPulseDuration: 0.2
+    enableScalePulse: 0
+    pulseScaleMultiplier: 1.2
+    pulseScaleDuration: 0.2
   - startTime: 10.5
     visualEffect: {fileID: 5432491707936817209, guid: d7242b76d53eb67439a68fdc6d9b9440, type: 3}
     stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
     vfxRadius: 1.5
-    enableColorPulse: 1
-    pulseColor: {r: 0.6156863, g: 0.15686275, b: 0.15686275, a: 0}
-    pulseDuration: 0.5
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 0.735849, g: 0.0041651228, b: 0.0041651228, a: 1}
+    basePulseDuration: 0.4
+    enableDecalColorPulse: 0
+    decalPulseColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+    decalPulseDuration: 0.2
+    enableScalePulse: 0
+    pulseScaleMultiplier: 1.2
+    pulseScaleDuration: 0.2
   - startTime: 12
     visualEffect: {fileID: 5432491707936817209, guid: d7242b76d53eb67439a68fdc6d9b9440, type: 3}
     stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
     vfxRadius: 1.5
-    enableColorPulse: 1
-    pulseColor: {r: 0.6156863, g: 0.15686275, b: 0.15686275, a: 0}
-    pulseDuration: 0.5
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 0.735849, g: 0.0041651228, b: 0.0041651228, a: 1}
+    basePulseDuration: 0.4
+    enableDecalColorPulse: 0
+    decalPulseColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+    decalPulseDuration: 0.2
+    enableScalePulse: 0
+    pulseScaleMultiplier: 1.2
+    pulseScaleDuration: 0.2
   - startTime: 13
     visualEffect: {fileID: 5432491707936817209, guid: d7242b76d53eb67439a68fdc6d9b9440, type: 3}
     stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
     vfxRadius: 1.5
-    enableColorPulse: 1
-    pulseColor: {r: 0.6156863, g: 0.15686275, b: 0.15686275, a: 0}
-    pulseDuration: 0.5
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 0.735849, g: 0.0041651228, b: 0.0041651228, a: 1}
+    basePulseDuration: 0.4
+    enableDecalColorPulse: 0
+    decalPulseColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+    decalPulseDuration: 0.2
+    enableScalePulse: 0
+    pulseScaleMultiplier: 1.2
+    pulseScaleDuration: 0.2
   additionalGravity: 40
   tickingSound: {fileID: 0}

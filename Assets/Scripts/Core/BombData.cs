@@ -26,6 +26,7 @@ namespace Core
         [Header("Internal Effects (Base Color Pulse)")]
         [Tooltip("Bật để kích hoạt hiệu ứng nháy màu nền. Yêu cầu shader hỗ trợ '_BaseColor'.")]
         public bool enableBaseColorPulse = false;
+        [ColorUsage(true, true)]
         [Tooltip("Màu nền sẽ được nháy tới.")]
         public Color basePulseColor = Color.red;
         [Tooltip("Thời gian nháy màu nền (giây).")]
@@ -34,6 +35,7 @@ namespace Core
         [Header("Internal Effects (Decal Color Pulse)")]
         [Tooltip("Bật để kích hoạt hiệu ứng nháy màu họa tiết. Yêu cầu shader hỗ trợ '_DecalColor'.")]
         public bool enableDecalColorPulse = false;
+        [ColorUsage(true, true)]
         [Tooltip("Màu họa tiết sẽ được nháy tới.")]
         public Color decalPulseColor = Color.yellow;
         [Tooltip("Thời gian nháy màu họa tiết (giây).")]

@@ -2,6 +2,7 @@ using UnityEngine;
 using Core.Interfaces;
 using System.Collections.Generic;
 using Core;
+using System.Collections;
 
 namespace Managers
 {
@@ -40,6 +41,9 @@ namespace Managers
         [Header("Prefabs")]
         [Tooltip("Prefab của dung nham (lava).")]
         [SerializeField] private GameObject _lavaPrefab;
+
+        // Instance của dung nham, được giữ lại giữa các round.
+        private GameObject _lavaInstance;
         #endregion
 
         #region Unity Lifecycle
@@ -60,35 +64,45 @@ namespace Managers
                 _undergroundGenerator = FindAnyObjectByType<UndergroundGenerator>();
                 if (_undergroundGenerator == null) Debug.LogWarning("[MapManager] UndergroundGenerator not found in scene. Underground will not be built.", this);
             }
+
+            // Khởi tạo dung nham một lần duy nhất và tắt nó đi.
+            if (_lavaPrefab != null && _lavaLoader != null && _lavaInstance == null)
+            {
+                _lavaInstance = Instantiate(_lavaPrefab, _lavaLoader.transform);
+                _lavaInstance.SetActive(false);
+            }
         }
         #endregion
 
         #region IMapManager Implementation
-        /// <inheritdoc/>
-        public void LoadMapByIndex(int mapIndex, int undergroundIndex)
+        /// <summary>
+        /// Tải map và thế giới ngầm một cách bất đồng bộ (trong một coroutine).
+        /// </summary>
+        /// <returns>IEnumerator để có thể chạy như một coroutine.</returns>
+        public IEnumerator LoadMapByIndexAsync(int mapIndex, int undergroundIndex)
         {
-            ClearCurrentMap();
+            yield return StartCoroutine(ClearCurrentMapAsync());
 
             // Kiểm tra tính hợp lệ của các chỉ số và database
             if (_mapDatabase == null || _mapDatabase.maps.Count == 0)
             {
                 Debug.LogError("[MapManager] MapDatabase is not assigned or is empty.", this);
-                return;
+                yield break;
             }
             if (_undergroundDatabase == null || _undergroundDatabase.UndergroundDatas.Count == 0)
             {
                 Debug.LogError("[MapManager] UndergroundDatabase is not assigned or is empty.", this);
-                return;
+                yield break;
             }
             if (mapIndex < 0 || mapIndex >= _mapDatabase.maps.Count)
             {
                 Debug.LogError($"[MapManager] Invalid mapIndex: {mapIndex}. It's out of range for MapDatabase.", this);
-                return;
+                yield break;
             }
             if (undergroundIndex < 0 || undergroundIndex >= _undergroundDatabase.UndergroundDatas.Count)
             {
                 Debug.LogError($"[MapManager] Invalid undergroundIndex: {undergroundIndex}. It's out of range for UndergroundDatabase.", this);
-                return;
+                yield break;
             }
 
             // Tải các thành phần
@@ -96,24 +110,30 @@ namespace Managers
             if (mapData == null || mapData.MapPrefab == null)
             {
                 Debug.LogError($"[MapManager] MapData at index {mapIndex} or its prefab is null.", this);
-                return;
+                yield break;
             }
 
             var mapPrefab = mapData.MapPrefab;
             var undergroundData = _undergroundDatabase.UndergroundDatas[undergroundIndex];
 
             BuildMap(mapPrefab);
-            BuildUnderground(undergroundData);
+            yield return StartCoroutine(BuildUndergroundAsync(undergroundData));
             CreateLava();
+
+            // Tạm thời yield null một frame để đảm bảo việc build hoàn tất trước khi sang bước tiếp theo
+            yield return null;
         }
 
-        /// <inheritdoc/>
-        public void ClearCurrentMap()
+        /// <summary>
+        /// Dọn dẹp map hiện tại một cách bất đồng bộ.
+        /// </summary>
+        public IEnumerator ClearCurrentMapAsync()
         {
-            Debug.Log("[MapManager] Clearing current map objects.");
-            ClearChildren(_mapLoader);
-            ClearChildren(_lavaLoader);
-            if (_undergroundContainer != null) ClearChildren(_undergroundContainer.gameObject);
+            Debug.Log("[MapManager] Clearing current map objects asynchronously.");
+            if (_lavaInstance != null) _lavaInstance.SetActive(false);
+            yield return StartCoroutine(ClearChildrenAsync(_mapLoader, 100));
+            // Các khối underground được quản lý bởi pool, nên chúng ta sẽ trả chúng về pool thay vì hủy.
+            if (_undergroundContainer != null) yield return StartCoroutine(ReturnAllBlocksToPoolAsync(_undergroundContainer.gameObject, 200));
         }
 
         /// <inheritdoc/>
@@ -128,6 +148,29 @@ namespace Managers
         {
             // Trả về số lượng profile nếu database tồn tại, ngược lại trả về 0.
             return _undergroundDatabase != null ? _undergroundDatabase.UndergroundDatas.Count : 0;
+        }
+
+        /// <summary>
+        /// Lấy tên của một map dựa trên chỉ số (index) của nó trong database.
+        /// </summary>
+        /// <param name="index">Chỉ số của map trong MapDatabase.</param>
+        /// <returns>Tên của prefab map, hoặc một chuỗi báo lỗi nếu không tìm thấy.</returns>
+        public string GetMapNameByIndex(int index)
+        {
+            if (_mapDatabase == null || _mapDatabase.maps == null || index < 0 || index >= _mapDatabase.maps.Count)
+            {
+                Debug.LogWarning($"[MapManager] Invalid map index for GetMapNameByIndex: {index}");
+                return "Unknown Map";
+            }
+
+            var mapData = _mapDatabase.maps[index];
+            if (mapData == null || mapData.MapPrefab == null)
+            {
+                Debug.LogWarning($"[MapManager] MapData or its prefab is null at index: {index}");
+                return "Invalid Map";
+            }
+
+            return mapData.MapPrefab.name;
         }
         #endregion
 
@@ -156,45 +199,90 @@ namespace Managers
         /// </summary>
         private void CreateLava()
         {
-            if (_lavaPrefab == null)
+            if (_lavaInstance == null)
             {
                 Debug.LogWarning("[MapManager] Lava Prefab is not assigned. Skipping lava creation.", this);
                 return;
             }
-            if (_lavaLoader == null)
-            {
-                Debug.LogError("[MapManager] LavaLoader container is not assigned. Cannot create lava.", this);
-                return;
-            }
-            Instantiate(_lavaPrefab, _lavaLoader.transform);
-            Debug.Log($"[MapManager] Created lava: {_lavaPrefab.name}");
+            _lavaInstance.SetActive(true);
+            Debug.Log($"[MapManager] Activated lava: {_lavaInstance.name}");
         }
 
         /// <summary>
         /// Tạo các tầng địa chất dựa trên profile được cung cấp.
         /// Logic được chuyển từ UndergroundGenerator.cs.
         /// </summary>
-        private void BuildUnderground(UndergroundData profile)
+        private IEnumerator BuildUndergroundAsync(UndergroundData profile)
         {
             if (_undergroundGenerator == null)
             {
                 Debug.LogError("[MapManager] UndergroundGenerator is not assigned and could not be found. Cannot build underground.", this);
-                return;
+                yield break;
             }
-            _undergroundGenerator.Build(profile, _undergroundContainer);
+            yield return StartCoroutine(_undergroundGenerator.BuildAsync(profile, _undergroundContainer));
         }
         #endregion
 
         #region Utility Methods
+
+        /// <summary>
+        /// Trả tất cả các khối con của một đối tượng cha về lại Block Pool.
+        /// </summary>
+        private IEnumerator ReturnAllBlocksToPoolAsync(GameObject parent, int objectsPerFrame = 200)
+        {
+            if (parent == null) yield break;
+
+            // Kiểm tra xem có pool manager nào đang lắng nghe event despawn không.
+            if (!GameEvents.IsBlockPoolListening())
+            {
+                Debug.LogWarning("[MapManager] BlockPoolManager not found or not listening. Falling back to destroying underground blocks.", this);
+                yield return StartCoroutine(ClearChildrenAsync(parent, objectsPerFrame));
+                yield break;
+            }
+            var childrenToReturn = new List<Transform>();
+            foreach (Transform child in parent.transform)
+            {
+                childrenToReturn.Add(child);
+            }
+
+            for (int i = 0; i < childrenToReturn.Count; i++)
+            {
+                if (childrenToReturn[i] != null)
+                {
+                    // Gửi yêu cầu trả về pool thông qua hệ thống event.
+                    GameEvents.TriggerBlockDespawnRequest(childrenToReturn[i].gameObject);
+                }
+                if ((i + 1) % objectsPerFrame == 0)
+                {
+                    yield return null; // Đợi đến frame tiếp theo
+                }
+            }
+        }
+
         /// <summary>
         /// Xóa tất cả các đối tượng con của một đối tượng cha.
         /// </summary>
-        private void ClearChildren(GameObject parent)
+        private IEnumerator ClearChildrenAsync(GameObject parent, int objectsPerFrame = 100)
         {
-            if (parent == null) return;
+            if (parent == null) yield break;
+
+            // Tạo một danh sách các con để hủy, vì không thể sửa đổi collection khi đang duyệt qua nó.
+            var childrenToDestroy = new List<Transform>();
             foreach (Transform child in parent.transform)
             {
-                Destroy(child.gameObject);
+                childrenToDestroy.Add(child);
+            }
+
+            for (int i = 0; i < childrenToDestroy.Count; i++)
+            {
+                if (childrenToDestroy[i] != null)
+                {
+                    Destroy(childrenToDestroy[i].gameObject);
+                }
+                if ((i + 1) % objectsPerFrame == 0)
+                {
+                    yield return null; // Đợi đến frame tiếp theo
+                }
             }
         }
         #endregion
