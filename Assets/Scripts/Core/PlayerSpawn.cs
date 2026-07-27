@@ -2,51 +2,47 @@ using UnityEngine;
 
 namespace Core
 {
-    [RequireComponent(typeof(BoxCollider))] // Đảm bảo đối tượng luôn có BoxCollider
+    [RequireComponent(typeof(MeshCollider))] // Đảm bảo đối tượng luôn có MeshCollider
     public class PlayerSpawn : MonoBehaviour
     {
-        private BoxCollider _boxCollider;
+        private MeshCollider _meshCollider;
 
         private void Awake()
         {
-            _boxCollider = GetComponent<BoxCollider>();
+            _meshCollider = GetComponent<MeshCollider>();
         }
 
-        // Trả về vị trí đỉnh giữa (top-center) của BoxCollider trong không gian thế giới
+        // Trả về vị trí đỉnh giữa (top-center) của AABB của MeshCollider trong không gian thế giới
         public Vector3 SpawnPoint
         {
             get
             {
-                if (_boxCollider == null)
+                if (_meshCollider == null)
                 {
-                    Debug.LogError("PlayerSpawn requires a BoxCollider!", this);
+                    Debug.LogError("PlayerSpawn requires a MeshCollider!", this);
                     return transform.position;
                 }
-                
-                // Chuyển đổi tâm và kích thước collider sang không gian thế giới
-                Vector3 worldCenter = transform.TransformPoint(_boxCollider.center);
-                Vector3 worldSize = Vector3.Scale(_boxCollider.size, transform.lossyScale); // Tính cả scale của GameObject
-                
-                // Cộng thêm nửa chiều cao theo hướng "up" của đối tượng để lấy đỉnh giữa
-                return worldCenter + transform.up * (worldSize.y / 2f);
+
+                // Bounds của MeshCollider đã ở trong không gian thế giới (world space).
+                // Lấy điểm trung tâm trên cùng của bounding box để làm điểm spawn.
+                return _meshCollider.bounds.center + Vector3.up * _meshCollider.bounds.extents.y;
             }
         }
 
         // Hiển thị Gizmos trong Editor để dễ dàng nhìn thấy điểm spawn và collider
         private void OnDrawGizmos()
         {
-            if (_boxCollider == null)
+            // Lấy component trong OnDrawGizmos để thay đổi được thấy ngay trong Editor
+            if (_meshCollider == null)
             {
-                _boxCollider = GetComponent<BoxCollider>();
+                _meshCollider = GetComponent<MeshCollider>();
             }
 
-            if (_boxCollider != null)
+            if (_meshCollider != null && _meshCollider.sharedMesh != null)
             {
-                // Vẽ khung dây của BoxCollider
-                Gizmos.color = Color.green;
-                Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, transform.lossyScale);
-                Gizmos.DrawWireCube(_boxCollider.center, _boxCollider.size);
-                Gizmos.matrix = Matrix4x4.identity;
+                // Vẽ khung dây của Bounding Box (AABB) của MeshCollider
+                Gizmos.color = new Color(0f, 1f, 0f, 0.5f); // Màu xanh lá, hơi trong suốt
+                Gizmos.DrawWireCube(_meshCollider.bounds.center, _meshCollider.bounds.size);
 
                 // Vẽ điểm SpawnPoint thực tế
                 Gizmos.color = Color.yellow;
@@ -54,7 +50,7 @@ namespace Core
             }
             else
             {
-                // Cảnh báo nếu không có BoxCollider (mặc dù RequireComponent sẽ tự thêm)
+                // Cảnh báo nếu không có MeshCollider hoặc mesh chưa được gán
                 Gizmos.color = Color.red;
                 Gizmos.DrawWireCube(transform.position, Vector3.one);
             }
@@ -63,17 +59,15 @@ namespace Core
         // Phương thức Reset được gọi khi thêm component lần đầu hoặc click Reset trong Inspector
         private void Reset()
         {
-            _boxCollider = GetComponent<BoxCollider>();
-            if (_boxCollider == null)
+            _meshCollider = GetComponent<MeshCollider>();
+            if (_meshCollider == null)
             {
-                _boxCollider = gameObject.AddComponent<BoxCollider>();
-                _boxCollider.isTrigger = true; // Thường thì điểm spawn nên là trigger
+                _meshCollider = gameObject.AddComponent<MeshCollider>();
             }
-            // Đặt kích thước mặc định nếu collider có kích thước bằng 0
-            if (_boxCollider.size == Vector3.zero)
-            {
-                _boxCollider.size = new Vector3(1, 1, 1);
-            }
+
+            // Một MeshCollider để làm trigger thì bắt buộc phải là 'convex'.
+            _meshCollider.convex = true;
+            _meshCollider.isTrigger = true; // Thường thì điểm spawn nên là trigger
         }
     }
 }

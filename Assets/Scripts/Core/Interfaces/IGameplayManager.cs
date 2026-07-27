@@ -1,15 +1,8 @@
-using UnityEngine;
-
 namespace Core
 {
-    public interface IGameplayManager
+    public interface IGameloopManager
     {
-        void InitializeGame();
-        void StartGameLoop();
-        void EndGameLoop();
-
-        void RegisterSpawnPoint(PlayerSpawn spawnPoint);
-        void UnregisterSpawnPoint(PlayerSpawn spawnPoint);
-        // Có thể thêm các phương thức khác liên quan đến quản lý gameplay chung ở đây
+        // Interface này hiện tại đóng vai trò là một marker.
+        // Các phương thức điều khiển vòng lặp game đã được chuyển vào coroutine nội bộ của GameloopManager.
     }
 }

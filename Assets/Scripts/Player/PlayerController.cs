@@ -1,244 +1,269 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 using Core.Interfaces;
 
 namespace Player
 {
     /// <summary>
-    /// Điều khiển di chuyển và nhảy của nhân vật người chơi.
-    /// Sử dụng CharacterController và InputSystem để xử lý đầu vào.
+    /// Lớp Adapter để tích hợp AdvancedWalkerController từ package CMF vào hệ thống của game.
+    /// Lớp này kế thừa AdvancedWalkerController, triển khai IPlayer và kết nối với InputSystem của dự án.
     /// </summary>
-    public class PlayerController : MonoBehaviour, IPlayer
+    [RequireComponent(typeof(Mover))]
+    [RequireComponent(typeof(PlayerInputAdapter))] // Thay đổi RequireComponent
+    public partial class PlayerController : AdvancedWalkerController, IPlayer
     {
         #region Fields
-
-        [Header("Movement Settings")]
-        [SerializeField] private float _moveSpeed = 5f;
-        [SerializeField] private float _acceleration = 10f;
+        [Header("Adapter Settings")]
+        [Tooltip("Độ mượt khi xoay nhân vật theo hướng di chuyển ở góc nhìn thứ ba.")]
         [SerializeField] private float _rotationSmoothTime = 0.1f;
 
-        [Header("Jump Settings")]
-        [SerializeField] private float _jumpHeight = 2f;
-        [SerializeField] private float _gravity = -9.81f;
-        [SerializeField] private float _groundedOffset = 0.1f;
+        private float _rotationVelocity;
 
-        [Header("Input")]
-        [SerializeField] private InputActionAsset _inputActions;
-
-        private CharacterController _characterController;
-        private Transform _mainCameraTransform;
         private CameraController _cameraController;
 
-        // Input Action references
-        private InputActionMap _playerActionMap;
-        private InputAction _moveAction;
-        private InputAction _jumpAction;
+        private bool _justLanded; // Cờ báo cho sự kiện tiếp đất
 
-        // Movement state
-        private Vector2 _currentMoveInput;
-        private Vector3 _currentVelocity;
-        private float _verticalVelocity;
-        private float _targetRotation;
-        private float _rotationVelocity;
-        private bool _isGrounded;
+        #endregion
 
-        #region Properties
+        #region IPlayer Implementation
 
         /// <summary>
         /// Tham chiếu đến GameObject của người chơi.
         /// </summary>
-        public GameObject GO => gameObject;
+        public GameObject GameObject => gameObject;
 
         /// <summary>
         /// Tốc độ di chuyển hiện tại.
         /// </summary>
-        public float CurrentSpeed => _moveSpeed;
-
-        /// <summary>
-        /// Nhân vật đang ở trên mặt đất hay không.
-        /// </summary>
-        public bool IsGrounded => _isGrounded;
+        public float CurrentSpeed => movementSpeed;
 
         /// <summary>
         /// Nhân vật đang di chuyển hay không.
         /// </summary>
-        public bool IsMoving => _currentMoveInput.magnitude > 0.1f;
+        public bool IsMoving => HorizontalSpeed > 0.1f;
+
+        /// <summary>
+        /// Nhân vật có đang ở trên mặt đất hay không.
+        /// </summary>
+        public new bool IsGrounded => base.IsGrounded();
+
+        /// <summary>
+        /// Vận tốc hiện tại theo trục Y.
+        /// </summary>
+        public float VerticalVelocity => GetVelocity().y;
+
+        /// <summary>
+        /// Tốc độ di chuyển ngang hiện tại của người chơi.
+        /// </summary>
+        public float HorizontalSpeed
+        {
+            get
+            {
+                // TÍNH TOÁN TỐC ĐỘ TƯƠNG ĐỐI CHO ANIMATION
+                // Logic này giải quyết cả hai vấn đề:
+                // 1. Nhân vật không chạy animation khi bị kẹt vào tường (world velocity ~ 0).
+                // 2. Nhân vật không chạy animation khi đứng yên trên một platform di động (relative velocity ~ 0).
+
+                // Vận tốc của player trong world space.
+                Vector3 playerWorldVelocity = mover.GetVelocity();
+
+                // Vận tốc của mặt đất trong world space (được tính trong AdvancedWalkerController).
+                Vector3 groundWorldVelocity = groundMomentum;
+
+                // Vận tốc tương đối của player so với mặt đất.
+                Vector3 relativeVelocity = playerWorldVelocity - groundWorldVelocity;
+
+                // Chỉ quan tâm đến tốc độ trên mặt phẳng ngang và trả về độ lớn của nó.
+                relativeVelocity.y = 0;
+                return relativeVelocity.magnitude;
+            }
+        }
+
+        /// <summary>
+        /// Triển khai thuộc tính JustLanded từ IPlayer.
+        /// </summary>
+        public bool JustLanded
+        {
+            get
+            {
+                if (!_justLanded) return false;
+                _justLanded = false; // Tự động reset sau khi được đọc
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Triển khai thuộc tính IsClimbing từ IPlayer.
+        /// </summary>
+        public bool IsClimbing => currentControllerState == ControllerState.Climbing;
+
+        /// <summary>
+        /// Triển khai thuộc tính ClimbingSpeed từ IPlayer.
+        /// Giá trị này được tính toán trong partial class PlayerController.Climbing.
+        /// </summary>
+        public float ClimbingSpeed => _climbingDirection;
+
+        /// <summary>
+        /// Di chuyển người chơi đến một vị trí mới một cách an toàn.
+        /// </summary>
+        /// <param name="position">Vị trí thế giới mới.</param>
+        public void Teleport(Vector3 position)
+        {
+            // Đối với controller CMF, việc thay đổi vị trí phải được thực hiện thông qua component 'Mover'.
+            // Việc đặt 'transform.position' trực tiếp sẽ bị ghi đè trong lần cập nhật vật lý tiếp theo.
+            if (mover != null)
+            {
+                mover.SetPosition(position);
+                // Reset lại tất cả các lực đang tác động để người chơi không bị "bay" đi sau khi dịch chuyển.
+                SetMomentum(Vector3.zero);
+            }
+            else
+            {
+                transform.position = position;
+            }
+        }
+        #endregion
+
+        #region Public API
+
+        /// <summary>
+        /// Tính toán và trả về hướng di chuyển hiện tại dựa trên input của người chơi và hướng camera.
+        /// Phương thức này public để các component khác (như RagdollController) có thể sử dụng lại logic này.
+        /// </summary>
+        /// <returns>Vector3 đã được chuẩn hóa của hướng di chuyển.</returns>
+        public Vector3 GetMovementDirection()
+        {
+            // Gọi phương thức được kế thừa từ AdvancedWalkerController
+            return CalculateMovementDirection();
+        }
 
         #endregion
 
-        #region Unity Lifecycle
-
-        private void Awake()
+        /// <summary>
+        /// Ghi đè hàm Setup để lấy các component và thiết lập Input Actions.
+        /// </summary>
+        protected override void Setup()
         {
-            _characterController = GetComponent<CharacterController>();
-            _mainCameraTransform = Camera.main != null ? Camera.main.transform : null;
+            base.Setup(); // Gọi hàm Setup của lớp cha
+
+            // Gán cameraTransform từ CameraController để di chuyển theo hướng camera
             _cameraController = GetComponent<CameraController>();
-            SetupInputActions();
-        }
-
-        private void OnEnable()
-        {
-            _playerActionMap?.Enable();
-        }
-
-        private void OnDisable()
-        {
-            _playerActionMap?.Disable();
-        }
-
-        private void Update()
-        {
-            HandleGroundedState();
-            HandleMovement();
-            HandleJump();
-            ApplyFinalMovement();
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        /// <summary>
-        /// Thiết lập Input Actions từ InputActionAsset.
-        /// Lấy action map "Player" và các action Move, Jump.
-        /// </summary>
-        private void SetupInputActions()
-        {
-            if (_inputActions == null)
-            {
-                Debug.LogError("InputActionAsset chưa được gán! Vui lòng gán InputSystem_Actions vào Inspector.", this);
-                return;
-            }
-
-            _playerActionMap = _inputActions.FindActionMap("Basic", true);
-            if (_playerActionMap == null)
-            {
-                Debug.LogError("Không tìm thấy action map 'Player' trong InputActionAsset!", this);
-                return;
-            }
-
-            _moveAction = _playerActionMap.FindAction("Move", true);
-            _jumpAction = _playerActionMap.FindAction("Jump", true);
-
+            if (_cameraController != null && Camera.main != null)
+                cameraTransform = Camera.main.transform;
+            
+            // Lấy component Collider chính của player để dùng cho các phép tính vật lý
+            _mainCollider = GetComponent<Collider>();
         }
 
         /// <summary>
-        /// Kiểm tra trạng thái grounded của nhân vật.
-        /// Reset vertical velocity nếu đang grounded.
+        /// Được gọi khi component được bật.
+        /// Chúng ta sử dụng nó để đảm bảo trạng thái của controller được reset sạch sẽ
+        /// mỗi khi nó được kích hoạt lại (ví dụ: sau khi đứng dậy từ ragdoll).
+        /// Điều này ngăn chặn các trạng thái cũ (như 'Climbing') gây ra lỗi.
         /// </summary>
-        private void HandleGroundedState()
+        protected virtual void OnEnable()
         {
-            _isGrounded = _characterController.isGrounded;
+            // ĐỒNG BỘ HÓA VẬT LÝ:
+            // Khi đứng dậy từ ragdoll, RagdollController đã di chuyển transform đến vị trí mới.
+            // Tuy nhiên, Rigidbody có thể vẫn "nhớ" vị trí vật lý cũ của nó trước khi bị kinematic.
+            // Dòng code này buộc Rigidbody phải cập nhật trạng thái vật lý của nó theo vị trí và góc xoay
+            // hiện tại của transform, ngăn chặn việc bị teleport về vị trí cũ.
+            mover.GetComponent<Rigidbody>().position = transform.position;
 
-            if (_isGrounded && _verticalVelocity < 0f)
-            {
-                _verticalVelocity = -2f;
-            }
+            ResetStateToFalling();
+            SetMomentum(Vector3.zero);
         }
 
         /// <summary>
-        /// Xử lý di chuyển: đọc input Move và tính toán hướng di chuyển.
-        /// Hỗ trợ camera-relative movement cho 3rd person.
+        /// Ghi đè phương thức OnJumpStart để tùy chỉnh hành vi nhảy.
+        /// 1. Vô hiệu hóa 'jumpInputIsLocked' để cho phép Bunny Hop (nhảy liên tục khi giữ phím).
+        /// 2. Vô hiệu hóa 'jumpDuration' bằng cách chuyển trạng thái ngay lập tức, làm cho cú nhảy có chiều cao cố định.
         /// </summary>
-        private void HandleMovement()
+        protected override void OnJumpStart()
         {
-            _currentMoveInput = _moveAction?.ReadValue<Vector2>() ?? Vector2.zero;
+            // Gọi phương thức gốc để áp dụng lực nhảy và các sự kiện cơ bản.
+            // Tuy nhiên, phương thức gốc sẽ khóa input nhảy, chúng ta sẽ không gọi nó.
+            // base.OnJumpStart(); 
 
-            Vector3 moveDirection = GetCameraRelativeDirection(_currentMoveInput);
+            // Tái triển khai logic của OnJumpStart nhưng bỏ qua phần khóa input.
+            if (_useLocalMomentum)
+                momentum = tr.localToWorldMatrix * momentum;
 
-            if (_currentMoveInput.magnitude < 0.01f)
-            {
-                _currentVelocity = Vector3.Lerp(_currentVelocity, Vector3.zero, _acceleration * Time.deltaTime);
-            }
-            else
-            {
-                Vector3 targetVelocity = moveDirection * CurrentSpeed;
-                _currentVelocity = Vector3.Lerp(_currentVelocity, targetVelocity, _acceleration * Time.deltaTime);
-            }
+            momentum += tr.up * _jumpSpeed;
 
-            RotateCharacter(moveDirection);
+            OnJump?.Invoke(momentum);
+
+            if (_useLocalMomentum)
+                momentum = tr.worldToLocalMatrix * momentum;
+
+            // Thay vì ép trạng thái thành 'Rising', hãy để lớp cha xử lý việc chuyển sang 'Jumping'.
+            // Điều này cho phép trạng thái 'Grounded' được thiết lập đúng cách trong một frame trước khi nhảy lại.
+            // Bằng cách không gọi base.OnJumpStart(), chúng ta vẫn bỏ qua được việc khóa input ('jumpInputIsLocked = true'),
+            // cho phép thực hiện bunny hop.
+            // Dòng dưới đây không còn cần thiết và là nguyên nhân gây ra vấn đề.
+            // currentControllerState = ControllerState.Rising;
         }
 
         /// <summary>
-        /// Chuyển đổi input Vector2 thành hướng di chuyển 3D dựa trên góc nhìn camera.
+        /// Ghi đè hàm OnGroundContactRegained để bật cờ _justLanded.
         /// </summary>
-        private Vector3 GetCameraRelativeDirection(Vector2 moveInput)
+        protected override void OnGroundContactRegained()
         {
-            if (_mainCameraTransform == null)
-            {
-                return new Vector3(moveInput.x, 0f, moveInput.y).normalized;
-            }
+            base.OnGroundContactRegained();
+            _justLanded = true;
+        }
 
-            Vector3 cameraForward = Vector3.ProjectOnPlane(_mainCameraTransform.forward, Vector3.up).normalized;
-            Vector3 cameraRight = Vector3.ProjectOnPlane(_mainCameraTransform.right, Vector3.up).normalized;
 
-            return (cameraForward * moveInput.y + cameraRight * moveInput.x).normalized;
+        /// <summary>
+        /// Ghi đè FixedUpdate của lớp cha để thêm logic xoay nhân vật.
+        /// Luôn phải gọi base.FixedUpdate() để đảm bảo logic di chuyển và vật lý gốc được thực thi.
+        /// </summary>
+        protected override void FixedUpdate()
+        {
+            ClimbingUpdate(); // Gọi logic cập nhật của phần leo trèo.
+            base.FixedUpdate(); // Rất quan trọng! Gọi hàm của lớp cha để xử lý di chuyển.
+            HandleCharacterRotation();
         }
 
         /// <summary>
-        /// Xoay nhân vật về hướng di chuyển hoặc theo góc nhìn camera (nếu đang ngắm).
+        /// Xử lý việc xoay nhân vật.
+        /// - Ở chế độ First Person/Shift Lock: Xoay tức thì theo camera (logic này nằm trong CameraController).
+        /// - Ở chế độ Third Person (mặc định): Xoay mượt mà theo hướng di chuyển.
         /// </summary>
-        private void RotateCharacter(Vector3 moveDirection)
+        private void HandleCharacterRotation()
         {
-            bool isAiming = _cameraController != null && (_cameraController.IsFirstPerson || _cameraController.IsShiftLock);
+            if (_cameraController == null) return;
 
-            if (isAiming && _mainCameraTransform != null)
+            bool isShiftLocked = _cameraController.IsShiftLock;
+
+            // Khi bật Shift Lock hoặc ở góc nhìn thứ nhất, nhân vật sẽ xoay theo camera.
+            // Logic này được xử lý trong CameraController để đảm bảo thứ tự thực thi đúng.
+            if (isShiftLocked || _cameraController.IsFirstPerson)
             {
-                // Xoay nhân vật chạy theo góc camera (giống game FPS) - xoay lập tức không có độ trễ
-                float cameraYaw = _mainCameraTransform.eulerAngles.y;
-                transform.rotation = Quaternion.Euler(0f, cameraYaw, 0f);
-                
-                // Reset vận tốc xoay để tránh giật khi chuyển về góc nhìn thứ 3
+                // Reset vận tốc xoay mượt để không bị giật khi chuyển về góc nhìn thứ 3.
                 _rotationVelocity = 0f;
+                // Xử lý xoay nhân vật theo camera đã được chuyển sang CameraController.
             }
             else
             {
-                // Di chuyển tự do ở góc nhìn thứ 3
-                if (moveDirection == Vector3.zero) return;
+                // Khi đang leo và không bật Shift Lock, không xoay nhân vật theo hướng di chuyển.
+                if (currentControllerState == ControllerState.Climbing)
+                {
+                    return;
+                }
 
-                _targetRotation = Mathf.Atan2(moveDirection.x, moveDirection.z) * Mathf.Rad2Deg;
+                // Ở góc nhìn thứ 3 (không Shift Lock), xoay nhân vật mượt mà theo hướng di chuyển.
+                Vector3 horizontalVelocity = GetMovementVelocity();
+                horizontalVelocity.y = 0;
 
-                float rotation = Mathf.SmoothDampAngle(
-                    transform.eulerAngles.y,
-                    _targetRotation,
-                    ref _rotationVelocity,
-                    _rotationSmoothTime
-                );
+                // Chỉ xoay khi có di chuyển
+                if (horizontalVelocity.magnitude < 0.1f) return;
 
-                transform.rotation = Quaternion.Euler(0f, rotation, 0f);
+                // Tính toán góc xoay dựa trên hướng di chuyển
+                float targetAngle = Mathf.Atan2(horizontalVelocity.x, horizontalVelocity.z) * Mathf.Rad2Deg;
+                float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref _rotationVelocity, _rotationSmoothTime);
+                
+                transform.rotation = Quaternion.Euler(0f, angle, 0f);
             }
         }
-
-        /// <summary>
-        /// Xử lý nhảy: áp dụng vertical velocity khi người chơi nhấn Jump.
-        /// Hỗ trợ bunny hop khi giữ phím nhảy.
-        /// </summary>
-        private void HandleJump()
-        {
-            bool isJumpPressed = _jumpAction?.IsPressed() == true;
-
-            if (isJumpPressed && _isGrounded)
-            {
-                _verticalVelocity = Mathf.Sqrt(_jumpHeight * -2f * _gravity);
-            }
-
-            _verticalVelocity += _gravity * Time.deltaTime;
-        }
-
-        /// <summary>
-        /// Áp dụng chuyển động cuối cùng lên CharacterController.
-        /// Kết hợp horizontal velocity + vertical velocity (gravity + jump).
-        /// </summary>
-        private void ApplyFinalMovement()
-        {
-            Vector3 finalVelocity = _currentVelocity;
-            finalVelocity.y = _verticalVelocity;
-
-            _characterController.Move(finalVelocity * Time.deltaTime);
-        }
-
-        #endregion
-
-        #endregion
     }
 }

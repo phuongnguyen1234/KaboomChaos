@@ -3,7 +3,9 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags: []
+  tags:
+  - Climbable
+  - FloatingTextContainer
   layers:
   - Default
   - TransparentFX
@@ -18,9 +20,9 @@ TagManager:
   - MapObject
   - Lava
   - Environment
-  - 
-  - 
-  - 
+  - Trigger
+  - VFX
+  - TransparentObjects
   - 
   - 
   - 
