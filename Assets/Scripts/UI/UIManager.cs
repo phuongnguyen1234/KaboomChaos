@@ -12,6 +12,7 @@ namespace UI
     /// </summary>
     public class UIManager : MonoBehaviour, IUIManager
     {
+        private static WaitForSeconds _waitForSeconds1 = new WaitForSeconds(1f);
         #region Fields
         [Header("Notification Panel")]
         [Tooltip("Panel chứa thông báo chung.")]
@@ -197,7 +198,7 @@ namespace UI
             yield return new WaitForSeconds(_arrowMoveDuration);
 
             // 4. Chờ 1 giây
-            yield return new WaitForSeconds(1f);
+            yield return _waitForSeconds1;
 
             // 5. Ẩn thanh intensity và reset vị trí mũi tên cho lần sau
             _intensityBarPanel.SetActive(false);
@@ -242,16 +243,16 @@ namespace UI
             _countdownPanel.SetActive(true);
 
             _countdownText.text = "3";
-            yield return new WaitForSeconds(1f);
+            yield return _waitForSeconds1;
 
             _countdownText.text = "2";
-            yield return new WaitForSeconds(1f);
+            yield return _waitForSeconds1;
 
             _countdownText.text = "1";
-            yield return new WaitForSeconds(1f);
+            yield return _waitForSeconds1;
 
             _countdownText.text = "Go!";
-            yield return new WaitForSeconds(1f);
+            yield return _waitForSeconds1;
 
             _countdownPanel.SetActive(false);
         }

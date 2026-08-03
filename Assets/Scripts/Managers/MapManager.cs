@@ -35,6 +35,8 @@ namespace Managers
         [SerializeField] private Transform _undergroundContainer;
 
         [Header("Generators")]
+        [Tooltip("Số lượng đối tượng map được kích hoạt mỗi frame khi tải bất đồng bộ.")]
+        [SerializeField] private int _mapObjectsPerFrame = 100;
         [Tooltip("Component chịu trách nhiệm sinh ra thế giới ngầm. Nếu bỏ trống, sẽ tự tìm trong scene.")]
         [SerializeField] private UndergroundGenerator _undergroundGenerator;
 
@@ -116,7 +118,7 @@ namespace Managers
             var mapPrefab = mapData.MapPrefab;
             var undergroundData = _undergroundDatabase.UndergroundDatas[undergroundIndex];
 
-            BuildMap(mapPrefab);
+            yield return StartCoroutine(BuildMapAsync(mapPrefab, _mapObjectsPerFrame));
             yield return StartCoroutine(BuildUndergroundAsync(undergroundData));
             CreateLava();
 
@@ -176,22 +178,50 @@ namespace Managers
 
         #region Private Build Methods
         /// <summary>
-        /// Sinh ra prefab map chính vào trong đối tượng MapLoader.
+        /// Sinh ra prefab map chính vào trong đối tượng MapLoader một cách bất đồng bộ.
+        /// Kích hoạt các đối tượng con của map theo từng cụm để tránh giật lag.
         /// </summary>
-        private void BuildMap(GameObject mapPrefab)
+        private IEnumerator BuildMapAsync(GameObject mapPrefab, int objectsPerFrame)
         {
             if (mapPrefab == null)
             {
                 Debug.LogError("[MapManager] mapPrefab is null. Cannot build map.", this);
-                return;
+                yield break;
             }
             if (_mapLoader == null)
             {
                 Debug.LogError("[MapManager] MapLoader container is not assigned. Cannot build map.", this);
-                return;
+                yield break;
             }
-            Instantiate(mapPrefab, _mapLoader.transform);
-            Debug.Log($"[MapManager] Built map: {mapPrefab.name}");
+
+            // Bước 1: Instantiate prefab map chính. Thao tác này nhanh vì các con của nó sẽ bị tắt đi.
+            GameObject mapInstance = Instantiate(mapPrefab, _mapLoader.transform);
+            mapInstance.name = mapPrefab.name; // Dọn dẹp tên "(Clone)"
+
+            // Bước 2: Lấy danh sách tất cả các object con trực tiếp và tắt chúng đi.
+            var childrenToActivate = new List<Transform>();
+            foreach (Transform child in mapInstance.transform)
+            {
+                childrenToActivate.Add(child);
+                child.gameObject.SetActive(false);
+            }
+
+            Debug.Log($"[MapManager] Building map '{mapPrefab.name}' asynchronously with {childrenToActivate.Count} objects.");
+
+            // Bước 3: Kích hoạt lại các object con theo từng cụm mỗi frame.
+            for (int i = 0; i < childrenToActivate.Count; i++)
+            {
+                if (childrenToActivate[i] != null)
+                {
+                    childrenToActivate[i].gameObject.SetActive(true);
+                }
+
+                if ((i + 1) % objectsPerFrame == 0)
+                {
+                    yield return null; // Đợi đến frame tiếp theo
+                }
+            }
+            Debug.Log($"[MapManager] Finished building map: {mapPrefab.name}");
         }
 
         /// <summary>

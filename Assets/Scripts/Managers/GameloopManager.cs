@@ -53,6 +53,7 @@ namespace Managers
         private IPlayerManager _playerManager;
         private IMapManager _mapManager;
         private IBombSpawnerManager _bombSpawnerManager;
+        private IDestructionManager _destructionManager;
         private IUIManager _uiManager;
 
         [Header("Game Loop Settings")]
@@ -111,6 +112,7 @@ namespace Managers
                 _playerManager = PlayerManager.Instance;
                 _mapManager = MapManager.Instance;
                 _bombSpawnerManager = BombSpawnerManager.Instance;
+                _destructionManager = DestructionManager.Instance;
                 _uiManager = IUIManager.Instance;
             }
         }

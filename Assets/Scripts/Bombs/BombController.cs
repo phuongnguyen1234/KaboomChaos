@@ -29,6 +29,7 @@ namespace Bombs
         private Rigidbody _rb;
         private Collider _collider;
         private AudioSource _audioSource;
+        private IDestructionManager _destructionManager; // Thêm tham chiếu đến interface
 
         // State
         private bool _isActive = false;
@@ -38,7 +39,7 @@ namespace Bombs
         private readonly Dictionary<Transform, Vector3> _originalPartScales = new();
 
         // Reusable array for non-allocating physics queries to avoid garbage collection.
-        private const int MAX_EXPLOSION_HITS = 256; // Tăng kích thước bộ đệm để xử lý các vụ nổ phức tạp.
+        private const int MAX_EXPLOSION_HITS = 512; // Tăng kích thước bộ đệm để xử lý các vụ nổ phức tạp.
         private readonly Collider[] _explosionHits = new Collider[MAX_EXPLOSION_HITS];
 
         #endregion
@@ -59,6 +60,7 @@ namespace Bombs
             _rb = GetComponent<Rigidbody>();
             _collider = GetComponent<Collider>(); // Get any Collider component
             _audioSource = GetComponent<AudioSource>();
+            _destructionManager = Managers.DestructionManager.Instance; // Lấy instance của DestructionManager dưới dạng interface
 
             // Cache original scales of parts to pulse for scale pulsing effect.
             _originalPartScales.Clear();
@@ -380,7 +382,23 @@ namespace Bombs
                 }
             }
             
-            if (_bombData.explosionSound != null) AudioSource.PlayClipAtPoint(_bombData.explosionSound, explosionCenter);
+            if (_bombData.explosionSound != null) 
+                AudioSource.PlayClipAtPoint(_bombData.explosionSound, explosionCenter);
+
+            // --- GIAI ĐOẠN MỚI: Tác động lên kiến trúc (Destructible Pieces) ---
+            // Gọi DestructionManager để xử lý việc sụp đổ các công trình.
+            // Đây là hệ thống riêng biệt với việc phá hủy các khối địa hình (DestructibleBlock).
+            // CHỈ xử lý phá hủy kiến trúc nếu bom được cấu hình để áp dụng lực.
+            // Điều này cho phép tạo ra các loại bom chỉ gây hiệu ứng mà không làm sập công trình.
+            if (_bombData.applyForce && _destructionManager != null)
+            {
+                _destructionManager.HandleExplosion(explosionCenter, _bombData.radius, _bombData.force);
+            }
+            else
+            {
+                Debug.LogWarning("[BombController] DestructionManager.Instance không được tìm thấy. Bỏ qua xử lý phá hủy kiến trúc.");
+            }
+
             if (_bombData.radius <= 0f) return;
 
             // --- Giai đoạn 1: Tác động lên các đối tượng động (Players, Props) bằng Physics.OverlapSphere ---
@@ -450,7 +468,7 @@ namespace Bombs
                     }
                     else // Nếu không, chỉ áp dụng sát thương thông thường và lực riêng biệt.
                     {
-                        damageableComponent.TakeDamage(finalDamage);
+                        damageableComponent.TakeDamage(finalDamage, DamageSourceType.Explosion);
 
                         // Áp dụng lực riêng vì đối tượng không có IExplosionDamageable.
                         if (_bombData.applyForce && hit.attachedRigidbody != null && !hit.attachedRigidbody.isKinematic)
@@ -484,7 +502,7 @@ namespace Bombs
                 }
 
                 // Các hiệu ứng khác (trạng thái, phá hủy địa hình) được áp dụng riêng biệt.
-                ApplyOtherExplosionEffects(hit, explosionCenter, Vector3.Distance(explosionCenter, hit.transform.position));
+                ApplyOtherExplosionEffects(hit, Vector3.Distance(explosionCenter, hit.transform.position));
             }
         }
 
@@ -492,7 +510,7 @@ namespace Bombs
         /// Áp dụng các hiệu ứng phụ của vụ nổ như hiệu ứng trạng thái và phá hủy địa hình.
         /// Tách ra để giữ cho logic chính trong TriggerSingleExplosion gọn gàng hơn.
         /// </summary>
-        private void ApplyOtherExplosionEffects(Collider hit, Vector3 explosionCenter, float distanceToBlockCenter)
+        private void ApplyOtherExplosionEffects(Collider hit, float distanceToBlockCenter)
         {
             // Hiệu ứng trạng thái cho đối tượng động
             if (_bombData.effect != StatusEffectType.None && (_bombData.statusEffectLayers.value & (1 << hit.gameObject.layer)) != 0)

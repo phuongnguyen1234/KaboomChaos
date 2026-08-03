@@ -49,6 +49,11 @@ namespace Managers
             {
                 destructibleBlock.ResetState();
             }
+            // Yêu cầu 1: Reset lại hiệu ứng trạng thái của khối khi nó được lấy ra từ pool.
+            if (instance.TryGetComponent<StatusEffectReceiver>(out var statusReceiver))
+            {
+                statusReceiver.ResetState();
+            }
         }
 
     }

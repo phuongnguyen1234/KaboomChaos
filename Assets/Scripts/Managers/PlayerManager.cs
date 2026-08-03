@@ -125,14 +125,22 @@ namespace Managers
         public void EndRound()
         {
             _playersInRound.Clear();
-            // Kích hoạt lại tất cả người chơi (để họ xuất hiện ở lobby)
+            // Kích hoạt lại tất cả người chơi (nếu cần) và reset trạng thái của họ cho vòng mới.
             foreach (var player in _activePlayers)
             {
-                if (player != null && player.GameObject != null && !player.GameObject.activeSelf)
+                if (player?.GameObject == null) continue;
+
+                if (!player.GameObject.activeSelf)
                 {
                     player.GameObject.SetActive(true);
                 }
+
             }
+
+            // Phát một sự kiện toàn cục yêu cầu tất cả các component liên quan đến người chơi (như PlayerHealth, StatusEffectReceiver)
+            // tự reset lại trạng thái của chúng. Bất kỳ component nào quan tâm sẽ lắng nghe sự kiện này.
+            // Đây là cách tiếp cận nhất quán với kiến trúc của dự án.
+            GameEvents.TriggerRoundEndPlayerReset();
         }
         #endregion
 

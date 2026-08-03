@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Core.Interfaces;
 using UnityEngine;
 
 namespace Core
@@ -27,6 +28,13 @@ namespace Core
         [Tooltip("Tỷ lệ xuất hiện của khối phụ (0-100). Ví dụ: 35 có nghĩa là 35% số khối sẽ là khối phụ.")]
         [Range(0, 100)]
         public float scatterPercentage = 35f;
+
+        [Tooltip("Hiệu ứng trạng thái ban đầu được áp dụng cho các khối RẢI RÁC (scattered blocks).")]
+        public StatusEffectType scatterInitialEffect = StatusEffectType.None;
+
+        [Header("Trạng thái ban đầu")]
+        [Tooltip("Hiệu ứng trạng thái ban đầu được áp dụng cho các khối CHÍNH trong tầng này (ví dụ: Obsidian).")]
+        public StatusEffectType initialEffect = StatusEffectType.None;
     }
 
     /// <summary>

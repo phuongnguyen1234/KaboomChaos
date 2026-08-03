@@ -77,14 +77,14 @@ MonoBehaviour:
   upwardsModifier: 1
   affectedLayers:
     serializedVersion: 2
-    m_Bits: 34752
+    m_Bits: 1984
   canDestroyTerrain: 1
   terrainDestructionPowerFalloff:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 6
+      value: 7
       inSlope: -3
       outSlope: -3
       tangentMode: 34
@@ -93,7 +93,7 @@ MonoBehaviour:
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 1
-      value: 3
+      value: 4
       inSlope: -3
       outSlope: -3
       tangentMode: 34

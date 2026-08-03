@@ -254,11 +254,14 @@ namespace Player
                 // Ở góc nhìn thứ 3 (không Shift Lock), xoay nhân vật mượt mà theo hướng di chuyển.
                 Vector3 horizontalVelocity = GetMovementVelocity();
                 horizontalVelocity.y = 0;
+                
+                // CẢI TIẾN: Chỉ xoay khi có input di chuyển VÀ nhân vật đang thực sự di chuyển.
+                // horizontalVelocity.magnitude > 0.1f: Người chơi có đang nhấn nút di chuyển không?
+                // HorizontalSpeed > 0.1f: Nhân vật có đang di chuyển thực tế không (không bị kẹt)?
+                // Điều này ngăn nhân vật xoay tại chỗ khi bị kẹt vào tường.
+                if (horizontalVelocity.magnitude < 0.1f || HorizontalSpeed < 0.1f) return;
 
-                // Chỉ xoay khi có di chuyển
-                if (horizontalVelocity.magnitude < 0.1f) return;
-
-                // Tính toán góc xoay dựa trên hướng di chuyển
+                // Tính toán góc xoay dựa trên hướng di chuyển mong muốn (từ input)
                 float targetAngle = Mathf.Atan2(horizontalVelocity.x, horizontalVelocity.z) * Mathf.Rad2Deg;
                 float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref _rotationVelocity, _rotationSmoothTime);
                 

@@ -102,9 +102,16 @@ namespace Managers
                     {
                         for (int z = 0; z < profile.gridSize.y; z++)
                         {
-                            GameObject prefabToSpawn = layer.blockPrefab; // Default prefab
+                            // Xác định prefab và hiệu ứng sẽ được áp dụng
+                            GameObject prefabToSpawn = layer.blockPrefab;
+                            StatusEffectType effectToApply = layer.initialEffect;
+
                             if (layer.enableScattering && layer.scatterPrefab != null && (random.NextDouble() * 100.0 < layer.scatterPercentage))
+                            {
                                 prefabToSpawn = layer.scatterPrefab;
+                                effectToApply = layer.scatterInitialEffect; // Sử dụng hiệu ứng của khối rải rác
+                            }
+                                
 
                             // Tính toán vị trí local dựa trên kích thước khối chuẩn của grid.
                             Vector3 localPos = new(
@@ -132,6 +139,18 @@ namespace Managers
                             }
                             blockInstance.name = $"{prefabToSpawn.name} ({x},{currentYPosition:F1},{z})";
 
+                            // ÁP DỤNG HIỆU ỨNG BAN ĐẦU (NẾU CÓ)
+                            if (effectToApply != StatusEffectType.None)
+                            {
+                                if (blockInstance.TryGetComponent<StatusEffectReceiver>(out var receiver))
+                                {
+                                    receiver.SetPermanentEffect(effectToApply);
+                                }
+                                else
+                                {
+                                    Debug.LogWarning($"Prefab '{prefabToSpawn.name}' được yêu cầu có hiệu ứng '{effectToApply}' nhưng không có component 'StatusEffectReceiver'.", blockInstance);
+                                }
+                            }
                             // Đảm bảo khối có component DestructibleBlock để có thể bị phá hủy
                             if (blockInstance.GetComponent<DestructibleBlock>() == null)
                                 Debug.LogWarning($"Prefab '{prefabToSpawn.name}' không có component 'DestructibleBlock'. Sẽ không thể bị phá hủy.", blockInstance);

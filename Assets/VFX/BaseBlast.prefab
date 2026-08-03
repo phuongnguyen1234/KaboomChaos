@@ -8648,10 +8648,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d32f934f0591ee540bdaf682b8cb2d48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Core::MaterialEffectController
+  _applyMaterialOverrides: 1
   _customBaseColor: {r: 1, g: 1, b: 1, a: 1}
   _customDecalColor: {r: 1, g: 1, b: 1, a: 1}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _statusEffectProfiles: []
 --- !u!1 &747627864793514714
 GameObject:
   m_ObjectHideFlags: 0
@@ -17306,7 +17308,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 9f13b4aedd2b1b8449dc5fa910b6f798, type: 2}
+  - {fileID: 2100000, guid: 9e8cde02a18269f4abb4eb10fb71ea2d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -17350,7 +17352,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d32f934f0591ee540bdaf682b8cb2d48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Core::MaterialEffectController
+  _applyMaterialOverrides: 1
   _customBaseColor: {r: 1, g: 1, b: 1, a: 1}
   _customDecalColor: {r: 1, g: 1, b: 1, a: 0}
   _customAlpha: 0.5
   _customEmissionIntensity: 0
+  _statusEffectProfiles: []

@@ -13,26 +13,33 @@ MonoBehaviour:
   m_Name: Default
   m_EditorClassIdentifier: Core::UndergroundProfile
   gridSize: {x: 11, y: 11}
-  spacing: {x: 0, y: 0, z: 0}
   layers:
   - blockPrefab: {fileID: 9066696034182284053, guid: dd6d0707b72bc634281fb4f2eec64bd5, type: 3}
     height: 1
     enableScattering: 0
     scatterPrefab: {fileID: 0}
     scatterPercentage: 0
+    scatterInitialEffect: 0
+    initialEffect: 0
   - blockPrefab: {fileID: 2106488410961741141, guid: d21bdea397d750c409bca03cfa86431a, type: 3}
     height: 2
     enableScattering: 0
     scatterPrefab: {fileID: 0}
     scatterPercentage: 0
+    scatterInitialEffect: 0
+    initialEffect: 0
   - blockPrefab: {fileID: 7768746031248934290, guid: c8bcc1f6242299d46a60e65a9c499d18, type: 3}
     height: 1
-    enableScattering: 0
-    scatterPrefab: {fileID: 0}
-    scatterPercentage: 0
+    enableScattering: 1
+    scatterPrefab: {fileID: 2106488410961741141, guid: d21bdea397d750c409bca03cfa86431a, type: 3}
+    scatterPercentage: 10
+    scatterInitialEffect: 0
+    initialEffect: 0
   - blockPrefab: {fileID: 7768746031248934290, guid: c8bcc1f6242299d46a60e65a9c499d18, type: 3}
     height: 2
     enableScattering: 1
-    scatterPrefab: {fileID: 1146903277956279930, guid: ed0d6d045b213494fa8eb825696fd62f, type: 3}
-    scatterPercentage: 20
+    scatterPrefab: {fileID: 7756762216282166330, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
+    scatterPercentage: 10
+    scatterInitialEffect: 4
+    initialEffect: 0
   randomSeed: 0

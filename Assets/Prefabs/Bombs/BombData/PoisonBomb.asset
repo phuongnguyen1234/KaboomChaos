@@ -1,0 +1,218 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c9ddd93070daf042939c9a26fb65e5b, type: 3}
+  m_Name: PoisonBomb
+  m_EditorClassIdentifier: Core::Core.BombData
+  id: Electric Bomb
+  displayName: Electric Bomb
+  description: "Bom \u0111i\u1EC7n"
+  bombPrefab: {fileID: 7480504946259583760, guid: 1469bed90f9b4ef44b7cb172216d0edd, type: 3}
+  radius: 6
+  damage: 0
+  damageFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  effect: 2
+  effectDuration: 15
+  statusEffectLayers:
+    serializedVersion: 2
+    m_Bits: 1536
+  applyForce: 0
+  force: 0
+  forceMode: 1
+  forceFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: -1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  upwardsModifier: 0
+  affectedLayers:
+    serializedVersion: 2
+    m_Bits: 1984
+  canDestroyTerrain: 0
+  terrainDestructionPowerFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 5
+      inSlope: 0
+      outSlope: -4
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: -4
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  explodeMultipleTimes: 0
+  numberOfExplosions: 3
+  delayBetweenExplosions: 0.5
+  explosionSpreadRadius: 2
+  explosionVFX: {fileID: 4115158409028047315, guid: e0d31c364f02f8747a6fbeb6603cbe88, type: 3}
+  explosionSound: {fileID: 8300000, guid: 919d2fde6741a2f4c8c69e431a100ad7, type: 3}
+  spawnWeightByDifficulty:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 1
+      value: 100
+      inSlope: 0
+      outSlope: -20
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 5
+      value: 20
+      inSlope: -20
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  fuseTime: 13
+  isActivatedOnContact: 0
+  fuseStages:
+  - startTime: 3
+    visualEffect: {fileID: 0}
+    stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
+    vfxRadius: 0
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 0.5773585, g: 0.43471703, b: 0, a: 1}
+    basePulseDuration: 0.2
+    enableDecalColorPulse: 1
+    decalPulseColor: {r: 0.3735848, g: 0.21960565, b: 0, a: 1}
+    decalPulseDuration: 0.2
+    enableScalePulse: 0
+    pulseScaleMultiplier: 0
+    pulseScaleDuration: 0
+  - startTime: 6
+    visualEffect: {fileID: 0}
+    stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
+    vfxRadius: 0
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 0.5773585, g: 0.43471703, b: 0, a: 1}
+    basePulseDuration: 0.2
+    enableDecalColorPulse: 1
+    decalPulseColor: {r: 0.3735848, g: 0.21960565, b: 0, a: 1}
+    decalPulseDuration: 0.2
+    enableScalePulse: 0
+    pulseScaleMultiplier: 0
+    pulseScaleDuration: 0
+  - startTime: 8.5
+    visualEffect: {fileID: 0}
+    stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
+    vfxRadius: 0
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 0.5773585, g: 0.43471703, b: 0, a: 1}
+    basePulseDuration: 0.2
+    enableDecalColorPulse: 1
+    decalPulseColor: {r: 0.3735848, g: 0.21960565, b: 0, a: 1}
+    decalPulseDuration: 0.2
+    enableScalePulse: 0
+    pulseScaleMultiplier: 0
+    pulseScaleDuration: 0
+  - startTime: 10.5
+    visualEffect: {fileID: 0}
+    stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
+    vfxRadius: 0
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 0.5773585, g: 0.43471703, b: 0, a: 1}
+    basePulseDuration: 0.2
+    enableDecalColorPulse: 1
+    decalPulseColor: {r: 0.3735848, g: 0.21960565, b: 0, a: 1}
+    decalPulseDuration: 0.2
+    enableScalePulse: 0
+    pulseScaleMultiplier: 0
+    pulseScaleDuration: 0
+  - startTime: 12
+    visualEffect: {fileID: 0}
+    stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
+    vfxRadius: 0
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 0.5773585, g: 0.43471703, b: 0, a: 1}
+    basePulseDuration: 0.2
+    enableDecalColorPulse: 1
+    decalPulseColor: {r: 0.3735848, g: 0.21960565, b: 0, a: 1}
+    decalPulseDuration: 0.2
+    enableScalePulse: 0
+    pulseScaleMultiplier: 0
+    pulseScaleDuration: 0
+  - startTime: 13
+    visualEffect: {fileID: 0}
+    stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
+    vfxRadius: 0
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 0.5773585, g: 0.43471703, b: 0, a: 1}
+    basePulseDuration: 0.2
+    enableDecalColorPulse: 1
+    decalPulseColor: {r: 0.3735848, g: 0.21960565, b: 0, a: 1}
+    decalPulseDuration: 0.2
+    enableScalePulse: 0
+    pulseScaleMultiplier: 0
+    pulseScaleDuration: 0
+  additionalGravity: 30
+  tickingSound: {fileID: 0}

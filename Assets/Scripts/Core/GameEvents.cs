@@ -21,6 +21,11 @@ namespace Core
         /// Được gọi khi máu của người chơi thay đổi.
         /// </summary>
         public static event Action<IPlayer, float, float> OnPlayerHealthChanged;
+        /// <summary>
+        /// Được gọi khi kết thúc một round, yêu cầu các component của người chơi tự reset lại trạng thái.
+        /// Ví dụ: PlayerHealth sẽ hồi đầy máu, StatusEffectReceiver sẽ xóa hiệu ứng.
+        /// </summary>
+        public static event Action OnRoundEndPlayerReset;
         #endregion
 
         #region Bomb Events
@@ -70,6 +75,7 @@ namespace Core
         #region Player Triggers
         public static void TriggerPlayerDied(IPlayer player) => OnPlayerDied?.Invoke(player);
         public static void TriggerPlayerHealthChanged(IPlayer player, float currentHealth, float maxHealth) => OnPlayerHealthChanged?.Invoke(player, currentHealth, maxHealth);
+        public static void TriggerRoundEndPlayerReset() => OnRoundEndPlayerReset?.Invoke();
         #endregion
 
         #region Bomb Triggers

@@ -814,13 +814,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2eb36ed999dd1c439fa238e5531565e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Player::Player.CMFPlayerAdapter
-  _movementSpeed: 9
+  _movementSpeed: 10
   _airControlRate: 5
   _jumpSpeed: 20.5
   _coyoteTimeDuration: 0.1
   _jumpDuration: 0.1
-  _airFriction: 12
+  _airFriction: 20
   _groundFriction: 100
+  _slipperyPhysicsMaterial: {fileID: 13400000, guid: 624cc8f3fbd14344a90b69d2df285867, type: 2}
+  _slipperyFriction: 0.6
+  _iceControlRate: 20
   _gravity: 50
   _slideGravity: 5
   _slopeLimit: 80
@@ -834,7 +837,7 @@ MonoBehaviour:
   _climbCapsuleCenterY: 1
   _climbDetectionDistance: 0.2
   _climbDetectionRadius: 0.24
-  _rotationSmoothTime: 0.08
+  _rotationSmoothTime: 0.1
 --- !u!114 &-3142878197026154125
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -875,6 +878,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Player::Player.PlayerHealth
   _maxHealth: 100
+  _statusDamagePerTick: 5
+  _statusEffectDOTInterval: 1
+  _contactDamageImmunityDuration: 1
   _deathSfx: {fileID: 8300000, guid: d670819ed5673144ba4dcfc2141f9d7f, type: 3}
   _takeDamageSfx: {fileID: 8300000, guid: 474a28eaba5ccb84ea6552efc1ac28a5, type: 3}
 --- !u!114 &3698780341714318101
@@ -1165,8 +1171,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 0.8, y: 1.6, z: 0.4}
+  m_Center: {x: 0, y: -0.4, z: 0}
 --- !u!114 &899841746580604249
 MonoBehaviour:
   m_ObjectHideFlags: 0

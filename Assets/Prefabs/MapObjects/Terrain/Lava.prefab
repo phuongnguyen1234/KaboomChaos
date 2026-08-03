@@ -78308,7 +78308,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 66, y: 1.5, z: 66}
+  m_Size: {x: 66, y: 0.8, z: 66}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!82 &7030197644399947346
 AudioSource:
@@ -78419,4 +78419,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31d999b4166a9be4492ee9e3b956b9bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Core::Core.LavaController
-  _damagePerSecond: 25
+  _damageAmount: 25
+  _damageInterval: 0.3
+  _effectToApply: 1
+  _effectDurationOnExit: 10

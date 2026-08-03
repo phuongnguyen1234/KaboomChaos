@@ -11,15 +11,25 @@ namespace Core
         /// Độ cứng của khối. Bom có 'destructionPower' lớn hơn hoặc bằng giá trị này mới có thể phá hủy nó.
         /// </summary>
         [SerializeField]
-        private int toughness = 1;
+        private int _initialToughness = 1;
+
+        /// <summary>
+        /// Public property để các hệ thống khác có thể đọc và thay đổi độ cứng.
+        /// </summary>
+        public int Toughness { get; set; }
+
+        private void Awake()
+        {
+            // Khởi tạo độ cứng runtime bằng giá trị ban đầu
+            Toughness = _initialToughness;
+        }
 
         /// <summary>
         /// Reset trạng thái của khối khi được lấy ra từ pool.
         /// </summary>
         public void ResetState()
         {
-            // Hiện tại không có trạng thái nào cần reset (như máu),
-            // nhưng phương thức này cần tồn tại để tương thích với pool manager.
+            Toughness = _initialToughness;
         }
 
         /// <summary>
@@ -28,7 +38,14 @@ namespace Core
         /// <param name="destructionPower">Sức mạnh phá hủy của tác động.</param>
         public void ReceiveImpact(int destructionPower)
         {
-            if (destructionPower < toughness) return;
+            if (destructionPower < Toughness) return;
+
+            // Yêu cầu các component khác (như StatusEffectReceiver) dọn dẹp trước khi bị vô hiệu hóa.
+            // Điều này ngăn chặn lỗi race condition khi un-parent các particle effect.
+            if (TryGetComponent<StatusEffectReceiver>(out var receiver))
+            {
+                receiver.PrepareForDespawn();
+            }
 
             // Gửi yêu cầu trả về pool thông qua hệ thống event.
             // Điều này giúp DestructibleBlock không cần biết về sự tồn tại của BlockPoolManager.

@@ -77,7 +77,7 @@ MonoBehaviour:
   upwardsModifier: 1
   affectedLayers:
     serializedVersion: 2
-    m_Bits: 38848
+    m_Bits: 6080
   canDestroyTerrain: 1
   terrainDestructionPowerFalloff:
     serializedVersion: 2
@@ -107,7 +107,7 @@ MonoBehaviour:
   numberOfExplosions: 3
   delayBetweenExplosions: 0.5
   explosionSpreadRadius: 2
-  explosionVFX: {fileID: 2096552461435851326, guid: 0370a55c632d008479e1f08df1cd39f1, type: 3}
+  explosionVFX: {fileID: 2096552461435851326, guid: c3b2951fae4969c4394711b604af4208, type: 3}
   explosionSound: {fileID: 8300000, guid: 7eb6bffa1fa7ac8448bf97314da3dce4, type: 3}
   spawnWeightByDifficulty:
     serializedVersion: 2

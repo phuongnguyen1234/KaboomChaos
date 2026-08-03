@@ -8,6 +8,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1383965444989790091, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
+      propertyPath: _customDecalColor.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1383965444989790091, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
+      propertyPath: _customDecalColor.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1383965444989790091, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
+      propertyPath: _customDecalColor.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1383965444989790091, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
+      propertyPath: _customDecalColor.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1383965444989790091, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3536681037913576558, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -54,6 +74,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6226117529890685089, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
       propertyPath: toughness
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6226117529890685089, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
+      propertyPath: _initialToughness
       value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 6422829287474631470, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
