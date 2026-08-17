@@ -1,7 +1,5 @@
-// File: h:\Documents\KaboomChaos\KaboomChaos\Assets\Scripts\Managers\UndergroundGenerator.cs
 using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
 using Core;
 using System.Collections;
 using Core.Interfaces;
@@ -12,8 +10,28 @@ namespace Managers
     /// Chịu trách nhiệm tạo ra cấu trúc thế giới ngầm dựa trên một UndergroundData.
     /// Logic này được tách ra từ MapManager để tái sử dụng và quản lý dễ dàng hơn.
     /// </summary>
-    public class UndergroundGenerator : MonoBehaviour
+    public class UndergroundGenerator : MonoBehaviour, IUndergroundGenerator
     {
+        public static IUndergroundGenerator Instance { get; private set; }
+
+        /// <summary>
+        /// Chiều cao (tọa độ Y) của điểm cao nhất của thế giới ngầm được tạo ra lần cuối.
+        /// </summary>
+        public float LastGeneratedHeight { get; private set; }
+
+        private void Awake()
+        {
+            if (Instance != null && Instance as MonoBehaviour != this)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                Instance = this;
+                DontDestroyOnLoad(gameObject);
+            }
+        }
+
         /// <summary>
         /// Tạo các tầng địa chất một cách bất đồng bộ để tránh giật lag.
         /// </summary>
@@ -38,6 +56,9 @@ namespace Managers
                 Debug.LogWarning("[UndergroundGenerator] UndergroundData has no layers or the first layer is missing a prefab. Cannot build.", this);
                 yield break;
             }
+
+            // Reset chiều cao trước khi xây dựng
+            LastGeneratedHeight = 0;
 
             // --- Helper: Đo kích thước Prefab ---
             // Cache để lưu kích thước của các prefab đã được đo, tránh việc tạo và hủy đối tượng liên tục.
@@ -80,10 +101,8 @@ namespace Managers
             float offsetZ = (profile.gridSize.y - 1) * standardBlockSize.z / 2.0f;
 
             var random = new System.Random(profile.randomSeed);
-            // Yêu cầu: Thế giới ngầm cần được xây trên một lớp nền cao 2 đơn vị.
-            // Do đó, vị trí Y ban đầu (của lớp dưới cùng) phải bắt đầu từ 2.0f thay vì 0.
-            // Điều này sẽ dịch chuyển toàn bộ cấu trúc lên trên 2 đơn vị.
-            float currentYPosition = 2.0f; // Dùng float để có vị trí chính xác.
+            // Vị trí Y ban đầu (local) cho MẶT ĐÁY của khối thấp nhất trong container.
+            float currentBottomY = 0.0f; // Dùng float để có vị trí chính xác.
 
             int blockCounter = 0;
 
@@ -116,7 +135,7 @@ namespace Managers
                             // Tính toán vị trí local dựa trên kích thước khối chuẩn của grid.
                             Vector3 localPos = new(
                                 x * standardBlockSize.x - offsetX,
-                                currentYPosition,
+                                currentBottomY + (layerBlockHeight / 2f), // Pivot của khối ở giữa, nên đặt center của khối
                                 z * standardBlockSize.z - offsetZ
                             );
 
@@ -137,7 +156,7 @@ namespace Managers
                                 blockInstance = Instantiate(prefabToSpawn, container);
                                 blockInstance.transform.SetLocalPositionAndRotation(localPos, Quaternion.identity);
                             }
-                            blockInstance.name = $"{prefabToSpawn.name} ({x},{currentYPosition:F1},{z})";
+                            blockInstance.name = $"{prefabToSpawn.name} ({x},{currentBottomY:F1},{z})";
 
                             // ÁP DỤNG HIỆU ỨNG BAN ĐẦU (NẾU CÓ)
                             if (effectToApply != StatusEffectType.None)
@@ -164,11 +183,12 @@ namespace Managers
                         }
                     }
                     // Tăng vị trí Y lên theo chiều cao của khối trong tầng này.
-                    currentYPosition += layerBlockHeight;
+                    currentBottomY += layerBlockHeight;
                 }
             }
 
-            Debug.Log($"[UndergroundGenerator] Built underground data for {profile.gridSize.x * profile.TotalHeight * profile.gridSize.y} blocks.");
+            // Gán chiều cao cuối cùng để các hệ thống khác có thể sử dụng
+            LastGeneratedHeight = currentBottomY; // LastGeneratedHeight là tọa độ Y của mặt trên cùng của khối cao nhất.
         }
     }
 }

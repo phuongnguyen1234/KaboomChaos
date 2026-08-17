@@ -65,6 +65,18 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6036855656442103476, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
+      propertyPath: _customBaseColor.b
+      value: 0.49537194
+      objectReference: {fileID: 0}
+    - target: {fileID: 6036855656442103476, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
+      propertyPath: _customBaseColor.g
+      value: 0.8154267
+      objectReference: {fileID: 0}
+    - target: {fileID: 6036855656442103476, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
+      propertyPath: _customBaseColor.r
+      value: 0.9547169
+      objectReference: {fileID: 0}
+    - target: {fileID: 6036855656442103476, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
       propertyPath: _customDecalColor.a
       value: 1
       objectReference: {fileID: 0}

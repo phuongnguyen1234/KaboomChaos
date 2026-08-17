@@ -1,6 +1,6 @@
 using UnityEngine;
 using Core.Interfaces;
-using Core; // Để có thể tham chiếu đến DestructibleBlock
+using Core;
 
 namespace Managers
 {

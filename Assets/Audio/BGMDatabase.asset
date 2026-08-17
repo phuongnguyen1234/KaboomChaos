@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a5c78ae70a40fb46becab2669810091, type: 3}
+  m_Name: BGMDatabase
+  m_EditorClassIdentifier: Core::Core.Database.BGMDatabase
+  HomeMusic: {fileID: 8300000, guid: 1b1fe9ea19f99e04b8b2e0776830213c, type: 3}
+  LobbyMusic: {fileID: 8300000, guid: 0e844b94332e6144fb1b76de5761236a, type: 3}
+  NormalGameplayMusic:
+  - {fileID: 8300000, guid: 741fe69f2d36edf45affb7284022fb8a, type: 3}
+  - {fileID: 8300000, guid: ce7368b0903a23f468fb40e65b00aa9b, type: 3}
+  - {fileID: 8300000, guid: afa0b6e738fbb834f8ab1d88d0bdbb15, type: 3}
+  - {fileID: 8300000, guid: ea0a31997148570459c7d3f27c4e3cb4, type: 3}
+  - {fileID: 8300000, guid: 8faf8270757f20949a8364f5df8e5adf, type: 3}
+  - {fileID: 8300000, guid: 815ba8c4e2356bc4783466cc20b0efa0, type: 3}
+  Last30sNormalMusic: {fileID: 8300000, guid: 03f64c5b1da95374db824f73ce545765, type: 3}
+  IntenseGameplayMusic:
+  - {fileID: 8300000, guid: 91721c907a6bf95469745d42eba14f5f, type: 3}
+  - {fileID: 8300000, guid: 5339251c623b80349be282ec2904f32a, type: 3}
+  - {fileID: 8300000, guid: da0ec76562a3f194a968c1b2e377bd0e, type: 3}
+  - {fileID: 8300000, guid: 5ef99f557deaf644d8297887954ec9cd, type: 3}
+  - {fileID: 8300000, guid: f23dc8f927d10e44cb79d797c794b4e5, type: 3}
+  - {fileID: 8300000, guid: 6a1afeb4152057d4cafca7fcba8f298a, type: 3}
+  - {fileID: 8300000, guid: e28cf90ef29af1b4faa1688c5133dc75, type: 3}
+  - {fileID: 8300000, guid: 8e154a4c53c77c843b400de816bd4154, type: 3}
+  - {fileID: 8300000, guid: 3624d196ebd0c5e4b974efcabd2280fe, type: 3}
+  - {fileID: 8300000, guid: b9f936f194fd99f4bb35045f63cbc8db, type: 3}
+  - {fileID: 8300000, guid: 57745a44059247b4dbad0581febb700d, type: 3}
+  - {fileID: 8300000, guid: 8164f009d05c69646b7e15bc805c454a, type: 3}
+  - {fileID: 8300000, guid: 9a7d857fe6d0619439d993293bfb27c1, type: 3}
+  Last30sIntenseMusic: {fileID: 8300000, guid: 30a69050ce38af444b0544a19915ba64, type: 3}

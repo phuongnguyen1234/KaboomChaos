@@ -26,6 +26,14 @@ namespace Core
         /// Ví dụ: PlayerHealth sẽ hồi đầy máu, StatusEffectReceiver sẽ xóa hiệu ứng.
         /// </summary>
         public static event Action OnRoundEndPlayerReset;
+        /// <summary>
+        /// Được gọi khi một hiệu ứng trạng thái được áp dụng lên người chơi.
+        /// </summary>
+        public static event Action<IPlayer, StatusEffectType> OnPlayerStatusEffectApplied;
+        /// <summary>
+        /// Được gọi khi một hiệu ứng trạng thái trên người chơi được hoàn tác.
+        /// </summary>
+        public static event Action<IPlayer, StatusEffectType> OnPlayerStatusEffectReverted;
         #endregion
 
         #region Bomb Events
@@ -68,6 +76,13 @@ namespace Core
         public static event Func<GameObject, Vector3, Quaternion, GameObject> OnBlockSpawnRequest;
         #endregion
 
+        #region Game Loop Events
+        /// <summary>
+        /// Được gọi khi kết thúc một round, yêu cầu các hiệu ứng tạm thời (khí độc, điện...) tự dọn dẹp.
+        /// </summary>
+        public static event Action OnRoundEndCleanup;
+        #endregion
+
         #endregion
 
         #region Trigger Methods
@@ -76,6 +91,8 @@ namespace Core
         public static void TriggerPlayerDied(IPlayer player) => OnPlayerDied?.Invoke(player);
         public static void TriggerPlayerHealthChanged(IPlayer player, float currentHealth, float maxHealth) => OnPlayerHealthChanged?.Invoke(player, currentHealth, maxHealth);
         public static void TriggerRoundEndPlayerReset() => OnRoundEndPlayerReset?.Invoke();
+        public static void TriggerPlayerStatusEffectApplied(IPlayer player, StatusEffectType effect) => OnPlayerStatusEffectApplied?.Invoke(player, effect);
+        public static void TriggerPlayerStatusEffectReverted(IPlayer player, StatusEffectType effect) => OnPlayerStatusEffectReverted?.Invoke(player, effect);
         #endregion
 
         #region Bomb Triggers
@@ -95,6 +112,10 @@ namespace Core
         #region Block & Terrain Triggers
         public static void TriggerBlockDespawnRequest(GameObject blockInstance) => OnBlockDespawnRequest?.Invoke(blockInstance);
         public static GameObject TriggerBlockSpawnRequest(GameObject prefab, Vector3 position, Quaternion rotation) => OnBlockSpawnRequest?.Invoke(prefab, position, rotation);
+        #endregion
+
+        #region Game Loop Triggers
+        public static void TriggerRoundEndCleanup() => OnRoundEndCleanup?.Invoke();
         #endregion
         
         #region Listener Checks

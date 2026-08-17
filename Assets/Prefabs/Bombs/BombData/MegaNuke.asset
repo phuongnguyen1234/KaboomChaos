@@ -1,0 +1,193 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66c0a8f62a442a447a21eacde9a15608, type: 3}
+  m_Name: MegaNuke
+  m_EditorClassIdentifier: Assembly-CSharp::Bombs.Data.MissileBombData
+  id: mega-nuke
+  displayName: Mega Nuke
+  description: Mega Nuke
+  bombPrefab: {fileID: 5712356794409419925, guid: 0dae2df7e96d15842924f0702157d899, type: 3}
+  radius: 12
+  damage: 80
+  damageFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  effect: 0
+  effectDuration: 0
+  statusEffectLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  applyForce: 1
+  force: 30
+  forceMode: 1
+  forceFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: -1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  upwardsModifier: 0.5
+  affectedLayers:
+    serializedVersion: 2
+    m_Bits: 1984
+  triggerLayers:
+    serializedVersion: 2
+    m_Bits: 5696
+  canDestroyTerrain: 1
+  terrainDestructionPowerFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 7.5
+      inSlope: -3
+      outSlope: -3
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 4.5
+      inSlope: -3
+      outSlope: -3
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  explodeMultipleTimes: 1
+  minNumberOfExplosions: 6
+  maxNumberOfExplosions: 9
+  spawnSound: {fileID: 8300000, guid: 8b514b8162f3b754f842b9176e4d078b, type: 3}
+  delayBetweenExplosions: 0.2
+  explosionSpreadRadius: 6
+  subExplosionDamage: 50
+  subExplosionDamageFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: -0.6
+      outSlope: -0.6
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0.4
+      inSlope: -0.6
+      outSlope: -0.6
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  explosionVFX: {fileID: 7387641680929074750, guid: fdd70fa6eb0a8e149ba17067174cb01e, type: 3}
+  explosionSoundPitch: 1
+  explosionSound: {fileID: 8300000, guid: b4a33f5902ca2ee4cbff08eaaca96b3b, type: 3}
+  minPlayerSpawnChance: 5
+  maxPlayerSpawnChance: 30
+  playerSpawnRadius: 2
+  possibleVariants: []
+  spawnWeightByDifficulty:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 2.631579
+      outSlope: 2.631579
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 2.9
+      value: 5
+      inSlope: 2.631579
+      outSlope: 31.818184
+      tangentMode: 69
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 4
+      value: 40
+      inSlope: 31.818184
+      outSlope: 40
+      tangentMode: 69
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 5
+      value: 80
+      inSlope: 40
+      outSlope: 40
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  maxPerSpawnWave: 1
+  maxActiveInstances: 3
+  fallSpeed: 6.5
+  landingLightVFX: {fileID: 1805167288089911798, guid: 41a1b5e54e513e84e9defb3a091a203a, type: 3}
+  landingLightColor: {r: 1, g: 0, b: 0, a: 1}

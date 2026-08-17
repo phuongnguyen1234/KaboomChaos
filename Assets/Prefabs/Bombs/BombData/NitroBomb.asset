@@ -1,0 +1,195 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24da25a9bf358e94986e2bb078029fb6, type: 3}
+  m_Name: NitroBomb
+  m_EditorClassIdentifier: Assembly-CSharp::Bombs.Data.BombData
+  id: nitro-bomb
+  displayName: Nitro Bomb
+  description: Nitro Bomb
+  bombPrefab: {fileID: 1948470642424037743, guid: 77dad62c764ff0e479565ded5414ebaa, type: 3}
+  radius: 9
+  damage: 25
+  damageFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  effect: 0
+  effectDuration: 0
+  statusEffectLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  applyForce: 1
+  force: 25
+  forceMode: 1
+  forceFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: -1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  upwardsModifier: 0.5
+  affectedLayers:
+    serializedVersion: 2
+    m_Bits: 1984
+  triggerLayers:
+    serializedVersion: 2
+    m_Bits: 64
+  canDestroyTerrain: 1
+  terrainDestructionPowerFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 5
+      inSlope: 0
+      outSlope: -4
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: -4
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  explodeMultipleTimes: 0
+  minNumberOfExplosions: 1
+  maxNumberOfExplosions: 3
+  spawnSound: {fileID: 0}
+  delayBetweenExplosions: 0.5
+  explosionSpreadRadius: 2
+  subExplosionDamage: 25
+  subExplosionDamageFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: -1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  explosionVFX: {fileID: 2096552461435851326, guid: c3b2951fae4969c4394711b604af4208, type: 3}
+  explosionSoundPitch: 1
+  explosionSound: {fileID: 8300000, guid: 84bc0c6ab87183a4d8ba6955f79ed2b1, type: 3}
+  minPlayerSpawnChance: 0
+  maxPlayerSpawnChance: 0
+  playerSpawnRadius: 0
+  possibleVariants: []
+  spawnWeightByDifficulty:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 1
+      value: 5
+      inSlope: 6.25
+      outSlope: 6.25
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 5
+      value: 30
+      inSlope: 6.25
+      outSlope: 6.25
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  maxPerSpawnWave: 2
+  maxActiveInstances: 8
+  fuseTime: 2
+  isActivatedOnContact: 1
+  changeColorOnFuse: 0
+  fuseColor: {r: 0.7471313, g: 2.9960785, b: 0, a: 1}
+  persistentFuseVFX: {fileID: 0}
+  fuseStages:
+  - startTime: 0
+    visualEffect: {fileID: 0}
+    stageSoundPitch: 1
+    stageSound: {fileID: 8300000, guid: df96f5ddac7c8e147b78b1b01c42adf0, type: 3}
+    vfxRadius: 0
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 0.7471313, g: 2.9960785, b: 0, a: 1}
+    basePulseDuration: 4
+    enableDecalColorPulse: 0
+    decalPulseColor: {r: 0, g: 0, b: 0, a: 0}
+    decalPulseDuration: 0
+    enableScalePulse: 1
+    pulseScaleMultiplier: 1
+    pulseScaleDuration: 4
+  additionalGravity: 30
+  tickingSoundPitch: 1
+  tickingSound: {fileID: 0}

@@ -77,7 +77,7 @@ SphereCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7480504946259583760}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 92d11dc6c4ce50b4d8529dee959aa88c, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -99,7 +99,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7480504946259583760}
   serializedVersion: 5
-  m_Mass: 10
+  m_Mass: 2
   m_LinearDamping: 0.05
   m_AngularDamping: 0.01
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -117,7 +117,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!82 &8640172119038241363
 AudioSource:
   m_ObjectHideFlags: 0
@@ -227,7 +227,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fdcc6663c22f0ad4892f61ffaa935049, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bombs.BombController
-  _bombData: {fileID: 11400000, guid: 14d8743e0a241234f826ccc82bf906da, type: 2}
+  _bombData: {fileID: 11400000, guid: 2a8bce99b7d8c6d4ead93ae42a231d42, type: 2}
+  _obsidianBlockPrefab: {fileID: 6006132834714911948, guid: 54c8046279390e0418713f443a64a3cf, type: 3}
+  _lavaInteractionRadius: 2
+  _lavaLayer:
+    serializedVersion: 2
+    m_Bits: 2048
+  _poisonGasPrefab: {fileID: 0}
+  _poisonGasScale: 0
   _partsToPulse:
   - {fileID: 8592307716436520536}
   - {fileID: 5247020594286987825}
@@ -286,6 +293,14 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 78f0b216f5881e049b40b7164de5b6a5, type: 3}
       propertyPath: m_Name
       value: IceBomb-2-Bomb
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 78f0b216f5881e049b40b7164de5b6a5, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 8164078558771037576, guid: 78f0b216f5881e049b40b7164de5b6a5, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

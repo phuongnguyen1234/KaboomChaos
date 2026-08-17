@@ -14,8 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Core::Bombs.BombDatabase
   bombs:
   - {fileID: 11400000, guid: 63bed31c7c4bb494180f4aa54c03b1b1, type: 2}
-  - {fileID: 11400000, guid: 1a994abda87ac504faae42ed9ad4744c, type: 2}
-  - {fileID: 11400000, guid: ee25a0c5cc0d1064a8063926553a0cfc, type: 2}
+  - {fileID: 11400000, guid: f177867cc09d48247814de41ccb25e86, type: 2}
   - {fileID: 11400000, guid: c0ecc81f7c5d9f14c9df4500287b90c5, type: 2}
-  - {fileID: 11400000, guid: 14d8743e0a241234f826ccc82bf906da, type: 2}
-  - {fileID: 11400000, guid: 0a31d37aaed6edf44b0479c5a1d64f8b, type: 2}
+  - {fileID: 11400000, guid: 2a8bce99b7d8c6d4ead93ae42a231d42, type: 2}
+  - {fileID: 11400000, guid: 05ac0e51897a44042bd3f0491ea50476, type: 2}
+  - {fileID: 11400000, guid: 4405f2b60f20d2e45aed5638708bc69b, type: 2}
+  - {fileID: 11400000, guid: bfb9bbd6bf1cdd74f8c30ace3829c537, type: 2}
+  - {fileID: 11400000, guid: 52e2f8dcd81897e4bb7ce7edc4a04953, type: 2}
+  - {fileID: 11400000, guid: c89ce175b82f5b547a45c9a94a1e1abd, type: 2}
+  - {fileID: 11400000, guid: 1a994abda87ac504faae42ed9ad4744c, type: 2}
+  - {fileID: 11400000, guid: df5c75780cba3d04589e7b474a7b7f35, type: 2}
+  - {fileID: 11400000, guid: 3035384567261404aadaef2b1c3269dc, type: 2}
+  - {fileID: 11400000, guid: a0e32fcba76dc984593928cc92942cce, type: 2}
+  - {fileID: 11400000, guid: 143d93000be8dca498b2b510b25cf72a, type: 2}

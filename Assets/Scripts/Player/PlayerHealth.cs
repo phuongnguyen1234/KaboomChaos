@@ -37,8 +37,14 @@ namespace Player
         [Header("SFX Settings")]
         [Tooltip("Âm thanh sẽ phát khi người chơi chết.")]
         [SerializeField] private AudioClip _deathSfx;
-        [Tooltip("Âm thanh sẽ phát khi người chơi nhận sát thương.")]
+        [Tooltip("Âm thanh sẽ phát khi người chơi nhận sát thương (chung).")]
         [SerializeField] private AudioClip _takeDamageSfx;
+        [Tooltip("Âm thanh sẽ phát khi nhận sát thương từ hiệu ứng Burning.")]
+        [SerializeField] private AudioClip _burningDamageSfx;
+        [Tooltip("Âm thanh sẽ phát khi nhận sát thương từ hiệu ứng Electrified.")]
+        [SerializeField] private AudioClip _electrifiedDamageSfx;
+        [Tooltip("Âm thanh sẽ phát khi nhận sát thương từ hiệu ứng Poison.")]
+        [SerializeField] private AudioClip _poisonDamageSfx;
 
         // Component để kích hoạt ragdoll
         private RagdollController _ragdollController;
@@ -57,6 +63,11 @@ namespace Player
         public event Action OnDied;
 
         public bool IsAlive { get; private set; }
+        /// <summary>
+        /// Máu hiện tại của người chơi.
+        /// </summary>
+        public float CurrentHealth => _currentHealth;
+
 
         #region Unity Lifecycle
 
@@ -99,7 +110,7 @@ namespace Player
         /// <summary>
         /// Xử lý sát thương và lực từ một vụ nổ.
         /// </summary>
-        public void TakeExplosionDamage(float amount, Vector3 force, Vector3 point)
+        public void TakeExplosionDamage(float amount, Vector3 force, Vector3 point, IBaseBombData bombData)
         {
             if (!IsAlive) return;
 
@@ -109,13 +120,13 @@ namespace Player
                 // Hiển thị số sát thương bay lên trước khi chết
                 ShowDamageNumber(amount);
                 _currentHealth = 0;
-                Die(force, point);
+                Die(force, point); // Die() không cần biết về bombData, nó chỉ cần lực.
             }
             else // Nếu không, xử lý sát thương và lực một cách riêng biệt.
             {
                 TakeDamage(amount, DamageSourceType.Explosion);
                 // Yêu cầu RagdollController xử lý lực tác động.
-                _ragdollController?.OnExplosionHit(force, point);
+                _ragdollController?.OnExplosionHit(force, point, bombData);
             }
         }
 
@@ -126,29 +137,53 @@ namespace Player
         {
             if (!IsAlive) return;
 
-            // Phát âm thanh nhận sát thương
-            if (_audioSource != null && _takeDamageSfx != null)
-            {
-                _audioSource.PlayOneShot(_takeDamageSfx);
-            }
-
             // KIỂM TRA MIỄN NHIỄM (LOGIC MỚI)
+            bool isImmune = false;
             if (sourceType == DamageSourceType.StatusEffectContact && effectContext != StatusEffectType.None)
             {
                 // Kiểm tra miễn nhiễm cho từng loại hiệu ứng trạng thái riêng biệt.
                 if (_statusEffectContactImmunityTimestamps.TryGetValue(effectContext, out float lastDamageTime))
                 {
-                    if (Time.time < lastDamageTime + _contactDamageImmunityDuration) return;
+                    if (Time.time < lastDamageTime + _contactDamageImmunityDuration) isImmune = true;
                 }
-                _statusEffectContactImmunityTimestamps[effectContext] = Time.time;
+                if (!isImmune) _statusEffectContactImmunityTimestamps[effectContext] = Time.time;
             }
             else if (sourceType == DamageSourceType.EnvironmentalContact)
             {
-                // Sát thương môi trường (dung nham, khí độc) dùng chung một bộ đếm thời gian.
-                if (Time.time < _lastEnvironmentalContactDamageTime + _contactDamageImmunityDuration) return;
-                _lastEnvironmentalContactDamageTime = Time.time;
+                if (Time.time < _lastEnvironmentalContactDamageTime + _contactDamageImmunityDuration) isImmune = true;
+                if (!isImmune) _lastEnvironmentalContactDamageTime = Time.time;
             }
             
+            if (isImmune) return; // Nếu miễn nhiễm, không gây sát thương, không phát âm thanh, không hiện text nổi.
+
+            // Yêu cầu 2: Nếu sát thương bằng 0, không xử lý gì thêm (không phát âm thanh, không hiện text).
+            if (amount <= 0) return;
+
+            // --- Logic chọn và phát âm thanh sát thương ---
+            AudioClip clipToPlay = _takeDamageSfx; // Âm thanh mặc định
+
+            // Chọn âm thanh cụ thể dựa trên ngữ cảnh hiệu ứng
+            if (sourceType == DamageSourceType.StatusEffectContact || sourceType == DamageSourceType.StatusEffectDOT || sourceType == DamageSourceType.EnvironmentalContact)
+            {
+                switch (effectContext)
+                {
+                    case StatusEffectType.Burning:
+                        if (_burningDamageSfx != null) clipToPlay = _burningDamageSfx;
+                        break;
+                    case StatusEffectType.Electrified:
+                        if (_electrifiedDamageSfx != null) clipToPlay = _electrifiedDamageSfx;
+                        break;
+                    case StatusEffectType.Poison:
+                        if (_poisonDamageSfx != null) clipToPlay = _poisonDamageSfx;
+                        break;
+                }
+            }
+            // Phát âm thanh đã chọn
+            if (_audioSource != null && clipToPlay != null)
+            {
+                _audioSource.PlayOneShot(clipToPlay);
+            }
+
             // Hiển thị số sát thương bay lên CHỈ KHI sát thương thực sự được áp dụng
             ShowDamageNumber(amount);
 
@@ -178,20 +213,20 @@ namespace Player
             // Bắt đầu hiệu ứng mới nếu nó là loại gây sát thương
             if (effect == StatusEffectType.Burning || effect == StatusEffectType.Electrified)
             {
-                _statusEffectCoroutine = StartCoroutine(DamageOverTimeRoutine(duration));
+                _statusEffectCoroutine = StartCoroutine(DamageOverTimeRoutine(duration, effect));
             }
         }
 
         /// <summary>
         /// Coroutine gây sát thương theo thời gian.
         /// </summary>
-        private IEnumerator DamageOverTimeRoutine(float duration) // Đây là sát thương DOT từ hiệu ứng áp dụng lên player
+        private IEnumerator DamageOverTimeRoutine(float duration, StatusEffectType effectContext) // Đây là sát thương DOT từ hiệu ứng áp dụng lên player
         {
             float timer = 0f;
             while (timer < duration && IsAlive) // Thêm kiểm tra IsAlive để dừng khi chết
             {
                 // Gây sát thương và chờ
-                TakeDamage(_statusDamagePerTick, DamageSourceType.StatusEffectDOT);
+                TakeDamage(_statusDamagePerTick, DamageSourceType.StatusEffectDOT, effectContext);
                 yield return new WaitForSeconds(_statusEffectDOTInterval);
                 timer += _statusEffectDOTInterval;
             }
@@ -224,8 +259,6 @@ namespace Player
 
             // Cập nhật lại UI máu cho người chơi.
             GameEvents.TriggerPlayerHealthChanged(_player, _currentHealth, _maxHealth);
-
-            Debug.Log($"[PlayerHealth] State has been reset for player {gameObject.name}.", this);
         }
 
         #endregion

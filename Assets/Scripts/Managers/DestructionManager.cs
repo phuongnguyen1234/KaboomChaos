@@ -1,6 +1,5 @@
 using UnityEngine;
 using Core.Interfaces;
-using Destruction;
 using Core;
 
 namespace Managers
@@ -56,10 +55,10 @@ namespace Managers
             for (int i = 0; i < hitCount; i++)
             {
                 var hit = _hitColliders[i];
-                if (hit.TryGetComponent<DestructiblePiece>(out var piece))
+                if (hit.TryGetComponent<DestructiblePart>(out var piece))
                 {
                     // Một mảnh chỉ có thể bị ảnh hưởng nếu nó còn nguyên vẹn hoặc đang rơi.
-                    if (piece.CurrentState == PieceState.Intact || piece.CurrentState == PieceState.Falling)
+                    if (piece.CurrentState == PartState.Intact || piece.CurrentState == PartState.Loose)
                     {
                         piece.RegisterHit();
                         piece.ApplyExplosionForce(position, force, radius);

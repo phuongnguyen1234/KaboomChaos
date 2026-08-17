@@ -31,8 +31,9 @@ namespace Managers
 
     public class GameloopManager : MonoBehaviour, IGameloopManager
     {
-        private static WaitForSeconds _waitForSeconds2 = new(2f);
-        private static WaitForSeconds _waitForSeconds1 = new(1f);
+        private static WaitForSeconds _waitForSeconds3 = new WaitForSeconds(3f);
+        private static readonly WaitForSeconds _waitForSeconds2 = new(2f);
+        private static readonly WaitForSeconds _waitForSeconds1 = new(1f);
         #region Properties
 
         /// <summary>
@@ -44,6 +45,11 @@ namespace Managers
         /// Trạng thái hiện tại của vòng lặp game.
         /// </summary>
         public GameState CurrentState { get; private set; } = GameState.None;
+
+        /// <summary>
+        /// Độ khó hiện tại của round đấu.
+        /// </summary>
+        public float CurrentIntensity { get; private set; } = 1f;
 
         #endregion
 
@@ -84,14 +90,21 @@ namespace Managers
         [Tooltip("Độ khó tối đa.")]
         [SerializeField] private float _maxIntensity = 5f;
 
-        [Header("Scene References")]
-        [Tooltip("Khu vực mà người chơi sẽ được dịch chuyển đến khi bắt đầu vòng đấu.")]
-        [SerializeField] private BoxCollider _arenaSpawnArea;
+        [Header("Dynamic Positioning Offsets")]
+        [Tooltip("Offset tọa độ Y cho khu vực spawn người chơi trong đấu trường, tính từ mặt trên của map (MapTopY). Dùng giá trị âm để đặt thấp hơn.")]
+        [SerializeField] private float _arenaSpawnAreaYOffset = 0f;
+        [Tooltip("Offset tọa độ Y cho khu vực sinh bom, tính từ mặt trên của map (MapTopY). Dùng giá trị âm để đặt thấp hơn.")]
+        [SerializeField] private float _bombSpawnerYOffset = 0f;
+        [Tooltip("Offset tọa độ Y cho đường biên trên, tính từ mặt trên của map (MapTopY).")]
+        [SerializeField] private float _topBorderYOffset = 5f;
+
+        // Scene References (obtained from SceneObjectRegistry)
+        private BoxCollider _arenaSpawnArea;
+        private Transform _topBorder;
 
         // Game loop state
         private int _selectedMapIndex = -1;
         private int _selectedUndergroundIndex = -1;
-        private float _currentIntensity = 1f;
         private float _nextRoundIntensity = 1f;
         #endregion
 
@@ -106,14 +119,6 @@ namespace Managers
             {
                 Instance = this;
                 DontDestroyOnLoad(gameObject); // Giữ Manager tồn tại khi chuyển đổi giữa các scene.
-
-                // Lấy tham chiếu đến các manager khác.
-                // Giả định rằng các manager này cũng là Singleton và đã được khởi tạo.
-                _playerManager = PlayerManager.Instance;
-                _mapManager = MapManager.Instance;
-                _bombSpawnerManager = BombSpawnerManager.Instance;
-                _destructionManager = DestructionManager.Instance;
-                _uiManager = IUIManager.Instance;
             }
         }
 
@@ -130,6 +135,23 @@ namespace Managers
 
         private void Start()
         {
+            // Lấy tham chiếu đến các manager khác trong Start() để đảm bảo các Singleton của chúng đã được khởi tạo trong Awake().
+            // Việc này được đảm bảo bởi Bootstrapper.
+            _playerManager = PlayerManager.Instance;
+            _mapManager = MapManager.Instance;
+            _bombSpawnerManager = BombSpawnerManager.Instance;
+            _destructionManager = DestructionManager.Instance;
+            _uiManager = IUIManager.Instance;
+
+            // Lấy tham chiếu đến các đối tượng trong scene từ Registry
+            var registry = SceneObjectRegistry.Instance;
+            if (registry != null)
+            {
+                _arenaSpawnArea = registry.ArenaSpawnArea;
+                _topBorder = registry.TopBorder;
+            }
+            else Debug.LogError("[GameloopManager] SceneObjectRegistry.Instance is null!", this);
+
             // Spawn người chơi lần đầu tiên khi game khởi chạy.
             _playerManager?.SpawnInitialPlayer();
 
@@ -260,16 +282,18 @@ namespace Managers
             _playerManager?.StartRound(); // Chuẩn bị danh sách người chơi cho round mới
             TeleportPlayersToArena();
 
+            // Nhạc nền của sảnh chờ đã được dừng bên trong TeleportPlayersToArena().
+            // Sẽ có một khoảng lặng cho đến khi round đấu chính thức bắt đầu.
             // Yêu cầu 1: Chờ 3 giây sau khi teleport trước khi hiển thị thanh độ khó.
-            yield return new WaitForSeconds(3f);
+            yield return _waitForSeconds3;
 
             // 2. Gán độ khó cho round hiện tại và hiển thị nó ngay lập tức.
-            _currentIntensity = Mathf.Clamp(_nextRoundIntensity, _minIntensity, _maxIntensity);
-            Debug.Log($"[GameloopManager] Round starting. Current intensity locked at: {_currentIntensity}");
+            CurrentIntensity = Mathf.Clamp(_nextRoundIntensity, _minIntensity, _maxIntensity);
+            Debug.Log($"[GameloopManager] Round starting. Current intensity locked at: {CurrentIntensity}");
             if (_uiManager != null)
             {
-                yield return StartCoroutine(_uiManager.AnimateIntensityBar(_currentIntensity, _minIntensity, _maxIntensity));
-                _uiManager.ShowCurrentIntensity(_currentIntensity);
+                yield return StartCoroutine(_uiManager.AnimateIntensityBar(CurrentIntensity, _minIntensity, _maxIntensity));
+                _uiManager.ShowCurrentIntensity(CurrentIntensity);
             }
             
             // Bây giờ, tính toán lại độ khó CƠ BẢN cho round TIẾP THEO dựa trên số người chơi của round này.
@@ -289,6 +313,9 @@ namespace Managers
             Debug.Log("[GameloopManager] Giai đoạn 4: Đếm ngược và Bắt đầu");
             // Sử dụng coroutine đếm ngược mới từ UIManager
             if (_uiManager != null) yield return StartCoroutine(_uiManager.ShowCountdown());
+
+            // Bắt đầu phát nhạc gameplay sau khi đếm ngược kết thúc.
+            _playerManager?.SetGameplayMusicForRoundPlayers(CurrentIntensity);
         }
 
         /// <summary>
@@ -311,6 +338,7 @@ namespace Managers
             
             float lateJoinTimer = _lateJoinDuration;
             bool lateJoinPeriodActive = true;
+            bool last30sMusicTriggered = false;
 
             // Vòng lặp chính của round đấu.
             // Điều kiện kết thúc: hết giờ, hoặc số người chơi còn lại đạt ngưỡng kết thúc.
@@ -348,6 +376,14 @@ namespace Managers
                     lastDisplayedSecond = currentSecond;
                     _uiManager?.UpdateTimer(lastDisplayedSecond);
                 }
+
+                // Kích hoạt nhạc 30 giây cuối
+                if (!last30sMusicTriggered && roundTimer <= 30f)
+                {
+                    _playerManager?.SetLast30sMusicForRoundPlayers(CurrentIntensity);
+                    last30sMusicTriggered = true;
+                    Debug.Log("[GameloopManager] 30 seconds left. Playing final music.");
+                }
                 yield return null;
             }
             Debug.Log("[GameloopManager] Round kết thúc.");
@@ -370,6 +406,9 @@ namespace Managers
             // Phương thức này phải được gọi TRƯỚC EndRound(), vì EndRound() sẽ xóa danh sách người chơi trong round.
             _playerManager?.ReturnRoundSurvivorsToLobby();
 
+            // Bật lại nhạc sảnh chờ cho tất cả người chơi.
+            _playerManager?.SetLobbyMusicForAllPlayers();
+
             // Hiển thị thông báo kết thúc round
             _uiManager?.ShowNotification("Round Over!", _postRoundWaitDuration);
 
@@ -377,6 +416,10 @@ namespace Managers
 
             // Kích hoạt lại các player đã chết và dọn dẹp danh sách round
             _playerManager?.EndRound(); 
+
+            // DỌN DẸP HIỆU ỨNG: Kích hoạt sự kiện để các hiệu ứng còn sót lại (khí độc, điện...) tự hủy.
+            GameEvents.TriggerRoundEndCleanup();
+            Debug.Log("[GameloopManager] Triggered Round End Cleanup event for stray effects.");
 
             // Hiển thị thông báo đang dọn dẹp
             _uiManager?.ShowNotification("Cleaning up the play area...", 1000f); // Hiển thị lâu, sẽ bị ẩn sau khi dọn xong
@@ -409,6 +452,10 @@ namespace Managers
             }
             
             Debug.Log($"[GameloopManager] Đang tải map. MapIndex: {mapIndex}, UndergroundIndex: {undergroundIndex}");
+            // Đảm bảo MapManager đã được khởi tạo và có thể truy cập
+            if (_mapManager == null) {
+                _mapManager = MapManager.Instance; // Lấy instance nếu chưa có
+            }
             yield return StartCoroutine(_mapManager.LoadMapByIndexAsync(mapIndex, undergroundIndex));
         }
 
@@ -423,12 +470,17 @@ namespace Managers
                 Debug.LogError("[GameloopManager] Arena Spawn Area is not assigned!", this);
                 return;
             }
+            if (_mapManager == null) {
+                Debug.LogError("[GameloopManager] MapManager is null, cannot get MapTopY for arena spawn.", this);
+                return;
+            }
             if (player == null || player.GameObject == null) return;
 
             Bounds bounds = _arenaSpawnArea.bounds;
             float randomX = Random.Range(bounds.min.x, bounds.max.x);
             float randomZ = Random.Range(bounds.min.z, bounds.max.z);
             // Dịch chuyển player đến vị trí ngẫu nhiên trên mặt phẳng của arena
+            // Sử dụng đỉnh của arenaSpawnArea làm điểm tham chiếu cho mặt đất của arena.
             player.Teleport(new Vector3(randomX, bounds.center.y + bounds.extents.y, randomZ));
             Debug.Log($"[GameloopManager] Teleported {player.GameObject.name} to arena.");
         }
@@ -443,11 +495,40 @@ namespace Managers
                 Debug.LogError("[GameloopManager] Arena Spawn Area is not assigned!", this);
                 return;
             }
+            if (_mapManager == null) {
+                Debug.LogError("[GameloopManager] MapManager is null, cannot get MapTopY for arena spawn.", this);
+                return;
+            }
             var players = _playerManager?.GetAllPlayers();
             if (players == null) return;
 
+            // SỬA LỖI: Phải cập nhật vị trí của các đối tượng môi trường TRƯỚC KHI dịch chuyển người chơi vào.
+            // Điều này đảm bảo người chơi luôn được spawn bên trong các ranh giới đã được cập nhật của round mới.
+            // Lấy chiều cao mặt đất của map làm tham chiếu
+            float mapTopY = _mapManager.MapTopY;
+
+            // Cập nhật vị trí của BombSpawner, Arena và TopBorder với các offset tùy chỉnh
+            float targetBombTopY = mapTopY + _bombSpawnerYOffset;
+            _bombSpawnerManager?.SetSpawnAreaTopY(targetBombTopY);
+
+            // Điều chỉnh vị trí của _arenaSpawnArea để mặt trên của nó nằm ở vị trí mong muốn
+            if (_arenaSpawnArea != null)
+            {
+                float targetArenaTopY = mapTopY + _arenaSpawnAreaYOffset;
+                // _arenaSpawnArea.bounds.center.y + _arenaSpawnArea.bounds.extents.y là mặt trên hiện tại của collider.
+                float currentTopY = _arenaSpawnArea.bounds.center.y + _arenaSpawnArea.bounds.extents.y;
+                float yDifference = targetArenaTopY - currentTopY;
+                _arenaSpawnArea.transform.position = new Vector3(_arenaSpawnArea.transform.position.x, _arenaSpawnArea.transform.position.y + yDifference, _arenaSpawnArea.transform.position.z);
+            }
+
+            if (_topBorder != null) _topBorder.position = new Vector3(_topBorder.position.x, mapTopY + _topBorderYOffset, _topBorder.position.z);
+
+            // Sau khi môi trường đã được định vị, tiến hành dịch chuyển người chơi.
             foreach (var player in players)
+            {
+                player.StopMusic(); // Dừng nhạc lobby của người chơi
                 TeleportPlayerToArena(player);
+            }
         }
 
         private IEnumerator CleanupRoundAsync()
@@ -462,8 +543,6 @@ namespace Managers
 
             _nextRoundIntensity = Mathf.Max(_minIntensity, _nextRoundIntensity - _intensityReductionOnDeath);
             Debug.Log($"[GameloopManager] Player died. Next round intensity adjusted to: {_nextRoundIntensity}");
-            // Không cập nhật UI bar ở đây. Thanh UI sẽ chỉ hiển thị độ khó của round hiện tại và không thay đổi.
-            // _uiManager?.UpdateIntensityBar(_nextRoundIntensity, _minIntensity, _maxIntensity);
         }
         #endregion
     }

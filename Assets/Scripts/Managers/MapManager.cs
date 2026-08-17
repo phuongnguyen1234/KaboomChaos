@@ -27,26 +27,29 @@ namespace Managers
         [SerializeField] private MapDatabase _mapDatabase;
 
         [Header("Scene Containers")]
-        [Tooltip("Đối tượng cha để chứa prefab map được tạo ra.")]
-        [SerializeField] private GameObject _mapLoader;
-        [Tooltip("Đối tượng cha để chứa dung nham được tạo ra.")]
-        [SerializeField] private GameObject _lavaLoader;
-        [Tooltip("Đối tượng cha để chứa các khối của thế giới ngầm.")]
-        [SerializeField] private Transform _undergroundContainer;
-
-        [Header("Generators")]
         [Tooltip("Số lượng đối tượng map được kích hoạt mỗi frame khi tải bất đồng bộ.")]
         [SerializeField] private int _mapObjectsPerFrame = 100;
-        [Tooltip("Component chịu trách nhiệm sinh ra thế giới ngầm. Nếu bỏ trống, sẽ tự tìm trong scene.")]
-        [SerializeField] private UndergroundGenerator _undergroundGenerator;
 
         [Header("Prefabs")]
         [Tooltip("Prefab của dung nham (lava).")]
         [SerializeField] private GameObject _lavaPrefab;
 
         // Instance của dung nham, được giữ lại giữa các round.
+        private GameObject _mapInstance; // Lưu trữ instance của map đã được sinh ra
         private GameObject _lavaInstance;
+
+        // Scene References (obtained from SceneObjectRegistry)
+        private GameObject _mapContainer;
+        private GameObject _lavaContainer;
+        private Transform _undergroundContainer;
+        private IUndergroundGenerator _undergroundGenerator;
         #endregion
+
+        /// <summary>
+        /// Tọa độ Y cao nhất của map hiện tại (bao gồm cả underground và map chính).
+        /// Các đối tượng như TopBorder, BombSpawner, PlayerSpawn có thể sử dụng giá trị này để đặt vị trí.
+        /// </summary>
+        public float MapTopY { get; private set; }
 
         #region Unity Lifecycle
         private void Awake()
@@ -61,20 +64,31 @@ namespace Managers
                 DontDestroyOnLoad(gameObject);
             }
 
-            if (_undergroundGenerator == null)
+            // Lấy tham chiếu đến các đối tượng trong scene từ Registry
+            var registry = SceneObjectRegistry.Instance;
+            if (registry != null)
             {
-                _undergroundGenerator = FindAnyObjectByType<UndergroundGenerator>();
-                if (_undergroundGenerator == null) Debug.LogWarning("[MapManager] UndergroundGenerator not found in scene. Underground will not be built.", this);
+                _mapContainer = registry.MapContainer;
+                _lavaContainer = registry.LavaContainer;
+                _undergroundContainer = registry.UndergroundContainer;
             }
+            else Debug.LogError("[MapManager] SceneObjectRegistry.Instance is null!", this);
 
             // Khởi tạo dung nham một lần duy nhất và tắt nó đi.
-            if (_lavaPrefab != null && _lavaLoader != null && _lavaInstance == null)
+            if (_lavaPrefab != null && _lavaContainer != null && _lavaInstance == null)
             {
-                _lavaInstance = Instantiate(_lavaPrefab, _lavaLoader.transform);
+                _lavaInstance = Instantiate(_lavaPrefab, _lavaContainer.transform);
                 _lavaInstance.SetActive(false);
             }
         }
         #endregion
+
+        private void Start()
+        {
+            // Lấy tham chiếu đến manager trong Start() để đảm bảo nó đã được Bootstrapper khởi tạo.
+            _undergroundGenerator = UndergroundGenerator.Instance;
+            if (_undergroundGenerator == null) Debug.LogWarning("[MapManager] UndergroundGenerator.Instance is null. Underground will not be built.", this);
+        }
 
         #region IMapManager Implementation
         /// <summary>
@@ -84,6 +98,7 @@ namespace Managers
         public IEnumerator LoadMapByIndexAsync(int mapIndex, int undergroundIndex)
         {
             yield return StartCoroutine(ClearCurrentMapAsync());
+            _mapInstance = null; // Đảm bảo _mapInstance là null trước khi tải map mới
 
             // Kiểm tra tính hợp lệ của các chỉ số và database
             if (_mapDatabase == null || _mapDatabase.maps.Count == 0)
@@ -118,10 +133,31 @@ namespace Managers
             var mapPrefab = mapData.MapPrefab;
             var undergroundData = _undergroundDatabase.UndergroundDatas[undergroundIndex];
 
-            yield return StartCoroutine(BuildMapAsync(mapPrefab, _mapObjectsPerFrame));
+            // --- THAY ĐỔI LOGIC: Xây dựng thế giới ngầm TRƯỚC để lấy chiều cao của nó ---
+            // 1. Xây dựng thế giới ngầm.
             yield return StartCoroutine(BuildUndergroundAsync(undergroundData));
+
+            // 2. Lấy chiều cao của thế giới ngầm và đặt vị trí cho map chính.
+            // Điều này đảm bảo map chính sẽ nằm ngay trên mặt của thế giới ngầm.
+            if (_undergroundGenerator != null && _mapContainer != null)
+            {   // LastGeneratedHeight là chiều cao LOCAL của underground so với _undergroundContainer.
+                // undergroundTopY phải là chiều cao WORLD của mặt trên cùng của underground.
+                float undergroundTopY = _undergroundContainer.position.y + _undergroundGenerator.LastGeneratedHeight;
+                _mapContainer.transform.position = new Vector3(0, undergroundTopY, 0);
+            }
+
+            // 3. Xây dựng map chính ở vị trí đã được điều chỉnh và lưu trữ instance.
+            yield return StartCoroutine(BuildMapAsync(mapPrefab, _mapObjectsPerFrame));
+            // 4. Tạo dung nham.
             CreateLava();
 
+            // 5. Tính toán và lưu trữ chiều cao tổng thể của map (bao gồm cả underground và map chính)
+            if (_mapContainer != null && _mapInstance != null)
+            {
+                // Lấy chiều cao cục bộ của bề mặt map (từ pivot của _mapInstance).
+                float mapSurfaceLocalY = GetMapSurfaceLocalY(_mapInstance);
+                MapTopY = _mapContainer.transform.position.y + mapSurfaceLocalY; // MapTopY là world Y của mặt trên của map chính.
+            }
             // Tạm thời yield null một frame để đảm bảo việc build hoàn tất trước khi sang bước tiếp theo
             yield return null;
         }
@@ -133,7 +169,15 @@ namespace Managers
         {
             Debug.Log("[MapManager] Clearing current map objects asynchronously.");
             if (_lavaInstance != null) _lavaInstance.SetActive(false);
-            yield return StartCoroutine(ClearChildrenAsync(_mapLoader, 100));
+
+            // Reset vị trí của map container về gốc để chuẩn bị cho lần tải map tiếp theo.
+            if (_mapContainer != null)
+            {
+                _mapContainer.transform.position = Vector3.zero;
+                _mapInstance = null; // Xóa tham chiếu đến instance map cũ
+            }
+
+            yield return StartCoroutine(ClearChildrenAsync(_mapContainer, 100));
             // Các khối underground được quản lý bởi pool, nên chúng ta sẽ trả chúng về pool thay vì hủy.
             if (_undergroundContainer != null) yield return StartCoroutine(ReturnAllBlocksToPoolAsync(_undergroundContainer.gameObject, 200));
         }
@@ -188,19 +232,19 @@ namespace Managers
                 Debug.LogError("[MapManager] mapPrefab is null. Cannot build map.", this);
                 yield break;
             }
-            if (_mapLoader == null)
+            if (_mapContainer == null)
             {
                 Debug.LogError("[MapManager] MapLoader container is not assigned. Cannot build map.", this);
                 yield break;
             }
 
             // Bước 1: Instantiate prefab map chính. Thao tác này nhanh vì các con của nó sẽ bị tắt đi.
-            GameObject mapInstance = Instantiate(mapPrefab, _mapLoader.transform);
-            mapInstance.name = mapPrefab.name; // Dọn dẹp tên "(Clone)"
+            _mapInstance = Instantiate(mapPrefab, _mapContainer.transform); // Gán vào trường _mapInstance
+            _mapInstance.name = mapPrefab.name; // Dọn dẹp tên "(Clone)" cho trường _mapInstance
 
             // Bước 2: Lấy danh sách tất cả các object con trực tiếp và tắt chúng đi.
             var childrenToActivate = new List<Transform>();
-            foreach (Transform child in mapInstance.transform)
+            foreach (Transform child in _mapInstance.transform)
             {
                 childrenToActivate.Add(child);
                 child.gameObject.SetActive(false);
@@ -235,7 +279,6 @@ namespace Managers
                 return;
             }
             _lavaInstance.SetActive(true);
-            Debug.Log($"[MapManager] Activated lava: {_lavaInstance.name}");
         }
 
         /// <summary>
@@ -252,7 +295,29 @@ namespace Managers
             yield return StartCoroutine(_undergroundGenerator.BuildAsync(profile, _undergroundContainer));
         }
         #endregion
-
+        
+        /// <summary>
+        /// Lấy tọa độ Y cục bộ của bề mặt map. Ưu tiên tìm một BoxCollider trigger trên root của mapInstance.
+        /// Nếu không tìm thấy BoxCollider trên root của mapInstance, sẽ trả về 0 và ghi log lỗi.
+        /// </summary>
+        /// <param name="instantiatedMap">GameObject của map đã được sinh ra.</param>
+        /// <returns>Tọa độ Y cục bộ của bề mặt map (tính từ pivot của instantiatedMap).</returns>
+        private float GetMapSurfaceLocalY(GameObject instantiatedMap)
+        {
+            if (instantiatedMap == null) return 0f;
+        
+            // Tìm BoxCollider trên root của mapInstance
+            if (instantiatedMap.TryGetComponent<BoxCollider>(out var mapTopCollider))
+            {
+                // Trả về tọa độ Y cục bộ của mặt trên của collider.
+                // mapTopCollider.center là local position của tâm collider.
+                // mapTopCollider.size.y là chiều cao local của collider.
+                return mapTopCollider.center.y + mapTopCollider.size.y / 2f;
+            }
+        
+            Debug.LogError($"[MapManager] Map prefab '{instantiatedMap.name}' does not have a BoxCollider on its root. Cannot determine MapTopY. Returning 0.", instantiatedMap);
+            return 0f;
+        }
         #region Utility Methods
 
         /// <summary>

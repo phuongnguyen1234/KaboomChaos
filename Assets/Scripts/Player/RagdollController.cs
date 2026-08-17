@@ -2,6 +2,8 @@ using UnityEngine;
 using System.Collections;
 using Core.Interfaces;
 
+using Core; // Cần cho GameEvents và StatusEffectType
+
 namespace Player
 {
     /// <summary>
@@ -21,6 +23,9 @@ namespace Player
         [Header("Ragdoll Settings")]
         [Tooltip("Kéo GameObject gốc chứa tất cả các bộ phận ragdoll vào đây.")]
         [SerializeField] private Transform _ragdollRoot;
+
+        [Tooltip("Hurtbox riêng dùng để nhận sát thương khi ở trạng thái bình thường (thường là một trigger collider con).")]
+        [SerializeField] private Collider _damageHurtbox;
 
         [Tooltip("Mục tiêu camera sẽ theo dõi khi ragdoll (ví dụ: đầu hoặc hông). Nếu bỏ trống, camera sẽ không đổi mục tiêu.")]
         [SerializeField] private Transform _ragdollFollowTarget;
@@ -61,11 +66,10 @@ namespace Player
         // State properties
         public bool IsRagdollActive { get; private set; } = false;
         private bool _isRecoverable = false;
+        private bool _isFrozen = false; // Cờ để theo dõi trạng thái đóng băng, được cập nhật qua GameEvents
+
         private Coroutine _recoveryCoroutine;
         private Coroutine _shatterCoroutine;
-
-        // Transform của camera để tính toán hướng di chuyển
-        private Transform _cameraTransform;
 
         #endregion
 
@@ -82,15 +86,12 @@ namespace Player
             _mainRigidbody = GetComponent<Rigidbody>();
             _mainCollider = GetComponent<CapsuleCollider>();
 
-            if (Camera.main != null)
-            {
-                _cameraTransform = Camera.main.transform;
-            }
-
             if (_ragdollRoot != null)
             {
-                _ragdollRigidbodies = _ragdollRoot.GetComponentsInChildren<Rigidbody>();
-                _ragdollColliders = _ragdollRoot.GetComponentsInChildren<Collider>();
+                // SỬA LỖI: Thêm 'true' để tìm cả các component trên các GameObject đang bị tắt trong Prefab.
+                // Điều này đảm bảo tất cả các bộ phận của ragdoll đều được quản lý chính xác.
+                _ragdollRigidbodies = _ragdollRoot.GetComponentsInChildren<Rigidbody>(true);
+                _ragdollColliders = _ragdollRoot.GetComponentsInChildren<Collider>(true);
                 
                 // Initial setup
                 SetRagdollState(false);
@@ -101,6 +102,19 @@ namespace Player
                 Debug.LogError("Ragdoll root has not been assigned! Ragdoll functionality will be disabled.", this);
                 enabled = false;
             }
+        }
+
+        private void OnEnable()
+        {
+            // Đăng ký lắng nghe các sự kiện hiệu ứng trạng thái để biết khi nào người chơi bị đóng băng.
+            GameEvents.OnPlayerStatusEffectApplied += HandleStatusEffectApplied;
+            GameEvents.OnPlayerStatusEffectReverted += HandleStatusEffectReverted;
+        }
+
+        private void OnDisable()
+        {
+            GameEvents.OnPlayerStatusEffectApplied -= HandleStatusEffectApplied;
+            GameEvents.OnPlayerStatusEffectReverted -= HandleStatusEffectReverted;
         }
 
         private void Update()
@@ -134,15 +148,38 @@ namespace Player
         /// Xử lý khi bị tác động bởi một vụ nổ.
         /// Quyết định xem có nên kích hoạt ragdoll hay chỉ thêm momentum.
         /// </summary>
-        public void OnExplosionHit(Vector3 force, Vector3 point)
+        public void OnExplosionHit(Vector3 force, Vector3 point, IBaseBombData bombData)
         {
+            // Nếu người chơi đang bị đóng băng (được thông báo qua event), họ sẽ miễn nhiễm với lực vật lý.
+            if (_isFrozen)
+            {
+                // LOGIC ĐÃ SỬA: Nếu bị đóng băng, người chơi không nhận lực đẩy từ vụ nổ.
+                // Sát thương vẫn được xử lý bởi PlayerHealth.
+                return; // Bỏ qua tất cả các xử lý vật lý.
+            }
+
+            // CẢI TIẾN: Nếu người chơi đã ở trạng thái ragdoll, luôn áp dụng lực từ vụ nổ.
+            // Bỏ qua các kiểm tra về ngưỡng lực hoặc cài đặt '_enableRagdollOnHit'.
+            if (IsRagdollActive)
+            {
+                EnableRagdollWithForce(force, point);
+                return;
+            }
+            // // LOGIC MỚI: Xử lý các hiệu ứng đặc biệt từ bom.
+            // // Nếu bom có hiệu ứng Electrified, luôn kích hoạt ragdoll bất kể lực tác động.
+            // if (bombData != null && bombData.Effect == StatusEffectType.Electrified)
+            // {
+            //     EnableRagdollWithForce(force, point);
+            //     return; // Đã xử lý, thoát khỏi phương thức.
+            // }
+
             // Nếu tính năng ragdoll khi bị đánh trúng bị tắt, chỉ thêm momentum và bỏ qua.
             if (!_enableRagdollOnHit)
             {
                 _playerController.AddMomentum(force);
                 return;
             }
-
+            
             // Nếu lực đủ mạnh, kích hoạt ragdoll.
             if (force.magnitude >= _ragdollForceThreshold)
             {
@@ -167,6 +204,12 @@ namespace Player
         public void SetRagdollState(bool state)
         {
             if (IsRagdollActive == state || !enabled) return;
+
+            // Nếu đang cố kích hoạt ragdoll trong khi bị đóng băng, hãy bỏ qua.
+            if (state && _isFrozen) {
+                return;
+            }
+
             IsRagdollActive = state;
 
             if (state)
@@ -179,6 +222,7 @@ namespace Player
                 // 1. Vô hiệu hóa các component điều khiển
                 if (_animator != null) _animator.enabled = false;
                 _playerController.enabled = false;
+                if (_damageHurtbox != null) _damageHurtbox.enabled = false;
                 _mainCollider.enabled = false;
                 if (_mainRigidbody != null) _mainRigidbody.isKinematic = true;
 
@@ -224,6 +268,7 @@ namespace Player
                 }
 
                 // 3. Kích hoạt lại các component vật lý và hình ảnh.
+                if (_damageHurtbox != null) _damageHurtbox.enabled = true;
                 _mainCollider.enabled = true;
                 if (_mainRigidbody != null) _mainRigidbody.isKinematic = false;
                 if (_animator != null) _animator.enabled = true;
@@ -295,6 +340,11 @@ namespace Player
         /// <param name="point">Điểm tác dụng lực.</param>
         public void EnableRagdollWithForce(Vector3 force, Vector3 point)
         {
+            // Nếu người chơi đang bị đóng băng, họ sẽ miễn nhiễm với lực vật lý.
+            if (_isFrozen)
+            {
+                return;
+            }
             // Đảm bảo nhân vật đang ở trạng thái ragdoll.
             if (!IsRagdollActive)
             {
@@ -472,6 +522,37 @@ namespace Player
             return closestRb;
         }
 
+        #endregion
+
+        #region Event Handlers
+
+        /// <summary>
+        /// Xử lý khi một hiệu ứng trạng thái được áp dụng lên người chơi.
+        /// </summary>
+        private void HandleStatusEffectApplied(IPlayer player, StatusEffectType effect)
+        {
+            // Chỉ phản hồi nếu sự kiện này dành cho chính người chơi này.
+            if (player.GameObject != gameObject) return;
+
+            if (effect == StatusEffectType.Frozen)
+            {
+                _isFrozen = true;
+            }
+        }
+
+        /// <summary>
+        /// Xử lý khi một hiệu ứng trạng thái trên người chơi được hoàn tác.
+        /// </summary>
+        private void HandleStatusEffectReverted(IPlayer player, StatusEffectType effect)
+        {
+            // Chỉ phản hồi nếu sự kiện này dành cho chính người chơi này.
+            if (player.GameObject != gameObject) return;
+
+            if (effect == StatusEffectType.Frozen)
+            {
+                _isFrozen = false;
+            }
+        }
         #endregion
     }
 }

@@ -301,6 +301,12 @@ public class CameraController : MonoBehaviour
             || _playerController == null 
             || Camera.main == null) return;
 
+        // Nếu người chơi đang bị đóng băng, không xoay nhân vật.
+        if (_playerController.IsFrozen)
+        {
+            return;
+        }
+
         // Chỉ xoay nhân vật khi ở chế độ First Person hoặc Shift Lock.
         if (isFirstPerson || isShiftLock)
         {

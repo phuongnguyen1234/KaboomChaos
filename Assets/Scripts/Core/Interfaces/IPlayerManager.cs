@@ -1,4 +1,3 @@
-// Core/Interfaces/IPlayerManager.cs
 using UnityEngine;
 using System.Collections.Generic;
 
@@ -19,5 +18,12 @@ namespace Core.Interfaces
         void AddPlayerToCurrentRound(IPlayer player);
         void EndRound();
         void ReturnRoundSurvivorsToLobby();
+        Vector3 GetRandomPlayerPosition();
+        List<IPlayer> GetPlayersInRound();
+
+        // BGM Control Methods
+        void SetGameplayMusicForRoundPlayers(float intensity);
+        void SetLast30sMusicForRoundPlayers(float intensity);
+        void SetLobbyMusicForAllPlayers();
     }
 }

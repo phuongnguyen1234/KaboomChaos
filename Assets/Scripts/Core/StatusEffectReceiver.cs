@@ -1,8 +1,8 @@
 using UnityEngine;
 using Core.Interfaces;
 using System.Collections;
+using Core.Utils;
 using System.Collections.Generic;
-using Destruction;
 
 namespace Core
 {
@@ -34,6 +34,18 @@ namespace Core
         [Tooltip("Sát thương mỗi lần khi người chơi chạm vào đối tượng đang Burning/Electrified.")]
         [SerializeField] private float _contactDamagePerTick = 5f; // Giữ lại trường này
 
+        [Header("Player-Specific Settings")]
+        [Tooltip("Thời gian (giây) người chơi bị đóng băng. Ghi đè thời gian mặc định của hiệu ứng.")]
+        [SerializeField] private float _playerFrozenDuration = 8.0f;
+
+        [Header("Hiệu ứng Hình ảnh Gameplay")]
+        [Tooltip("GameObject trực quan (ví dụ: khối băng) sẽ được bật khi người chơi bị đóng băng. Nên là một object con của player.")]
+        [SerializeField] private GameObject _frozenBlockVisual;
+
+        [Header("SFX")]
+        [Tooltip("Âm thanh phát ra khi người chơi được rã đông.")]
+        [SerializeField] private AudioClip _unfreezeSfx;
+
         [Header("Gameplay Effects VFX")]
         [SerializeField] private List<GameplayEffectProfile> _gameplayEffectProfiles = new();
 
@@ -43,13 +55,24 @@ namespace Core
         // Cached components
         private MaterialEffectController _materialEffectController;
         private DestructibleBlock _destructibleBlock;
-        private DestructiblePiece _destructiblePiece;
+        private DestructiblePart _destructiblePart;
+        private IPlayer _player; // Thay thế PlayerController bằng IPlayer
+        private Rigidbody _rigidbody;
+        private IDamageable _damageable; // Thêm để kiểm tra trạng thái IsAlive một cách trừu tượng
+        private AudioSource _audioSource;
         private Collider _objectCollider;
 
         // Trạng thái hiệu ứng
+        public StatusEffectType CurrentEffect => _currentEffect;
         private StatusEffectType _currentEffect = StatusEffectType.None;
+
+        /// <summary>Kiểm tra xem đối tượng có đang trong trạng thái "nóng" (cháy hoặc trong dung nham) hay không.</summary>
+        public bool IsHot => _currentEffect == StatusEffectType.Burning || _isInLavaZone;
         private StatusEffectType _temporaryOverlayEffect = StatusEffectType.None; // Hiệu ứng tạm thời chồng lên hiệu ứng vĩnh viễn (ví dụ: Obsidian bị nhiễm điện)
         private Coroutine _statusEffectCoroutine; // Coroutine đang chạy cho hiệu ứng hiện tại (cả vĩnh viễn và tạm thời)
+        
+        // Trạng thái tạm thời để biết đối tượng có đang trong vùng dung nham không (chỉ áp dụng cho DestructibleBlock)
+        private bool _isInLavaZone = false;
 
         // Cache lại các thuộc tính gốc để hoàn tác
         private PhysicsMaterial _originalPhysicMaterial;
@@ -66,7 +89,11 @@ namespace Core
             // Cache các component cần thiết để tối ưu hiệu năng.
             _materialEffectController = GetComponent<MaterialEffectController>();
             _destructibleBlock = GetComponent<DestructibleBlock>();
-            _destructiblePiece = GetComponent<DestructiblePiece>();
+            _destructiblePart = GetComponent<DestructiblePart>();
+            _player = GetComponent<IPlayer>(); // Lấy IPlayer thay vì PlayerController
+            _rigidbody = GetComponent<Rigidbody>();
+            _damageable = GetComponent<IDamageable>(); // Lấy component IDamageable
+            _audioSource = GetComponent<AudioSource>();
             _objectCollider = GetComponent<Collider>();
 
             if (_objectCollider != null)
@@ -86,12 +113,28 @@ namespace Core
             {
                 SetPermanentEffect(_initialEffect);
             }
+
+            // Đảm bảo khối băng bị tắt khi bắt đầu.
+            if (_frozenBlockVisual != null)
+            {
+                _frozenBlockVisual.SetActive(false);
+            }
         }
 
         private void OnEnable()
         {
-            // Đăng ký lắng nghe sự kiện reset cuối round
-            GameEvents.OnRoundEndPlayerReset += ResetStateIfPlayer;
+            // TỐI ƯU HÓA: Chỉ đăng ký một sự kiện dọn dẹp duy nhất để tránh gọi ResetState() hai lần.
+            // Nếu component này nằm trên một người chơi, nó sẽ được reset bởi sự kiện dành riêng cho người chơi.
+            if (_player != null)
+            {
+                GameEvents.OnRoundEndPlayerReset += ResetState;
+            }
+            // Nếu không, nó là một đối tượng trong màn chơi (như đá Obsidian) và sẽ được dọn dẹp
+            // bởi sự kiện dọn dẹp chung.
+            else
+            {
+                GameEvents.OnRoundEndCleanup += ResetState;
+            }
         }
 
         private void OnDisable()
@@ -111,7 +154,14 @@ namespace Core
             // Xem DestructibleBlock.cs để tham khảo cách triển khai đúng.
 
             // Hủy đăng ký để tránh lỗi
-            GameEvents.OnRoundEndPlayerReset -= ResetStateIfPlayer;
+            if (_player != null)
+            {
+                GameEvents.OnRoundEndPlayerReset -= ResetState;
+            }
+            else
+            {
+                GameEvents.OnRoundEndCleanup -= ResetState;
+            }
         }
 
         /// <summary>
@@ -125,6 +175,15 @@ namespace Core
         }
 
         /// <summary>
+        /// Đặt trạng thái cho biết đối tượng có đang trong vùng dung nham hay không.
+        /// Chỉ có ý nghĩa cho DestructibleBlock để xử lý tương tác với Frozen.
+        /// </summary>
+        /// <param name="state">True nếu đang trong vùng dung nham, False nếu không.</param>
+        public void SetIsInLavaZone(bool state)
+        {
+            _isInLavaZone = state;
+        }
+        /// <summary>
         /// Áp dụng một hiệu ứng trạng thái lên đối tượng.
         /// Xử lý các tương tác giữa các hiệu ứng và ghi đè hiệu ứng cũ nếu cần.
         /// </summary>
@@ -134,13 +193,34 @@ namespace Core
         {
             if (newEffect == StatusEffectType.None) return;
 
+            // Nếu đây là người chơi và hiệu ứng là Đóng băng, sử dụng thời gian đóng băng riêng.
+            if (_player != null && newEffect == StatusEffectType.Frozen)
+            {
+                duration = _playerFrozenDuration;
+            }
+
+
             // Quy tắc 2: Trạng thái Obsidian là vĩnh viễn.
             if (_currentEffect == StatusEffectType.Obsidian)
             {
                 // Nếu đã là Obsidian, nó miễn nhiễm với Lửa và Băng.
                 if (newEffect == StatusEffectType.Burning || newEffect == StatusEffectType.Frozen)
                 {
-                    Debug.Log($"'{gameObject.name}' is Obsidian and immune to {newEffect} effect.", this);
+                    // SỬA LỖI: Mặc dù Obsidian miễn nhiễm với hiệu ứng mới (Lửa/Băng),
+                    // chúng ta vẫn cần dọn dẹp bất kỳ hiệu ứng tạm thời nào đang có trên nó
+                    // (ví dụ: nếu nó đang bị nhiễm điện).
+                    if (_temporaryOverlayEffect != StatusEffectType.None)
+                    {
+                        // SỬA LỖI: Dừng coroutine đang chạy của hiệu ứng tạm thời TRƯỚC KHI hoàn tác.
+                        // Nếu không, coroutine cũ sẽ trở thành "zombie", tiếp tục chạy ngầm và
+                        // gọi RevertTemporaryOverlayEffect() một lần nữa khi hết giờ, gây ra
+                        // các hành vi không mong muốn và khó lường.
+                        if (_statusEffectCoroutine != null)
+                        {
+                            StopCoroutine(_statusEffectCoroutine);
+                        }
+                        RevertTemporaryOverlayEffect();
+                    }
                     return; // Ignore the new effect
                 }
                 // Special case: Obsidian can be Electrified visually, but its core state remains Obsidian.
@@ -157,24 +237,29 @@ namespace Core
             if (_currentEffect != StatusEffectType.None)
             {
                 // Tương tác: Lửa + Băng -> Obsidian.
-                // Quy tắc 1: Chỉ có DestructibleBlock mới hóa Obsidian. DestructiblePiece sẽ bị phá hủy.
-                if (_currentEffect == StatusEffectType.Burning && newEffect == StatusEffectType.Frozen)
+                // Quy tắc 1: Chỉ có DestructibleBlock mới hóa Obsidian. DestructiblePart sẽ bị phá hủy.
+                // Cập nhật logic: Nếu là DestructibleBlock, kiểm tra _isInLavaZone thay vì _currentEffect == Burning.
+                if ((_currentEffect == StatusEffectType.Burning || (_destructibleBlock != null && _isInLavaZone)) && newEffect == StatusEffectType.Frozen)
                 {
-                    if (_destructibleBlock != null)
+                    // Chỉ có khối mới hóa Obsidian. Người chơi sẽ không bị ảnh hưởng bởi tương tác này.
+                    if (_destructibleBlock != null && _player == null)
                     {
                         TurnToObsidian();
                     }
                     else
                     {
-                        // Nếu là DestructiblePiece hoặc đối tượng khác, nó sẽ bị phá hủy.
+                        // Nếu là DestructiblePart hoặc đối tượng khác, nó sẽ bị phá hủy.
                         DestroyWithImpact();
                     }
                     return; 
                 }
                 // Tương tác: Băng + Lửa -> Phá hủy
-                if (_currentEffect == StatusEffectType.Frozen && newEffect == StatusEffectType.Burning)
+                // LOGIC MỚI: Nếu người chơi bị đóng băng và trúng hiệu ứng Lửa, họ sẽ được rã đông.
+                // Các đối tượng khác sẽ bị phá hủy.
+                else if (_currentEffect == StatusEffectType.Frozen && newEffect == StatusEffectType.Burning)
                 {
-                    DestroyWithImpact();
+                    if (_player != null) RevertAllEffects(); // Rã đông người chơi
+                    else DestroyWithImpact(); // Phá hủy các đối tượng khác
                     return; 
                 } else // Nếu không có tương tác đặc biệt, hiệu ứng mới sẽ ghi đè lên hiệu ứng cũ.
                 {
@@ -302,10 +387,29 @@ namespace Core
                     _originalToughness = _destructibleBlock.Toughness;
                     _destructibleBlock.Toughness = 99;
                 }
-                if (_destructiblePiece != null)
+                if (_destructiblePart != null)
                 {
-                    _originalMaxHits = _destructiblePiece.MaxHits;
-                    _destructiblePiece.MaxHits = 99;
+                    _originalMaxHits = _destructiblePart.MaxHits;
+                    _destructiblePart.MaxHits = 99;
+                }
+
+                // LOGIC ĐÓNG BĂNG NGƯỜI CHƠI
+                // Yêu cầu: Bật khối băng, đóng băng animation, đứng yên, không nhận input.
+                if (_player != null)
+                {
+                    // Trực tiếp đóng băng vật lý và vô hiệu hóa controller
+                    // thay vì dựa vào event trong PlayerController.
+                    _player.SetMovementEnabled(false);
+                    if (_rigidbody != null) _rigidbody.isKinematic = true;
+
+                    // Phát sự kiện để các component khác (như PlayerAnimator) vẫn có thể phản ứng.
+                    GameEvents.TriggerPlayerStatusEffectApplied(_player, effect);
+                }
+
+                // Bật khối băng trực quan (logic này vẫn do StatusEffectReceiver quản lý).
+                if (_frozenBlockVisual != null)
+                {
+                    _frozenBlockVisual.SetActive(true);
                 }
             } else if (effect == StatusEffectType.Obsidian)
             {
@@ -316,11 +420,11 @@ namespace Core
                     _originalToughness = _destructibleBlock.Toughness;
                     _destructibleBlock.Toughness = int.MaxValue; // Obsidian không thể bị phá hủy
                 }
-                if (_destructiblePiece != null)
+                if (_destructiblePart != null)
                 {
                     // Although pieces shouldn't become Obsidian, this is a safeguard.
-                    _originalMaxHits = _destructiblePiece.MaxHits;
-                    _destructiblePiece.MaxHits = 10;
+                    _originalMaxHits = _destructiblePart.MaxHits;
+                    _destructiblePart.MaxHits = 10;
                 }
             }
         }
@@ -341,14 +445,42 @@ namespace Core
                 {
                     _destructibleBlock.Toughness = _originalToughness;
                 }
-                // Only revert MaxHits if it was a DestructiblePiece that became Frozen.
-                // This is a bit tricky because DestructiblePiece shouldn't become Obsidian.
+                // Only revert MaxHits if it was a DestructiblePart that became Frozen.
+                // This is a bit tricky because DestructiblePart shouldn't become Obsidian.
                 // But if it did, we wouldn't revert its MaxHits.
-                // Given the new rule, DestructiblePiece will be destroyed if Burning + Frozen.
-                // So this part for DestructiblePiece might not be strictly necessary for Frozen.
-                if (_destructiblePiece != null)
+                // Given the new rule, DestructiblePart will be destroyed if Burning + Frozen.
+                // So this part for DestructiblePart might not be strictly necessary for Frozen.
+                if (_destructiblePart != null)
                 {
-                    _destructiblePiece.MaxHits = _originalMaxHits;
+                    _destructiblePart.MaxHits = _originalMaxHits;
+                }
+
+                // LOGIC GIẢI BĂNG NGƯỜI CHƠI
+                // Hoàn tác lại các thay đổi của hiệu ứng đóng băng
+                if (_player != null)
+                {
+                    // Phát âm thanh rã đông
+                    // CHỈ phát âm thanh nếu đối tượng còn sống.
+                    // Tránh phát âm thanh khi người chơi đã chết và đang được reset.
+                    // Sử dụng interface IDamageable để tránh phụ thuộc trực tiếp vào PlayerHealth.
+                    if (_audioSource != null && _unfreezeSfx != null && _damageable.IsAlive)
+                    {
+                        _audioSource.PlayOneShot(_unfreezeSfx);
+                    }
+
+                    // Luôn khôi phục trạng thái di chuyển bình thường sau khi rã đông,
+                    // bỏ qua bất kỳ hiệu ứng ragdoll nào có thể đã xảy ra trong khi bị đóng băng.
+                    if (_rigidbody != null) _rigidbody.isKinematic = false;
+                    _player.SetMovementEnabled(true);
+
+                    // Phát sự kiện để các component khác (như PlayerAnimator) tự hoàn tác.
+                    GameEvents.TriggerPlayerStatusEffectReverted(_player, _currentEffect); // Animator vẫn cần sự kiện này
+                }
+
+                // Tắt khối băng trực quan
+                if (_frozenBlockVisual != null)
+                {
+                    _frozenBlockVisual.SetActive(false);
                 }
             }
             // Obsidian không bị hoàn tác theo thời gian.
@@ -364,18 +496,6 @@ namespace Core
             ApplyGameplayProperties(effect);
             ApplyEffectMaterialWithRandomOffset(effect);
             ApplyPermanentEffectVFX(effect);
-        }
-
-        /// <summary>
-        /// Một trình bao bọc (wrapper) cho ResetState, chỉ thực thi nếu component này được gắn vào một người chơi.
-        /// </summary>
-        private void ResetStateIfPlayer()
-        {
-            // Sự kiện OnRoundEndPlayerReset là toàn cục. Chúng ta chỉ muốn reset các hiệu ứng
-            // trên người chơi, không phải trên các khối (block) có thể giữ lại hiệu ứng của chúng.
-            // Kiểm tra xem GameObject này có component IPlayer không.
-            if (GetComponent<IPlayer>() != null)
-                ResetState();
         }
 
         /// <summary>
@@ -435,7 +555,19 @@ namespace Core
                 // Quan trọng: Tách VFX ra khỏi đối tượng cha TRƯỚC KHI yêu cầu trả về pool.
                 // Điều này ngăn lỗi "Cannot set the parent" khi đối tượng cha này cũng đang bị vô hiệu hóa trong cùng một frame.
                 _permanentVFXInstance.transform.SetParent(null);
+
+            // CẢI TIẾN: Thêm bước kiểm tra để đảm bảo có một pool manager đang lắng nghe.
+            // Nếu không, các VFX sẽ bị "mồ côi" trong scene, gây ra lỗi mà người dùng báo cáo
+            // (VFX còn active, ở scale 1, tại một vị trí bất kỳ).
+            if (GameEvents.IsVFXPoolListening())
+            {
                 GameEvents.TriggerVFXDespawnRequest(_permanentVFXInstance);
+            }
+            else
+            {
+                // Fallback: Nếu không có pool, tự hủy để tránh rò rỉ.
+                Destroy(_permanentVFXInstance);
+            }
                 _permanentVFXInstance = null;
             }
         }
@@ -449,7 +581,14 @@ namespace Core
 
             // Tương tự như RevertPermanentEffectVFX, unparent trước khi despawn.
             _temporaryVFXInstance.transform.SetParent(null);
+        if (GameEvents.IsVFXPoolListening())
+        {
             GameEvents.TriggerVFXDespawnRequest(_temporaryVFXInstance);
+        }
+        else
+        {
+            Destroy(_temporaryVFXInstance);
+        }
             _temporaryVFXInstance = null;
         }
 
@@ -461,76 +600,17 @@ namespace Core
         {
             if (vfxInstance == null) return;
 
-            ParticleSystem ps = vfxInstance.GetComponent<ParticleSystem>();
-            if (ps == null)
+            if (!vfxInstance.TryGetComponent<ParticleSystem>(out var ps))
             {
                 Debug.LogWarning($"VFX prefab '{vfxInstance.name}' không có component ParticleSystem.", vfxInstance);
                 return;
             }
 
-            var shape = ps.shape;
-            shape.enabled = true; // Đảm bảo module shape được bật
-
-            // Đảm bảo Particle System nằm ở vị trí gốc của object cha để hình dạng khớp chính xác.
-            vfxInstance.transform.localPosition = Vector3.zero;
-            vfxInstance.transform.localRotation = Quaternion.identity;
-            vfxInstance.transform.localScale = Vector3.one; // Đảm bảo không bị ảnh hưởng bởi scale lạ
-
-            // Cố gắng khớp hình dạng với collider của object cha (khối này)
-            if (_objectCollider != null)
-            {
-                if (_objectCollider is BoxCollider boxCollider)
-                {
-                    shape.shapeType = ParticleSystemShapeType.Box;
-                    shape.scale = boxCollider.size;
-                    shape.position = boxCollider.center; // Điều chỉnh vị trí nếu collider không ở tâm cục bộ
-                }
-                else if (_objectCollider is SphereCollider sphereCollider)
-                {
-                    shape.shapeType = ParticleSystemShapeType.Sphere;
-                    shape.radius = sphereCollider.radius;
-                    shape.position = sphereCollider.center;
-                }
-                else if (_objectCollider is MeshCollider meshCollider && meshCollider.sharedMesh != null)
-                {
-                    shape.shapeType = ParticleSystemShapeType.Mesh;
-                    shape.mesh = meshCollider.sharedMesh;
-                    shape.meshShapeType = ParticleSystemMeshShapeType.Triangle; // Phát hạt từ bề mặt mesh
-                }
-                else
-                {
-                    // Fallback: Nếu collider không phải là hình dạng phổ biến, thử dùng MeshFilter
-                    MeshFilter mf = GetComponent<MeshFilter>();
-                    if (mf != null && mf.sharedMesh != null)
-                    {
-                        shape.shapeType = ParticleSystemShapeType.Mesh;
-                        shape.mesh = mf.sharedMesh;
-                        shape.meshShapeType = ParticleSystemMeshShapeType.Triangle;
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"Không tìm thấy Collider hoặc MeshFilter phù hợp trên '{gameObject.name}' để cấu hình hình dạng VFX. Mặc định là Sphere.", this);
-                        shape.shapeType = ParticleSystemShapeType.Sphere; // Mặc định
-                        shape.radius = 0.5f; // Bán kính mặc định
-                    }
-                }
-            }
-            else // Không có collider trên object, thử MeshFilter
-            {
-                MeshFilter mf = GetComponent<MeshFilter>();
-                if (mf != null && mf.sharedMesh != null)
-                {
-                    shape.shapeType = ParticleSystemShapeType.Mesh;
-                    shape.mesh = mf.sharedMesh;
-                    shape.meshShapeType = ParticleSystemMeshShapeType.Triangle;
-                }
-                else
-                {
-                    Debug.LogWarning($"Không tìm thấy Collider hoặc MeshFilter trên '{gameObject.name}' để cấu hình hình dạng VFX. Mặc định là Sphere.", this);
-                    shape.shapeType = ParticleSystemShapeType.Sphere; // Mặc định
-                    shape.radius = 0.5f; // Bán kính mặc định
-                }
-            }
+            // Ủy quyền việc cấu hình cho lớp tiện ích.
+            // 'gameObject' ở đây chính là đối tượng có StatusEffectReceiver (khối, người chơi, v.v.)
+            // và sẽ được dùng làm nguồn hình dạng.
+            // Yêu cầu phát hạt từ bề mặt (surface) của mesh/collider.
+            ParticleSystemUtils.MatchShapeToSurface(ps, gameObject);
         }
 
         /// <summary>
@@ -538,7 +618,6 @@ namespace Core
         /// </summary>
         private void TurnToObsidian()
         {
-            Debug.Log($"'{gameObject.name}' is turning into Obsidian.", this);
             // Dừng bất kỳ coroutine hiệu ứng nào đang chạy (ví dụ: coroutine của hiệu ứng Burning).
             if (_statusEffectCoroutine != null)
             {
@@ -563,7 +642,6 @@ namespace Core
         /// </summary>
         private void DestroyWithImpact()
         {
-            Debug.Log($"'{gameObject.name}' is shattered by thermal shock.", this);
             // Dọn dẹp VFX TRƯỚC KHI đối tượng bị phá hủy/trả về pool để tránh lỗi cha-con.
             RevertPermanentEffectVFX();
             RevertTemporaryVFX();
@@ -571,9 +649,9 @@ namespace Core
             {
                 _destructibleBlock.ReceiveImpact(9999);
             }
-            else if (_destructiblePiece != null)
+            else if (_destructiblePart != null)
             {
-                gameObject.SetActive(false); // Destroy DestructiblePiece
+                gameObject.SetActive(false); // Destroy DestructiblePart
             }
             else
             {

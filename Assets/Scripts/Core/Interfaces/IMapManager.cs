@@ -6,6 +6,8 @@ namespace Core.Interfaces
     /// </summary>
     public interface IMapManager
     {
+        float MapTopY {get;}
+
         /// <summary>
         /// Tải một map hoàn chỉnh dựa trên các chỉ số từ database.
         /// </summary>

@@ -8,6 +8,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -1551694745437751910, guid: 0e12c99883657eb4781d5b62c3143d23, type: 3}
+      propertyPath: _gameplayEffectProfiles.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -1551694745437751910, guid: 0e12c99883657eb4781d5b62c3143d23, type: 3}
+      propertyPath: _gameplayEffectProfiles.Array.data[1].effectVFX
+      value: 
+      objectReference: {fileID: 8895673999334952703, guid: ce108e08b46b7fb4b82e6096589844de, type: 3}
+    - target: {fileID: -1551694745437751910, guid: 0e12c99883657eb4781d5b62c3143d23, type: 3}
+      propertyPath: _gameplayEffectProfiles.Array.data[2].effectVFX
+      value: 
+      objectReference: {fileID: 8895673999334952703, guid: 0e26367141e02a8458731c16df0440a1, type: 3}
+    - target: {fileID: -1551694745437751910, guid: 0e12c99883657eb4781d5b62c3143d23, type: 3}
+      propertyPath: _gameplayEffectProfiles.Array.data[1].effectType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -1551694745437751910, guid: 0e12c99883657eb4781d5b62c3143d23, type: 3}
+      propertyPath: _gameplayEffectProfiles.Array.data[2].effectType
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 3536681037913576558, guid: 0e12c99883657eb4781d5b62c3143d23, type: 3}
       propertyPath: m_LocalScale.y
       value: 6

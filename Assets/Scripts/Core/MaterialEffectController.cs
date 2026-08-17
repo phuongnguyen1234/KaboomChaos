@@ -62,6 +62,10 @@ public class MaterialEffectController : MonoBehaviour
     private Color _runtimeBaseColor;
     private Tweener _baseColorTween;
 
+    // Trạng thái runtime cho việc ghi đè màu ngòi nổ (fuse)
+    private bool _isFuseColorOverridden = false;
+    private Color _runtimeFuseColor;
+
     // Trạng thái runtime cho việc ghi đè màu họa tiết
     private bool _isDecalColorOverridden = false;
     private Color _runtimeDecalColor;
@@ -72,7 +76,9 @@ public class MaterialEffectController : MonoBehaviour
     private Coroutine _statusEffectCoroutine;
     private Dictionary<StatusEffectType, StatusEffectProfile> _statusEffectProfileMap;
     private bool _isEffectActive = false;
-    private Material[] _instancedEffectMaterials; // Để theo dõi các material được tạo ra
+
+    // CẢI TIẾN: Cache các material hiệu ứng đã được tạo ra để tái sử dụng.
+    private Dictionary<StatusEffectType, Material[]> _cachedEffectMaterialInstances;
 
     /// <summary>
     /// Cho phép truy cập và thay đổi giá trị alpha tùy chỉnh từ các script khác.
@@ -83,6 +89,20 @@ public class MaterialEffectController : MonoBehaviour
         get => _customAlpha;
         set {
             _customAlpha = Mathf.Clamp01(value);
+            UpdateColor();
+        }
+    }
+
+    /// <summary>
+    /// Cho phép truy cập và thay đổi màu nền tùy chỉnh từ các script khác.
+    /// Việc gán giá trị mới sẽ tự động cập nhật material của object.
+    /// </summary>
+    public Color CustomBaseColor
+    {
+        get => _customBaseColor;
+        set
+        {
+            _customBaseColor = value;
             UpdateColor();
         }
     }
@@ -143,6 +163,27 @@ public class MaterialEffectController : MonoBehaviour
             });
     }
 
+    /// <summary>
+    /// Thiết lập một màu nền cố định cho trạng thái ngòi nổ (fuse).
+    /// Màu này sẽ ghi đè lên màu tùy chỉnh và các hiệu ứng pulse.
+    /// </summary>
+    /// <param name="color">Màu để áp dụng.</param>
+    public void SetFuseColor(Color color)
+    {
+        _isFuseColorOverridden = true;
+        _runtimeFuseColor = color;
+        UpdateColor();
+    }
+
+    /// <summary>
+    /// Xóa bỏ màu nền cố định của trạng thái ngòi nổ.
+    /// </summary>
+    public void ClearFuseColor()
+    {
+        _isFuseColorOverridden = false;
+        UpdateColor();
+    }
+
     #region Status Effects
     /// <summary>
     /// Áp dụng một hiệu ứng trạng thái lên đối tượng bằng cách thay thế material.
@@ -177,11 +218,25 @@ public class MaterialEffectController : MonoBehaviour
         _isEffectActive = true;
         _myRenderer.SetPropertyBlock(null); // Xóa property block để material mới hiển thị đúng
 
-        // Tạo các material instance mới cho hiệu ứng
-        // Lưu ý: _originalMaterials được cache trong Awake và là sharedMaterials
-        var newMaterials = new Material[_originalMaterials.Length];
-        _instancedEffectMaterials = newMaterials; // Lưu lại tham chiếu để dọn dẹp sau
+        Material[] effectMaterialsToApply;
 
+        // CẢI TIẾN: Kiểm tra xem đã cache material cho hiệu ứng này chưa.
+        if (_cachedEffectMaterialInstances.TryGetValue(effect, out effectMaterialsToApply))
+        {
+            // Đã có, tái sử dụng trực tiếp.
+            // Gọi callback để cho phép tùy chỉnh (ví dụ: gán lại offset ngẫu nhiên).
+            // Vì chúng ta đang dùng lại cùng một instance, việc gọi callback này rất quan trọng.
+            if (onMaterialInstanced != null)
+            {
+                foreach (var mat in effectMaterialsToApply)
+                {
+                    onMaterialInstanced.Invoke(mat);
+                }
+            }
+        }
+        else // Chưa có trong cache, tạo mới.
+        {
+            effectMaterialsToApply = new Material[_originalMaterials.Length];
         for (int i = 0; i < _originalMaterials.Length; i++)
         {
             // Tạo một instance mới của material hiệu ứng
@@ -219,12 +274,15 @@ public class MaterialEffectController : MonoBehaviour
             // Gọi callback để cho phép tùy chỉnh material instance trước khi áp dụng.
             onMaterialInstanced?.Invoke(effectInstance);
 
-            newMaterials[i] = effectInstance;
+                effectMaterialsToApply[i] = effectInstance;
+        }
+
+            // Lưu vào cache để dùng cho các lần sau.
+            _cachedEffectMaterialInstances[effect] = effectMaterialsToApply;
         }
 
         // Áp dụng các material hiệu ứng
-        _myRenderer.materials = newMaterials;
-
+        _myRenderer.materials = effectMaterialsToApply;
     }
 
     /// <summary>
@@ -240,22 +298,7 @@ public class MaterialEffectController : MonoBehaviour
         // và đảm bảo renderer quay về đúng trạng thái sử dụng material gốc (asset).
         _myRenderer.sharedMaterials = _originalMaterials;
 
-        // Dọn dẹp các material đã được tạo ra
-        if (_instancedEffectMaterials != null)
-        {
-            foreach (var mat in _instancedEffectMaterials)
-            {
-                if (mat == null) continue;
-                
-                // Phải sử dụng DestroyImmediate trong Editor khi không ở Play Mode
-                // để dọn dẹp các material đã được tạo ra, tránh bị leak.
-                if (Application.isPlaying)
-                    Destroy(mat);
-                else
-                    DestroyImmediate(mat);
-            }
-            _instancedEffectMaterials = null;
-        }
+        // Việc dọn dẹp các material đã được cache sẽ được thực hiện trong OnDestroy.
 
         _isEffectActive = false;
         UpdateColor(); // Áp dụng lại các giá trị từ MaterialPropertyBlock
@@ -267,6 +310,9 @@ public class MaterialEffectController : MonoBehaviour
     {
         if (_myRenderer == null) _myRenderer = GetComponent<Renderer>();
         _propBlock ??= new MaterialPropertyBlock();
+
+        // Khởi tạo cache cho các material hiệu ứng.
+        _cachedEffectMaterialInstances ??= new Dictionary<StatusEffectType, Material[]>();
 
         // Cache the original materials for status effect reversion
         if (_myRenderer != null)
@@ -296,6 +342,7 @@ public class MaterialEffectController : MonoBehaviour
         // Khi component bị tắt, xóa mọi ghi đè màu để quay về màu gốc của material.
         _baseColorTween?.Kill();
         _decalColorTween?.Kill();
+        _isFuseColorOverridden = false; // Xóa ghi đè màu ngòi nổ
 
         if (_statusEffectCoroutine != null)
         {
@@ -316,20 +363,23 @@ public class MaterialEffectController : MonoBehaviour
         _baseColorTween?.Kill();
         _decalColorTween?.Kill();
 
-        // Dọn dẹp material được tạo ra để tránh rò rỉ bộ nhớ
-        if (_instancedEffectMaterials != null)
+        // CẢI TIẾN: Dọn dẹp tất cả các material đã được cache.
+        if (_cachedEffectMaterialInstances != null)
         {
-            foreach (var mat in _instancedEffectMaterials)
+            foreach (var materialArray in _cachedEffectMaterialInstances.Values)
             {
-                if (mat == null) continue;
+                foreach (var mat in materialArray)
+                {
+                    if (mat == null) continue;
 
-                if (Application.isPlaying)
-                {
-                    Destroy(mat);
-                }
-                else
-                {
-                    DestroyImmediate(mat);
+                    if (Application.isPlaying)
+                    {
+                        Destroy(mat);
+                    }
+                    else
+                    {
+                        DestroyImmediate(mat);
+                    }
                 }
             }
         }
@@ -364,7 +414,23 @@ public class MaterialEffectController : MonoBehaviour
         _propBlock ??= new MaterialPropertyBlock();
 
         // 3. Xác định các giá trị cuối cùng sẽ được áp dụng
-        Color finalBaseColor = _isBaseColorOverridden ? _runtimeBaseColor : _customBaseColor;
+        Color finalBaseColor;
+        if (_isFuseColorOverridden)
+        {
+            // Ưu tiên cao nhất: màu của ngòi nổ
+            finalBaseColor = _runtimeFuseColor;
+        }
+        else if (_isBaseColorOverridden)
+        {
+            // Ưu tiên thứ hai: màu của hiệu ứng pulse
+            finalBaseColor = _runtimeBaseColor;
+        }
+        else
+        {
+            // Mặc định: màu tùy chỉnh từ Inspector
+            finalBaseColor = _customBaseColor;
+        }
+
         _propBlock.SetColor(BASE_COLOR_PROPERTY_NAME, finalBaseColor);
 
         Color finalDecalColor = _isDecalColorOverridden ? _runtimeDecalColor : _customDecalColor;
@@ -384,6 +450,7 @@ public class MaterialEffectController : MonoBehaviour
             // Nếu ghi đè bị tắt, chỉ áp dụng các giá trị từ hiệu ứng pulse đang hoạt động.
             // Xóa block cũ để đảm bảo không còn giá trị rác.
             _propBlock.Clear();
+            if (_isFuseColorOverridden) _propBlock.SetColor(BASE_COLOR_PROPERTY_NAME, finalBaseColor);
             if (_isBaseColorOverridden) _propBlock.SetColor(BASE_COLOR_PROPERTY_NAME, finalBaseColor);
             if (_isDecalColorOverridden) _propBlock.SetColor(DECAL_COLOR_PROPERTY_NAME, finalDecalColor);
         }

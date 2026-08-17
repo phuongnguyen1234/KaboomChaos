@@ -59,8 +59,39 @@ namespace Core.Interfaces
         /// </summary>
         /// <param name="position">Vị trí thế giới mới.</param>
         void Teleport(Vector3 position);
+
+        /// <summary>
+        /// Bật hoặc tắt khả năng di chuyển của người chơi.
+        /// </summary>
+        /// <param name="enabled">True để bật di chuyển, False để tắt.</param>
+        void SetMovementEnabled(bool enabled);
         // Bạn có thể thêm các phương thức hoặc thuộc tính khác vào đây
-        // Ví dụ: Vector3 GetPosition();
-        // Ví dụ: void TakeDamage(float amount);
+        
+        /// <summary>
+        /// Cho biết người chơi có đang bị đóng băng hay không.
+        /// </summary>
+        bool IsFrozen { get; }
+
+        /// <summary>
+        /// Yêu cầu người chơi phát nhạc của sảnh chờ (lobby).
+        /// </summary>
+        void PlayLobbyMusic();
+
+        /// <summary>
+        /// Yêu cầu người chơi bắt đầu playlist nhạc gameplay dựa trên độ khó.
+        /// </summary>
+        /// <param name="intensity">Độ khó của round đấu.</param>
+        void PlayGameplayMusic(float intensity);
+
+        /// <summary>
+        /// Yêu cầu người chơi phát nhạc cho 30 giây cuối của round đấu.
+        /// </summary>
+        /// <param name="intensity">Độ khó của round đấu.</param>
+        void PlayLast30sMusic(float intensity);
+
+        /// <summary>
+        /// Yêu cầu người chơi dừng tất cả nhạc đang phát.
+        /// </summary>
+        void StopMusic();
     }
 }

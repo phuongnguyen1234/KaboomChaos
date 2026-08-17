@@ -69,6 +69,18 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2100000, guid: 9e8cde02a18269f4abb4eb10fb71ea2d, type: 2}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _initialScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _initialScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _initialScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _animationStages.Array.size
       value: 2
       objectReference: {fileID: 0}
@@ -78,7 +90,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _animationStages.Array.data[0].duration
-      value: 0.15
+      value: 0.01
       objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _animationStages.Array.data[1].duration
@@ -426,7 +438,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customEmissionIntensity
-      value: 2
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

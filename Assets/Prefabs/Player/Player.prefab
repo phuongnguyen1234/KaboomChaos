@@ -1,5 +1,71 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &129678604579971493
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3495166056585454315}
+  - component: {fileID: 1959957944779992112}
+  - component: {fileID: 3479097015042560399}
+  m_Layer: 6
+  m_Name: RagdollHitbox
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3495166056585454315
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 129678604579971493}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7678030116290802555}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1959957944779992112
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 129678604579971493}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f939b6690c89a624ba0f12818e8291af, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Player::PrimaryTarget
+--- !u!65 &3479097015042560399
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 129678604579971493}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.8, y: 0.8, z: 0.4}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &619254645760081542
 GameObject:
   m_ObjectHideFlags: 0
@@ -11,7 +77,7 @@ GameObject:
   - component: {fileID: 6389088593756549642}
   - component: {fileID: 6051370331350580785}
   - component: {fileID: 1419121136506455369}
-  - component: {fileID: 545991830023255388}
+  - component: {fileID: 936015602563846487}
   m_Layer: 6
   m_Name: PivotL_Leg
   m_TagString: Untagged
@@ -44,7 +110,7 @@ Rigidbody:
   m_GameObject: {fileID: 619254645760081542}
   serializedVersion: 5
   m_Mass: 1.7
-  m_LinearDamping: 0.1
+  m_LinearDamping: 0
   m_AngularDamping: 0.5
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -61,7 +127,7 @@ Rigidbody:
   m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 1
+  m_CollisionDetection: 0
 --- !u!65 &1419121136506455369
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -83,7 +149,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.4, y: 0.8, z: 0.4}
   m_Center: {x: 0, y: -0.4, z: 0}
---- !u!153 &545991830023255388
+--- !u!153 &936015602563846487
 ConfigurableJoint:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -94,16 +160,16 @@ ConfigurableJoint:
   m_ConnectedBody: {fileID: 397994070034975524}
   m_ConnectedArticulationBody: {fileID: 0}
   m_Anchor: {x: 0, y: 0, z: 0}
-  m_Axis: {x: 0, y: 1, z: 0}
+  m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
   m_ConnectedAnchor: {x: 0, y: 0, z: 0}
-  m_SecondaryAxis: {x: -1, y: 0, z: 0}
+  m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
   m_YMotion: 0
   m_ZMotion: 0
-  m_AngularXMotion: 0
-  m_AngularYMotion: 2
-  m_AngularZMotion: 2
+  m_AngularXMotion: 1
+  m_AngularYMotion: 1
+  m_AngularZMotion: 1
   m_LinearLimitSpring:
     spring: 0
     damper: 0
@@ -115,22 +181,22 @@ ConfigurableJoint:
     spring: 0
     damper: 0
   m_LowAngularXLimit:
-    limit: -105.79668
+    limit: -80
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: -41.503082
+    limit: 30
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
     spring: 0
     damper: 0
   m_AngularYLimit:
-    limit: 32.570385
+    limit: 15
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 45
+    limit: 40
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -258,7 +324,7 @@ GameObject:
   - component: {fileID: 6327533637506297728}
   - component: {fileID: 5389325450388497918}
   - component: {fileID: 4721368409684159294}
-  - component: {fileID: 7066166793197480060}
+  - component: {fileID: 8110452706050492083}
   m_Layer: 6
   m_Name: PivotR_Arm
   m_TagString: Untagged
@@ -291,7 +357,7 @@ Rigidbody:
   m_GameObject: {fileID: 4141190779602590162}
   serializedVersion: 5
   m_Mass: 1.5
-  m_LinearDamping: 0.1
+  m_LinearDamping: 0
   m_AngularDamping: 0.5
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -308,7 +374,7 @@ Rigidbody:
   m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 1
+  m_CollisionDetection: 0
 --- !u!65 &4721368409684159294
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -330,7 +396,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.4, y: 0.8, z: 0.4}
   m_Center: {x: 0, y: -0.2, z: 0}
---- !u!153 &7066166793197480060
+--- !u!153 &8110452706050492083
 ConfigurableJoint:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -348,9 +414,9 @@ ConfigurableJoint:
   m_XMotion: 0
   m_YMotion: 0
   m_ZMotion: 0
-  m_AngularXMotion: 0
-  m_AngularYMotion: 2
-  m_AngularZMotion: 2
+  m_AngularXMotion: 1
+  m_AngularYMotion: 1
+  m_AngularZMotion: 1
   m_LinearLimitSpring:
     spring: 0
     damper: 0
@@ -362,11 +428,11 @@ ConfigurableJoint:
     spring: 0
     damper: 0
   m_LowAngularXLimit:
-    limit: -177
+    limit: 0
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 0
+    limit: 177
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
@@ -377,7 +443,7 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 177
+    limit: 45
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -469,6 +535,7 @@ Transform:
   - {fileID: 6327533637506297728}
   - {fileID: 6389088593756549642}
   - {fileID: 4894884321513673382}
+  - {fileID: 3495166056585454315}
   m_Father: {fileID: 5295162767847564109}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &397994070034975524
@@ -480,7 +547,7 @@ Rigidbody:
   m_GameObject: {fileID: 5920700619113620694}
   serializedVersion: 5
   m_Mass: 2
-  m_LinearDamping: 0.1
+  m_LinearDamping: 0
   m_AngularDamping: 0.5
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -497,7 +564,7 @@ Rigidbody:
   m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 1
+  m_CollisionDetection: 0
 --- !u!65 &3580056539011561713
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -540,6 +607,9 @@ GameObject:
   - component: {fileID: -2564316294712072356}
   - component: {fileID: 5061967107407087969}
   - component: {fileID: 3698780341714318101}
+  - component: {fileID: 152607269323249147}
+  - component: {fileID: 3042991768119852323}
+  - component: {fileID: -1234592264942504701}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -563,6 +633,7 @@ Transform:
   - {fileID: 5295162767847564109}
   - {fileID: 6728300626546613372}
   - {fileID: 6062938417285825333}
+  - {fileID: 643955105398045}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!136 &5569519737715321138
@@ -614,7 +685,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 1
   m_Constraints: 112
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!95 &8864293117257458568
 Animator:
   serializedVersion: 7
@@ -694,7 +765,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -752,9 +823,9 @@ MonoBehaviour:
   firstPersonFollowTarget: {fileID: 6728300626546613372}
   lookSpeed: 0.2
   invertY: 1
-  zoomSpeed: 100
+  zoomSpeed: 120
   minZoom: 1
-  maxZoom: 15
+  maxZoom: 20
   enableFirstPerson: 1
   firstPersonThreshold: 1
   playerRenderers:
@@ -816,7 +887,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Player::Player.CMFPlayerAdapter
   _movementSpeed: 10
   _airControlRate: 5
-  _jumpSpeed: 20.5
+  _jumpSpeed: 25
   _coyoteTimeDuration: 0.1
   _jumpDuration: 0.1
   _airFriction: 20
@@ -824,7 +895,7 @@ MonoBehaviour:
   _slipperyPhysicsMaterial: {fileID: 13400000, guid: 624cc8f3fbd14344a90b69d2df285867, type: 2}
   _slipperyFriction: 0.6
   _iceControlRate: 20
-  _gravity: 50
+  _gravity: 60
   _slideGravity: 5
   _slopeLimit: 80
   _useLocalMomentum: 0
@@ -837,7 +908,7 @@ MonoBehaviour:
   _climbCapsuleCenterY: 1
   _climbDetectionDistance: 0.2
   _climbDetectionRadius: 0.24
-  _rotationSmoothTime: 0.1
+  _rotationSmoothTime: 0.15
 --- !u!114 &-3142878197026154125
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -877,12 +948,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a975e513c507b54fb1671b45d27c367, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Player::Player.PlayerHealth
-  _maxHealth: 100
+  _maxHealth: 250
   _statusDamagePerTick: 5
   _statusEffectDOTInterval: 1
   _contactDamageImmunityDuration: 1
   _deathSfx: {fileID: 8300000, guid: d670819ed5673144ba4dcfc2141f9d7f, type: 3}
   _takeDamageSfx: {fileID: 8300000, guid: 474a28eaba5ccb84ea6552efc1ac28a5, type: 3}
+  _burningDamageSfx: {fileID: 8300000, guid: e08fc97ad510a8d42b2706ed88581571, type: 3}
+  _electrifiedDamageSfx: {fileID: 8300000, guid: 9e491f57f9e81e947a6e138d775f4b6d, type: 3}
+  _poisonDamageSfx: {fileID: 8300000, guid: 49026c33cef60cb43a2648bd833395dc, type: 3}
 --- !u!114 &3698780341714318101
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -896,13 +970,64 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Player::Player.RagdollController
   _ragdollRoot: {fileID: 7678030116290802555}
+  _damageHurtbox: {fileID: 4471498031588053520}
   _ragdollFollowTarget: {fileID: 6415730543822700039}
-  _recoveryDelay: 3
+  _recoveryDelay: 2
   _ragdollForceThreshold: 500
   _enableRagdollOnHit: 0
   _deathBouncyMaterial: {fileID: 13400000, guid: 5f51d366b04c8254ab90a390a653d1cf, type: 2}
   _ragdollMoveSpeed: 100
-  _extraGravityForce: 10
+  _extraGravityForce: 30
+--- !u!114 &152607269323249147
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5972301456437702894}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d32f934f0591ee540bdaf682b8cb2d48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Core::MaterialEffectController
+  _applyMaterialOverrides: 0
+  _customBaseColor: {r: 0.7132075, g: 0.09554289, b: 0.09554289, a: 1}
+  _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
+  _customAlpha: 1
+  _customEmissionIntensity: 0
+  _statusEffectProfiles: []
+--- !u!114 &3042991768119852323
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5972301456437702894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d816462ba660fe41903318b3c3b94fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Core::Core.StatusEffectReceiver
+  _slipperyMaterial: {fileID: 0}
+  _contactDamagePerTick: 5
+  _playerFrozenDuration: 3
+  _frozenBlockVisual: {fileID: 7176821858139646439}
+  _unfreezeSfx: {fileID: 8300000, guid: 230609aefc295334d9267cb8f6af2df3, type: 3}
+  _gameplayEffectProfiles: []
+  _initialEffect: 0
+--- !u!114 &-1234592264942504701
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5972301456437702894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e681d99b2fee17b4daf9571511da31a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Player::PlayerBGMController
+  _bgmDatabase: {fileID: 11400000, guid: 5ad4e4a513883e84b916198f2ff20e53, type: 2}
 --- !u!1 &6134688723021336778
 GameObject:
   m_ObjectHideFlags: 0
@@ -914,7 +1039,7 @@ GameObject:
   - component: {fileID: 4894884321513673382}
   - component: {fileID: 2557787841061865721}
   - component: {fileID: 7273986764333321687}
-  - component: {fileID: 6067941643044477876}
+  - component: {fileID: 4029299382142120288}
   m_Layer: 6
   m_Name: PivotR_Leg
   m_TagString: Untagged
@@ -947,7 +1072,7 @@ Rigidbody:
   m_GameObject: {fileID: 6134688723021336778}
   serializedVersion: 5
   m_Mass: 1.7
-  m_LinearDamping: 0.1
+  m_LinearDamping: 0
   m_AngularDamping: 0.5
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -964,7 +1089,7 @@ Rigidbody:
   m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 1
+  m_CollisionDetection: 0
 --- !u!65 &7273986764333321687
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -986,7 +1111,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.4, y: 0.8, z: 0.4}
   m_Center: {x: 0, y: -0.4, z: 0}
---- !u!153 &6067941643044477876
+--- !u!153 &4029299382142120288
 ConfigurableJoint:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -997,16 +1122,16 @@ ConfigurableJoint:
   m_ConnectedBody: {fileID: 397994070034975524}
   m_ConnectedArticulationBody: {fileID: 0}
   m_Anchor: {x: 0, y: 0, z: 0}
-  m_Axis: {x: 0, y: 1, z: 0}
+  m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
   m_ConnectedAnchor: {x: 0, y: 0, z: 0}
-  m_SecondaryAxis: {x: 1, y: 0, z: 0}
+  m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
   m_YMotion: 0
   m_ZMotion: 0
-  m_AngularXMotion: 0
-  m_AngularYMotion: 2
-  m_AngularZMotion: 2
+  m_AngularXMotion: 1
+  m_AngularYMotion: 1
+  m_AngularZMotion: 1
   m_LinearLimitSpring:
     spring: 0
     damper: 0
@@ -1018,22 +1143,22 @@ ConfigurableJoint:
     spring: 0
     damper: 0
   m_LowAngularXLimit:
-    limit: -114.35408
+    limit: -80
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: -60.331978
+    limit: 30
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
     spring: 0
     damper: 0
   m_AngularYLimit:
-    limit: 30.700468
+    limit: 15
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 44.879177
+    limit: 40
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -1130,8 +1255,8 @@ GameObject:
   - component: {fileID: 6062938417285825333}
   - component: {fileID: 4471498031588053520}
   - component: {fileID: 899841746580604249}
-  m_Layer: 0
-  m_Name: Hitbox
+  m_Layer: 6
+  m_Name: NormalHitbox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1185,6 +1310,137 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f939b6690c89a624ba0f12818e8291af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Player::PrimaryTarget
+--- !u!1 &7176821858139646439
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 643955105398045}
+  - component: {fileID: 5870004034834434377}
+  - component: {fileID: 4339211651159776911}
+  - component: {fileID: 5946242397181550636}
+  - component: {fileID: 2912524070032150304}
+  m_Layer: 14
+  m_Name: IceBlock
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &643955105398045
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7176821858139646439}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalScale: {x: 1.8, y: 2.5, z: 1.8}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9058404962083530424}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &5870004034834434377
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7176821858139646439}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &4339211651159776911
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7176821858139646439}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 9f13b4aedd2b1b8449dc5fa910b6f798, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!65 &5946242397181550636
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7176821858139646439}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2912524070032150304
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7176821858139646439}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d32f934f0591ee540bdaf682b8cb2d48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Core::MaterialEffectController
+  _applyMaterialOverrides: 1
+  _customBaseColor: {r: 0.4584905, g: 0.7226415, b: 1, a: 1}
+  _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
+  _customAlpha: 0.5
+  _customEmissionIntensity: 0
+  _statusEffectProfiles: []
 --- !u!1 &8017734655258161230
 GameObject:
   m_ObjectHideFlags: 0
@@ -1196,7 +1452,7 @@ GameObject:
   - component: {fileID: 6662133148822328906}
   - component: {fileID: 5380697098662761866}
   - component: {fileID: 3163882725026526090}
-  - component: {fileID: 690689487423623833}
+  - component: {fileID: 5121314430289865162}
   m_Layer: 6
   m_Name: PivotL_Arm
   m_TagString: Untagged
@@ -1229,7 +1485,7 @@ Rigidbody:
   m_GameObject: {fileID: 8017734655258161230}
   serializedVersion: 5
   m_Mass: 1.5
-  m_LinearDamping: 0.1
+  m_LinearDamping: 0
   m_AngularDamping: 0.5
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -1246,7 +1502,7 @@ Rigidbody:
   m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 1
+  m_CollisionDetection: 0
 --- !u!65 &3163882725026526090
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1268,7 +1524,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.4, y: 0.8, z: 0.4}
   m_Center: {x: 0, y: -0.2, z: 0}
---- !u!153 &690689487423623833
+--- !u!153 &5121314430289865162
 ConfigurableJoint:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1286,9 +1542,9 @@ ConfigurableJoint:
   m_XMotion: 0
   m_YMotion: 0
   m_ZMotion: 0
-  m_AngularXMotion: 0
-  m_AngularYMotion: 2
-  m_AngularZMotion: 2
+  m_AngularXMotion: 1
+  m_AngularYMotion: 1
+  m_AngularZMotion: 1
   m_LinearLimitSpring:
     spring: 0
     damper: 0
@@ -1315,7 +1571,7 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 90
+    limit: 45
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -1413,7 +1669,7 @@ GameObject:
   - component: {fileID: 6415730543822700039}
   - component: {fileID: 8340573526381223733}
   - component: {fileID: 2083773553878315501}
-  - component: {fileID: 6430292278469765085}
+  - component: {fileID: 1367200637771186875}
   m_Layer: 6
   m_Name: PivotHead
   m_TagString: Untagged
@@ -1448,7 +1704,7 @@ Rigidbody:
   m_GameObject: {fileID: 9013983825752565263}
   serializedVersion: 5
   m_Mass: 1
-  m_LinearDamping: 0.1
+  m_LinearDamping: 0
   m_AngularDamping: 0.5
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -1465,7 +1721,7 @@ Rigidbody:
   m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 1
+  m_CollisionDetection: 0
 --- !u!65 &2083773553878315501
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1487,7 +1743,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.45, y: 0.44, z: 0.45}
   m_Center: {x: 0, y: 0.22, z: 0}
---- !u!153 &6430292278469765085
+--- !u!153 &1367200637771186875
 ConfigurableJoint:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1498,10 +1754,10 @@ ConfigurableJoint:
   m_ConnectedBody: {fileID: 397994070034975524}
   m_ConnectedArticulationBody: {fileID: 0}
   m_Anchor: {x: 0, y: 0, z: 0}
-  m_Axis: {x: 0, y: 1, z: 0}
+  m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
   m_ConnectedAnchor: {x: 0, y: 0, z: 0}
-  m_SecondaryAxis: {x: 1, y: 0, z: 0}
+  m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
   m_YMotion: 0
   m_ZMotion: 0
@@ -1519,22 +1775,22 @@ ConfigurableJoint:
     spring: 0
     damper: 0
   m_LowAngularXLimit:
-    limit: -90
+    limit: -85
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 90
+    limit: 85
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
     spring: 0
     damper: 0
   m_AngularYLimit:
-    limit: 3
+    limit: 80
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 20
+    limit: 80
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}

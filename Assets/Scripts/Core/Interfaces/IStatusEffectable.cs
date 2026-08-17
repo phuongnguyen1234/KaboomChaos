@@ -21,7 +21,8 @@ namespace Core.Interfaces
         Burning,
         Electrified,
         Frozen,
-        Obsidian,
+        Obsidian, // Hóa đá
+        Poison,   // Gây độc (cho các hiệu ứng AOE như mây độc)
     }
 
     /// <summary>

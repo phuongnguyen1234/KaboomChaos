@@ -1,3 +1,5 @@
+using Core;
+
 namespace Core.Interfaces
 {
     /// <summary>
@@ -21,5 +23,10 @@ namespace Core.Interfaces
         /// Resets the bomb's internal state so it can be reused by an object pool.
         /// </summary>
         void ResetState();
+
+        /// <summary>
+        /// Gets the ScriptableObject data defining this bomb.
+        /// </summary>
+        IBaseBombData BombData { get; }
     }
 }

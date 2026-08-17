@@ -1,5 +1,7 @@
 using UnityEngine;
 using Core.Interfaces;
+using Core;
+using Core.Miscellaneous;
 
 namespace Player
 {
@@ -19,8 +21,14 @@ namespace Player
         private float _rotationVelocity;
 
         private CameraController _cameraController;
+        private PlayerBGMController _bgmController;
+        private Vector3 _lastActualVelocity; // Vận tốc thực tế từ frame vật lý trước
+        private Vector3 _groundAngularVelocity; // Vận tốc góc của mặt đất
 
         private bool _justLanded; // Cờ báo cho sự kiện tiếp đất
+        private bool _isFrozen = false; // Cờ để theo dõi trạng thái đóng băng
+
+        public bool IsFrozen => _isFrozen;
 
         #endregion
 
@@ -63,8 +71,8 @@ namespace Player
                 // 1. Nhân vật không chạy animation khi bị kẹt vào tường (world velocity ~ 0).
                 // 2. Nhân vật không chạy animation khi đứng yên trên một platform di động (relative velocity ~ 0).
 
-                // Vận tốc của player trong world space.
-                Vector3 playerWorldVelocity = mover.GetVelocity();
+                // SỬA LỖI: Sử dụng vận tốc thực tế từ đầu frame vật lý để animation khớp với chuyển động thực tế.
+                Vector3 playerWorldVelocity = _lastActualVelocity;
 
                 // Vận tốc của mặt đất trong world space (được tính trong AdvancedWalkerController).
                 Vector3 groundWorldVelocity = groundMomentum;
@@ -121,7 +129,59 @@ namespace Player
                 transform.position = position;
             }
         }
+
+        /// <summary>
+        /// Bật hoặc tắt khả năng di chuyển của người chơi.
+        /// </summary>
+        /// <param name="enabled">True để bật di chuyển, False để tắt.</param>
+        public void SetMovementEnabled(bool enabled)
+        {
+            // Nếu người chơi bị đóng băng, không cho phép bật di chuyển.
+            if (_isFrozen && enabled)
+            {
+                return;
+            }
+            this.enabled = enabled;
+        }
         #endregion
+
+        #region BGM Control (IPlayer Implementation)
+
+        /// <summary>
+        /// Yêu cầu BGM controller của người chơi này phát nhạc sảnh chờ.
+        /// </summary>
+        public void PlayLobbyMusic()
+        {
+            _bgmController?.PlayLobbyMusic();
+        }
+
+        /// <summary>
+        /// Yêu cầu BGM controller của người chơi này bắt đầu playlist nhạc gameplay.
+        /// </summary>
+        public void PlayGameplayMusic(float intensity)
+        {
+            // Tên phương thức trong PlayerBGMController là StartGameplayMusicPlaylist
+            _bgmController?.PlayGameplayMusic(intensity);
+        }
+
+        /// <summary>
+        /// Yêu cầu BGM controller của người chơi này phát nhạc 30 giây cuối.
+        /// </summary>
+        public void PlayLast30sMusic(float intensity)
+        {
+            _bgmController?.PlayLast30sMusic(intensity);
+        }
+
+        /// <summary>
+        /// Yêu cầu BGM controller của người chơi này dừng mọi nhạc đang phát.
+        /// </summary>
+        public void StopMusic()
+        {
+            _bgmController?.StopMusic();
+        }
+
+        #endregion
+
 
         #region Public API
 
@@ -152,6 +212,12 @@ namespace Player
             
             // Lấy component Collider chính của player để dùng cho các phép tính vật lý
             _mainCollider = GetComponent<Collider>();
+
+            // Lấy BGM controller
+            _bgmController = GetComponent<PlayerBGMController>();
+            if (_bgmController == null) {
+                Debug.LogWarning("PlayerBGMController component not found on player prefab!", this);
+            }
         }
 
         /// <summary>
@@ -160,17 +226,32 @@ namespace Player
         /// mỗi khi nó được kích hoạt lại (ví dụ: sau khi đứng dậy từ ragdoll).
         /// Điều này ngăn chặn các trạng thái cũ (như 'Climbing') gây ra lỗi.
         /// </summary>
-        protected virtual void OnEnable()
+        protected void OnEnable()
         {
             // ĐỒNG BỘ HÓA VẬT LÝ:
             // Khi đứng dậy từ ragdoll, RagdollController đã di chuyển transform đến vị trí mới.
             // Tuy nhiên, Rigidbody có thể vẫn "nhớ" vị trí vật lý cũ của nó trước khi bị kinematic.
             // Dòng code này buộc Rigidbody phải cập nhật trạng thái vật lý của nó theo vị trí và góc xoay
             // hiện tại của transform, ngăn chặn việc bị teleport về vị trí cũ.
-            mover.GetComponent<Rigidbody>().position = transform.position;
+            if (mover != null) mover.GetComponent<Rigidbody>().position = transform.position;
+            
+            // Đăng ký lắng nghe sự kiện hiệu ứng trạng thái
+            GameEvents.OnPlayerStatusEffectApplied += HandleStatusEffectApplied;
+            GameEvents.OnPlayerStatusEffectReverted += HandleStatusEffectReverted;
+
+            // Đảm bảo trạng thái đóng băng được reset khi bật lại.
+            // Điều này quan trọng nếu player bị đóng băng và sau đó bị vô hiệu hóa/kích hoạt lại.
+            _isFrozen = false;
 
             ResetStateToFalling();
             SetMomentum(Vector3.zero);
+
+        }
+
+        protected void OnDisable()
+        {
+            GameEvents.OnPlayerStatusEffectApplied -= HandleStatusEffectApplied;
+            GameEvents.OnPlayerStatusEffectReverted -= HandleStatusEffectReverted;
         }
 
         /// <summary>
@@ -219,6 +300,24 @@ namespace Player
         /// </summary>
         protected override void FixedUpdate()
         {
+            // LƯU Ý QUAN TRỌNG VỀ THỨ TỰ THỰC THI:
+            // Lấy vận tốc của Rigidbody ở ĐẦU FixedUpdate. Đây là vận tốc cuối cùng sau khi vật lý được tính ở frame trước.
+            if (mover != null)
+            {
+                _lastActualVelocity = mover.GetVelocity();
+            }
+
+            // Lấy vận tốc góc của mặt đất để xử lý các platform xoay.
+            _groundAngularVelocity = Vector3.zero;
+            if (base.IsGrounded())
+            {
+                Collider groundCollider = mover.GetGroundCollider();
+                if (groundCollider != null && groundCollider.attachedRigidbody != null)
+                {
+                    _groundAngularVelocity = groundCollider.attachedRigidbody.angularVelocity;
+                }
+            }
+            
             ClimbingUpdate(); // Gọi logic cập nhật của phần leo trèo.
             base.FixedUpdate(); // Rất quan trọng! Gọi hàm của lớp cha để xử lý di chuyển.
             HandleCharacterRotation();
@@ -231,6 +330,12 @@ namespace Player
         /// </summary>
         private void HandleCharacterRotation()
         {
+            // Nếu người chơi đang bị đóng băng, không cho phép xoay.
+            if (_isFrozen)
+            {
+                return;
+            }
+
             if (_cameraController == null) return;
 
             bool isShiftLocked = _cameraController.IsShiftLock;
@@ -245,27 +350,185 @@ namespace Player
             }
             else
             {
-                // Khi đang leo và không bật Shift Lock, không xoay nhân vật theo hướng di chuyển.
                 if (currentControllerState == ControllerState.Climbing)
                 {
                     return;
                 }
 
-                // Ở góc nhìn thứ 3 (không Shift Lock), xoay nhân vật mượt mà theo hướng di chuyển.
-                Vector3 horizontalVelocity = GetMovementVelocity();
-                horizontalVelocity.y = 0;
-                
-                // CẢI TIẾN: Chỉ xoay khi có input di chuyển VÀ nhân vật đang thực sự di chuyển.
-                // horizontalVelocity.magnitude > 0.1f: Người chơi có đang nhấn nút di chuyển không?
-                // HorizontalSpeed > 0.1f: Nhân vật có đang di chuyển thực tế không (không bị kẹt)?
-                // Điều này ngăn nhân vật xoay tại chỗ khi bị kẹt vào tường.
-                if (horizontalVelocity.magnitude < 0.1f || HorizontalSpeed < 0.1f) return;
+                // CẢI TIẾN: Tách biệt logic xoay khi có input và khi đứng yên trên platform động.
+                bool hasMovementInput = GetMovementDirection().sqrMagnitude > 0.01f;
 
-                // Tính toán góc xoay dựa trên hướng di chuyển mong muốn (từ input)
-                float targetAngle = Mathf.Atan2(horizontalVelocity.x, horizontalVelocity.z) * Mathf.Rad2Deg;
-                float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref _rotationVelocity, _rotationSmoothTime);
-                
-                transform.rotation = Quaternion.Euler(0f, angle, 0f);
+                if (hasMovementInput)
+                {
+                    Vector3 lookDirection;
+
+                    // Khi ở trên không, xoay theo hướng input để có cảm giác điều khiển linh hoạt.
+                    if (!IsGrounded())
+                    {
+                        lookDirection = GetMovementDirection();
+                    }
+                    // Khi ở trên mặt đất, xoay theo hướng di chuyển thực tế để xử lý trượt tường.
+                    else
+                    {
+                        lookDirection = _lastActualVelocity;
+                        lookDirection.y = 0;
+                    }
+
+                    // Chỉ xoay khi có hướng nhìn hợp lệ.
+                    if (lookDirection.sqrMagnitude > 0.01f)
+                    {
+                        float targetAngle = Mathf.Atan2(lookDirection.x, lookDirection.z) * Mathf.Rad2Deg;
+                        float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref _rotationVelocity, _rotationSmoothTime);
+                        transform.rotation = Quaternion.Euler(0f, angle, 0f);
+                    }
+                }
+                else
+                {
+                    // KHI KHÔNG CÓ INPUT: Xoay theo platform nếu nó đang quay.
+                    // Điều này giải quyết vấn đề đứng trên đĩa xoay mà không quay mặt theo.
+                    if (IsGrounded() && _groundAngularVelocity.sqrMagnitude > 0.01f)
+                    {
+                        // CHỈ XOAY TRỤC Y: Chỉ lấy thành phần xoay quanh trục Y của platform
+                        // để đảm bảo người chơi luôn đứng thẳng và không bị nghiêng theo platform.
+                        Vector3 yawRotation = new(0, _groundAngularVelocity.y, 0);
+                        Quaternion rotationDelta = Quaternion.Euler(Mathf.Rad2Deg * Time.fixedDeltaTime * yawRotation);
+                        transform.rotation = rotationDelta * transform.rotation;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Xử lý khi một hiệu ứng trạng thái được áp dụng lên người chơi.
+        /// </summary>
+        private void HandleStatusEffectApplied(IPlayer player, StatusEffectType effect)
+        {
+            // Chỉ phản hồi nếu sự kiện này dành cho chính người chơi này.
+            if (player.GameObject != gameObject) return;
+
+            if (effect == StatusEffectType.Frozen)
+            {
+                _isFrozen = true;
+            }
+        }
+
+        /// <summary>
+        /// Xử lý khi một hiệu ứng trạng thái trên người chơi được hoàn tác.
+        /// </summary>
+        private void HandleStatusEffectReverted(IPlayer player, StatusEffectType effect)
+        {
+            // Chỉ phản hồi nếu sự kiện này dành cho chính người chơi này.
+            if (player.GameObject != gameObject) return;
+
+            if (effect == StatusEffectType.Frozen)
+            {
+                _isFrozen = false;
+            }
+        }
+
+        /// <summary>
+        /// Ghi đè để thêm logic di chuyển khi đang leo.
+        /// </summary>
+        protected override void HandleMomentum()
+        {
+            if (currentControllerState == ControllerState.Climbing)
+            {
+                // Xóa hết vận tốc hiện tại để không bị trượt/rơi
+                momentum = Vector3.zero;
+
+                // Lấy hướng di chuyển của người chơi
+                Vector3 moveDirection = CalculateMovementDirection();
+
+                _climbingDirection = 0f;
+
+                // Chỉ tính toán hướng leo khi có input di chuyển
+                if (moveDirection.magnitude > 0.1f)
+                {
+                    // --- LOGIC TỔNG QUÁT HÓA ---
+                    // Logic này hoạt động cho mọi góc camera.
+                    // Định nghĩa "leo xuống" là bất kỳ di chuyển nào có ý định rõ ràng là "hướng ra khỏi tường".
+                    // Mọi di chuyển khác (vào tường, song song tường) đều được hiểu là "leo lên".
+
+                    // Tính toán thành phần "hướng ra khỏi tường" của vector di chuyển.
+                    float awayComponent = Vector3.Dot(moveDirection.normalized, _climbableSurfaceNormal);
+
+                    // Ngưỡng để xác định ý định "leo xuống".
+                    // Giá trị 0.5f tương ứng với việc người chơi phải di chuyển trong một góc 60 độ so với hướng ra khỏi tường.
+                    const float climbDownThreshold = 0.5f;
+
+                    if (awayComponent > climbDownThreshold)
+                    {
+                        _climbingDirection = -1f; // Leo xuống
+                    }
+                    else
+                    {
+                        _climbingDirection = 1f; // Leo lên
+                    }
+                }
+
+                // Tạo vận tốc leo trên mặt phẳng tường
+                Vector3 climbVelocity = Vector3.ProjectOnPlane(tr.up, _climbableSurfaceNormal).normalized * _climbingDirection;
+
+                // Áp dụng vận tốc leo
+                momentum = climbVelocity * _climbSpeed;
+            }
+            else
+            {
+                // LOGIC BĂNG CHUYỀN (CONVEYOR BELT):
+                // Ghi đè groundMomentum nếu đang đứng trên băng chuyền.
+                // Phải thực hiện trước khi gọi base.HandleMomentum() để nó sử dụng giá trị mới.
+                if (currentControllerState == ControllerState.Grounded)
+                {
+                    if (mover.GetGroundCollider() != null && mover.GetGroundCollider().TryGetComponent<ConveyorBelt>(out var belt))
+                    {
+                        // Ghi đè groundMomentum với vận tốc của băng chuyền.
+                        // Bộ điều khiển gốc (AdvancedWalkerController) sẽ sử dụng giá trị này trong base.HandleMomentum()
+                        // để áp dụng ma sát và di chuyển người chơi một cách chính xác.
+                        groundMomentum = belt.WorldVelocity;
+                    }
+                }
+
+                // Nếu không leo, sử dụng logic của lớp cha
+                base.HandleMomentum();
+
+                 // --- LOGIC CHỐNG DÍNH TƯỜNG (WALL STICK PREVENTION) ---
+                // Khi người chơi nhảy vào tường và giữ input di chuyển, họ có thể bị "dính" lại do ma sát.
+                // Logic này sẽ loại bỏ phần vận tốc hướng vào tường khi người chơi ở trên không,
+                // cho phép họ trượt dọc theo tường một cách tự nhiên.
+
+                // Chỉ áp dụng khi ở trên không.
+                if (!IsGrounded)
+                {
+                    Vector3 horizontalMomentum = momentum;
+                    horizontalMomentum.y = 0;
+
+                    // Chỉ kiểm tra khi có vận tốc ngang (người chơi đang cố di chuyển trên không).
+                    if (horizontalMomentum.magnitude > 0.01f)
+                    {
+                        var capsule = _mainCollider as CapsuleCollider; // Lấy capsule collider chính.
+                        if (capsule != null) // Đảm bảo có collider để lấy thông số.
+                        {
+                            // CẢI TIẾN: Sử dụng SphereCast thay vì Raycast.
+                            // Raycast quá chính xác và có thể "trượt" ở các góc nhọn, gây ra lỗi ma sát mà bạn gặp phải.
+                            // SphereCast có thể tích, đại diện cho chiều rộng của người chơi tốt hơn, giúp phát hiện va chạm đáng tin cậy ở mọi góc độ.
+                            float castRadius = capsule.radius * 0.9f; // Dùng bán kính nhỏ hơn một chút để tránh dương tính giả với mặt đất.
+                            float castDistance = 0.2f; // Một khoảng cách ngắn là đủ để phát hiện tường đang tiếp xúc.
+                            Vector3 castOrigin = transform.position + capsule.center;
+
+                            // Bắn một SphereCast theo hướng di chuyển ngang.
+                            if (Physics.SphereCast(castOrigin, castRadius, horizontalMomentum.normalized, out RaycastHit hit, castDistance, ~0, QueryTriggerInteraction.Ignore))
+                            {
+                                // Chỉ xử lý nếu va chạm với một bức tường (bề mặt gần như thẳng đứng).
+                                if (Mathf.Abs(hit.normal.y) < 0.707f) // Ngưỡng 45 độ.
+                                {
+                                    // Chiếu vận tốc ngang lên mặt phẳng của tường để loại bỏ lực đẩy vào tường.
+                                    Vector3 projectedHorizontal = Vector3.ProjectOnPlane(horizontalMomentum, hit.normal);
+                                    momentum = new Vector3(projectedHorizontal.x, momentum.y, projectedHorizontal.z);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

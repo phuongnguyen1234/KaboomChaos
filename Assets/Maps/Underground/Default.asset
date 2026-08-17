@@ -22,7 +22,14 @@ MonoBehaviour:
     scatterInitialEffect: 0
     initialEffect: 0
   - blockPrefab: {fileID: 2106488410961741141, guid: d21bdea397d750c409bca03cfa86431a, type: 3}
-    height: 2
+    height: 1
+    enableScattering: 0
+    scatterPrefab: {fileID: 0}
+    scatterPercentage: 0
+    scatterInitialEffect: 0
+    initialEffect: 0
+  - blockPrefab: {fileID: 2106488410961741141, guid: 0d0cb2358a5a12e41b8919f605252346, type: 3}
+    height: 1
     enableScattering: 0
     scatterPrefab: {fileID: 0}
     scatterPercentage: 0
@@ -30,16 +37,23 @@ MonoBehaviour:
     initialEffect: 0
   - blockPrefab: {fileID: 7768746031248934290, guid: c8bcc1f6242299d46a60e65a9c499d18, type: 3}
     height: 1
-    enableScattering: 1
-    scatterPrefab: {fileID: 2106488410961741141, guid: d21bdea397d750c409bca03cfa86431a, type: 3}
-    scatterPercentage: 10
+    enableScattering: 0
+    scatterPrefab: {fileID: 0}
+    scatterPercentage: 0
     scatterInitialEffect: 0
     initialEffect: 0
-  - blockPrefab: {fileID: 7768746031248934290, guid: c8bcc1f6242299d46a60e65a9c499d18, type: 3}
-    height: 2
+  - blockPrefab: {fileID: 7768746031248934290, guid: 20e058d1a9dc4e24dbcf34f118fd2c2d, type: 3}
+    height: 1
     enableScattering: 1
-    scatterPrefab: {fileID: 7756762216282166330, guid: c227bba10c1c0674db3dd32421b6f0c0, type: 3}
-    scatterPercentage: 10
+    scatterPrefab: {fileID: 7768746031248934290, guid: 20e058d1a9dc4e24dbcf34f118fd2c2d, type: 3}
+    scatterPercentage: 20
+    scatterInitialEffect: 4
+    initialEffect: 0
+  - blockPrefab: {fileID: 7768746031248934290, guid: 20e058d1a9dc4e24dbcf34f118fd2c2d, type: 3}
+    height: 1
+    enableScattering: 1
+    scatterPrefab: {fileID: 7768746031248934290, guid: 20e058d1a9dc4e24dbcf34f118fd2c2d, type: 3}
+    scatterPercentage: 40
     scatterInitialEffect: 4
     initialEffect: 0
   randomSeed: 0

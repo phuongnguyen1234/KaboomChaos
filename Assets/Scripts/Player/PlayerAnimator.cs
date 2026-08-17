@@ -1,10 +1,12 @@
 using UnityEngine;
 using Core.Interfaces;
+using Core;
 
 namespace Player
 {
     /// <summary>
     /// Điều khiển các tham số của Animator dựa trên trạng thái của người chơi.
+    /// Đồng thời lắng nghe các sự kiện game để phản ứng với các thay đổi trạng thái (ví dụ: đóng băng).
     /// Lớp này hoạt động như một cầu nối giữa IPlayer và Animator Controller.
     /// </summary>
     [RequireComponent(typeof(Animator))]
@@ -40,12 +42,28 @@ namespace Player
             }
         }
 
+        private void OnEnable()
+        {
+            // Đăng ký lắng nghe sự kiện hiệu ứng trạng thái
+            GameEvents.OnPlayerStatusEffectApplied += HandleStatusEffectApplied;
+            GameEvents.OnPlayerStatusEffectReverted += HandleStatusEffectReverted;
+        }
+
+        private void OnDisable()
+        {
+            // Hủy đăng ký để tránh lỗi
+            GameEvents.OnPlayerStatusEffectApplied -= HandleStatusEffectApplied;
+            GameEvents.OnPlayerStatusEffectReverted -= HandleStatusEffectReverted;
+        }
+
         private void Update()
         {
             if (_player == null) return;
 
             // Cập nhật các tham số cơ bản
-            UpdateMovementParameters();
+            // Chỉ cập nhật nếu animator đang hoạt động (không bị đóng băng)
+            if (_animator != null && _animator.speed > 0)
+                UpdateMovementParameters();
         }
 
         #endregion
@@ -60,6 +78,16 @@ namespace Player
         public void TriggerReset()
         {
             if (_animator != null) _animator.SetTrigger(ResetTriggerHash);
+        }
+
+        /// <summary>
+        /// Đặt tốc độ của Animator.
+        /// Hữu ích để đóng băng hoặc làm chậm animation.
+        /// </summary>
+        /// <param name="speed">Tốc độ mới (1.0 là bình thường, 0.0 là đóng băng).</param>
+        public void SetAnimationSpeed(float speed)
+        {
+            if (_animator != null) _animator.speed = speed;
         }
 
         #endregion
@@ -88,6 +116,33 @@ namespace Player
             _animator.SetFloat(ClimbingSpeedHash, _player.ClimbingSpeed);
         }
 
+        #endregion
+
+        #region Event Handlers
+
+        /// <summary>
+        /// Xử lý khi một hiệu ứng trạng thái được áp dụng lên người chơi.
+        /// </summary>
+        private void HandleStatusEffectApplied(IPlayer player, StatusEffectType effect)
+        {
+            // Chỉ phản hồi nếu sự kiện này dành cho chính người chơi này.
+            if (player != _player) return;
+
+            if (effect == StatusEffectType.Frozen)
+                SetAnimationSpeed(0f);
+        }
+
+        /// <summary>
+        /// Xử lý khi một hiệu ứng trạng thái trên người chơi được hoàn tác.
+        /// </summary>
+        private void HandleStatusEffectReverted(IPlayer player, StatusEffectType effect)
+        {
+            // Chỉ phản hồi nếu sự kiện này dành cho chính người chơi này.
+            if (player != _player) return;
+
+            if (effect == StatusEffectType.Frozen)
+                SetAnimationSpeed(1f);
+        }
         #endregion
     }
 }

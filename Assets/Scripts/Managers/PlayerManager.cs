@@ -45,11 +45,13 @@ namespace Managers
             {
                 Instance = this;
                 DontDestroyOnLoad(gameObject);
-
-                // Lấy tham chiếu đến các manager khác.
-                // Giả định rằng các manager này cũng là Singleton và đã được khởi tạo trong Awake của chúng.
-                _spawnManager = SpawnManager.Instance;
             }
+        }
+
+        private void Start()
+        {
+            // Lấy tham chiếu trong Start() để đảm bảo các Singleton khác đã được khởi tạo trong Awake().
+            _spawnManager = SpawnManager.Instance;
         }
 
         private void OnEnable()
@@ -81,6 +83,15 @@ namespace Managers
             // Trả về một bản sao của danh sách để tránh sửa đổi từ bên ngoài
             return new List<IPlayer>(_activePlayers);
         }
+
+        /// <inheritdoc/>
+        public List<IPlayer> GetPlayersInRound()
+        {
+            // Trả về một bản sao của danh sách để tránh sửa đổi từ bên ngoài.
+            // Đây là danh sách những người chơi đang thực sự tham gia thi đấu.
+            return new List<IPlayer>(_playersInRound);
+        }
+
 
         public int GetAlivePlayerCount() => _playersInRound.Count;
 
@@ -142,6 +153,41 @@ namespace Managers
             // Đây là cách tiếp cận nhất quán với kiến trúc của dự án.
             GameEvents.TriggerRoundEndPlayerReset();
         }
+
+        /// <summary>
+        /// Bắt đầu phát nhạc gameplay cho tất cả người chơi đang trong round.
+        /// </summary>
+        /// <param name="intensity">Độ khó của round đấu.</param>
+        public void SetGameplayMusicForRoundPlayers(float intensity)
+        {
+            foreach (var player in _playersInRound)
+            {
+                player?.PlayGameplayMusic(intensity);
+            }
+        }
+
+        /// <summary>
+        /// Phát nhạc 30 giây cuối cho tất cả người chơi đang trong round.
+        /// </summary>
+        /// <param name="intensity">Độ khó của round đấu.</param>
+        public void SetLast30sMusicForRoundPlayers(float intensity)
+        {
+            foreach (var player in _playersInRound)
+            {
+                player?.PlayLast30sMusic(intensity);
+            }
+        }
+
+        /// <summary>
+        /// Phát nhạc lobby cho tất cả người chơi đang hoạt động.
+        /// </summary>
+        public void SetLobbyMusicForAllPlayers()
+        {
+            foreach (var player in _activePlayers)
+            {
+                player?.PlayLobbyMusic();
+            }
+        }
         #endregion
 
         #region Private Methods
@@ -168,6 +214,9 @@ namespace Managers
             {
                 _activePlayers.Add(newPlayer);
                 Debug.Log($"[PlayerManager] Player spawned and added to active list. Total players: {_activePlayers.Count}", newPlayer.GameObject);
+
+                // YÊU CẦU MỚI: Khi người chơi được sinh ra, họ sẽ ở sảnh chờ, vì vậy hãy bật nhạc lobby cho họ.
+                newPlayer.PlayLobbyMusic();
             }
         }
 
@@ -273,6 +322,18 @@ namespace Managers
         public IPlayer GetCurrentPlayer()
         {
             return _activePlayers.Count > 0 ? _activePlayers[0] : null;
+        }
+
+        /// <summary>
+        /// Lấy vị trí của một người chơi ngẫu nhiên đang hoạt động.
+        /// </summary>
+        /// <returns>Vị trí của người chơi ngẫu nhiên, hoặc Vector3.zero nếu không có người chơi nào.</returns>
+        public Vector3 GetRandomPlayerPosition()
+        {
+            if (_activePlayers.Count == 0) return Vector3.zero;
+
+            IPlayer randomPlayer = _activePlayers[Random.Range(0, _activePlayers.Count)];
+            return randomPlayer.GameObject.transform.position;
         }
 
         /// <summary>

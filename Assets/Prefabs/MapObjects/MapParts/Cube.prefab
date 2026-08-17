@@ -139,7 +139,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -201,9 +201,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Core::Core.StatusEffectReceiver
   _slipperyMaterial: {fileID: 13400000, guid: 624cc8f3fbd14344a90b69d2df285867, type: 2}
   _contactDamagePerTick: 5
+  _playerFrozenDuration: 8
+  _frozenBlockVisual: {fileID: 0}
+  _unfreezeSfx: {fileID: 0}
   _gameplayEffectProfiles:
   - effectType: 1
     effectVFX: {fileID: 8895673999334952703, guid: acd899fa10c1381488ca32e77204abae, type: 3}
   - effectType: 2
     effectVFX: {fileID: 8895673999334952703, guid: ce108e08b46b7fb4b82e6096589844de, type: 3}
+  - effectType: 3
+    effectVFX: {fileID: 8895673999334952703, guid: 0e26367141e02a8458731c16df0440a1, type: 3}
   _initialEffect: 0

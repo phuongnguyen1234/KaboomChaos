@@ -30,9 +30,8 @@ namespace Debugging
                 var player = FindAnyObjectByType<PlayerHealth>();
                 if (player != null && player.IsAlive)
                 {
-                    Debug.Log("Forcing player death for reset test...");
                     // Gây sát thương cực lớn để đảm bảo người chơi chết.
-                    player.TakeDamage(9999f);
+                    player.TakeDamage(player.CurrentHealth);
                 }
             }
         }

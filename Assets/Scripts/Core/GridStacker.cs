@@ -53,6 +53,13 @@ namespace Core
         [Tooltip("Tự động điều chỉnh BoxCollider của đối tượng này để bao trọn toàn bộ grid.")]
         [SerializeField] private bool _fitColliderToBounds = true;
 
+        [Header("Tùy chỉnh Màu Sắc Phần Tử")]
+        [Tooltip("Ghi đè màu cơ bản của tất cả các đơn vị trong grid. Yêu cầu các đơn vị phải có MaterialEffectController.")]
+        [SerializeField] private bool _overrideElementColor = false;
+
+        [Tooltip("Màu sẽ được áp dụng cho tất cả các đơn vị nếu 'Override Element Color' được bật.")]
+        [SerializeField, ColorUsage(true, true)] private Color _elementColor = Color.white;
+
         // --- Private Fields ---
         private BoxCollider _mainCollider;
         private GameObject _previousPrefab1;
@@ -295,6 +302,9 @@ namespace Core
 
                                 // Áp dụng material nếu được cấu hình
                                 ApplyMaterialOverride(unit);
+
+                                // Áp dụng màu tùy chỉnh nếu được cấu hình
+                                ApplyElementColorOverride(unit);
                             }
                             index++;
                         }
@@ -377,6 +387,40 @@ namespace Core
                 // nhưng việc revert material ở runtime ít phổ biến hơn và logic cũ không đáng tin cậy.
                 // Vì vậy, để trống ở đây là an toàn nhất.
     #endif
+            }
+        }
+
+        /// <summary>
+        /// Áp dụng hoặc hoàn tác việc ghi đè màu sắc trên một đơn vị.
+        /// </summary>
+        /// <param name="unit">Đối tượng đơn vị để áp dụng màu.</param>
+        private void ApplyElementColorOverride(GameObject unit)
+        {
+            if (unit == null) return;
+
+            var controller = unit.GetComponent<MaterialEffectController>();
+            if (controller == null) return;
+
+            if (_overrideElementColor)
+            {
+                // Gán màu tùy chỉnh. Yêu cầu MaterialEffectController có một public property để làm điều này.
+                controller.CustomBaseColor = _elementColor;
+            }
+            else
+            {
+#if UNITY_EDITOR
+                // Trong Editor, nếu tắt override, chúng ta hoàn tác lại giá trị của thuộc tính về giá trị gốc trên prefab.
+                // Điều này đảm bảo rằng nếu bạn bật override, thay đổi màu, rồi tắt override,
+                // màu sẽ quay trở lại giá trị mặc định của prefab.
+                var serializedObject = new SerializedObject(controller);
+                var property = serializedObject.FindProperty("_customBaseColor");
+                if (property != null)
+                {
+                    PrefabUtility.RevertPropertyOverride(property, InteractionMode.AutomatedAction);
+                }
+#endif
+                // Ở runtime, nếu _overrideElementColor là false, chúng ta không làm gì cả,
+                // giữ lại màu gốc của prefab khi nó được instantiate.
             }
         }
 

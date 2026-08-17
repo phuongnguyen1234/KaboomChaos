@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 8340667141495597888}
   - component: {fileID: 7030197644399947346}
   - component: {fileID: 1918747846164760695}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Lava
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -78420,6 +78420,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Core::Core.LavaController
   _damageAmount: 25
-  _damageInterval: 0.3
+  _damageInterval: 1
+  _damageableLayers:
+    serializedVersion: 2
+    m_Bits: 1216
   _effectToApply: 1
   _effectDurationOnExit: 10

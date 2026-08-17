@@ -46,7 +46,8 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
-    m_Floats: []
+    m_Floats:
+    - _Tiling: 0.125
     m_Colors:
     - _BaseColor: {r: 0.6901961, g: 1.9328303, b: 2, a: 1}
     - _Tint: {r: 0.64157355, g: 0.87597686, b: 0.94716984, a: 1}
