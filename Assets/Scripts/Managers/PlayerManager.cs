@@ -1,6 +1,8 @@
 using UnityEngine;
 using Core.Interfaces;
 using Core;
+using Core.Utilities;
+using Core.Interfaces.UI;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -32,6 +34,10 @@ namespace Managers
         
         // Danh sách những người chơi đang tham gia round đấu hiện tại.
         private readonly List<IPlayer> _playersInRound = new();
+
+        // Dữ liệu theo dõi từng người chơi xuyên suốt các round: win streak, thời điểm bắt đầu round, Extreme Mode.
+        // Key là IPlayer của người chơi ĐANG TỒN TẠI (chưa bị hồi sinh/phá hủy). Khi người chơi chết, entry sẽ được xóa.
+        private readonly Dictionary<IPlayer, PlayerRoundData> _playerData = new();
         #endregion
 
         #region Unity Lifecycle
@@ -58,12 +64,18 @@ namespace Managers
         {
             // Đăng ký lắng nghe sự kiện người chơi chết từ GameEvents
             GameEvents.OnPlayerDied += HandlePlayerDeath;
+            // Clear active players when returning to Home so "Play" does not spawn a duplicate.
+            GameEvents.OnReturnToHomeRequest += HandleReturnToHome;
+            // Handles the Roblox-style reset request (no player argument).
+            GameEvents.OnResetPlayerRequested += HandleResetPlayerRequested;
         }
 
         private void OnDisable()
         {
             // Hủy đăng ký để tránh rò rỉ bộ nhớ khi đối tượng bị hủy
             GameEvents.OnPlayerDied -= HandlePlayerDeath;
+            GameEvents.OnReturnToHomeRequest -= HandleReturnToHome;
+            GameEvents.OnResetPlayerRequested -= HandleResetPlayerRequested;
         }
         #endregion
 
@@ -102,11 +114,16 @@ namespace Managers
             {
                 if (player != null && player.GameObject != null)
                 {
+                    // TODO(AFK): Khi triển khai hệ thống AFK, hãy BỎ QUA những người chơi đang AFK
+                    // tại thời điểm này (không đưa vào _playersInRound), để:
+                    // 1. Họ không bị dịch chuyển vào arena.
+                    // 2. Độ khó (initialPlayerCountForRound trong GameloopManager) chỉ tính trên
+                    //    danh sách non-AFK tham gia ban đầu.
                     player.GameObject.SetActive(true); // Đảm bảo người chơi được kích hoạt
                     _playersInRound.Add(player);
                 }
             }
-            Debug.Log($"[PlayerManager] Started round with {_playersInRound.Count} players.");
+            Debug.Log($"[PlayerManager] Started round with {_playersInRound.Count} players.");            
         }
 
         /// <inheritdoc/>
@@ -133,6 +150,38 @@ namespace Managers
                 _playersInRound.Add(player);
             }
         }
+
+        /// <inheritdoc/>
+        public List<IPlayer> GetSurvivors()
+        {
+            List<IPlayer> survivors = new();
+            foreach (var player in _playersInRound)
+            {
+                // Người chơi vẫn còn GameObject active trong danh sách round được coi là còn sống sót.
+                if (player != null && player.GameObject != null)
+                {
+                    survivors.Add(player);
+                }
+            }
+            return survivors;
+        }
+
+        /// <inheritdoc/>
+        public PlayerRoundData GetPlayerRoundData(IPlayer player)
+        {
+            if (player == null) return null;
+
+            if (_playerData.TryGetValue(player, out var existingData))
+            {
+                return existingData;
+            }
+
+            // Tạo dữ liệu mới nếu chưa tồn tại (ví dụ: người chơi vừa được hồi sinh sau khi chết).
+            var newData = new PlayerRoundData();
+            _playerData[player] = newData;
+            return newData;
+        }
+
         public void EndRound()
         {
             _playersInRound.Clear();
@@ -215,8 +264,11 @@ namespace Managers
                 _activePlayers.Add(newPlayer);
                 Debug.Log($"[PlayerManager] Player spawned and added to active list. Total players: {_activePlayers.Count}", newPlayer.GameObject);
 
-                // YÊU CẦU MỚI: Khi người chơi được sinh ra, họ sẽ ở sảnh chờ, vì vậy hãy bật nhạc lobby cho họ.
-                newPlayer.PlayLobbyMusic();
+                // LƯU Ý: KHÔNG phát nhạc lobby tại đây nữa. Việc phát nhạc được điều phối tập trung:
+                // - Boot game / Home screen   -> BGMController.Start() phát HomeMusic.
+                // - Nhấn Play từ Home         -> BGMController xử lý qua GameEvents.OnStartGameRequest.
+                // - Chết trong round, hồi sinh về lobby -> UnifiedRespawnCoroutine (diedDuringRound = true).
+                // - Reset character ngay tại lobby -> không phát lại, giữ nguyên nhạc hiện tại.
             }
         }
 
@@ -229,9 +281,76 @@ namespace Managers
             if (player == null) return;
 
             // Nếu người chơi đang trong round, loại họ ra khỏi danh sách người chơi còn sống của round đó.
-            if (_playersInRound.Contains(player))
+            // Lưu lại cờ này để quyết định việc phát lại nhạc lobby sau khi hồi sinh:
+            // chỉ phát khi chết TRONG round; chết ngay tại lobby (Reset character) thì giữ nguyên nhạc hiện tại.
+            bool diedDuringRound = _playersInRound.Contains(player);
+            if (diedDuringRound)
             {
                 Debug.Log($"[PlayerManager] Player {player.GameObject.name} eliminated from the round.", player.GameObject);
+
+                // ===== SCORE CARD CÁ NHÂN CHO NGƯỜI THUA CUỘC =====
+                // Thời gian sống sót được tính theo ĐỒNG HỒ CỦA ROUND (CurrentRoundElapsedTime của GameloopManager),
+                // KHÔNG phải thời gian thực tế người chơi sống (Time.time - ...). Đúng theo yêu cầu:
+                // chỉ được tính score nếu đã sống sót trên 30 giây theo thời gian tính giờ của round.
+                var gameloop = GameloopManager.Instance;
+                bool isDuringActiveRound = gameloop != null && gameloop.CurrentState == GameState.RoundActive;
+                bool hasRoundRecord = _playerData.TryGetValue(player, out var roundData);
+
+                float roundIntensity = 1f;
+                float roundDuration = 150f;
+                float survivedRoundTime = 0f;
+                if (gameloop != null)
+                {
+                    roundIntensity = gameloop.CurrentIntensity;
+                    roundDuration = gameloop.CurrentRoundDuration;
+                    // Thời gian đã trôi qua theo đồng hồ của round tại thời điểm người chơi chết.
+                    survivedRoundTime = isDuringActiveRound ? gameloop.CurrentRoundElapsedTime : 0f;
+                }
+
+                // Survival Score: trả về 0 nếu chưa sống đủ 30 giây theo đồng hồ round (ScoreRules.md).
+                int survivalScore = ScoreCalculator.GetSurvivalScore(roundIntensity, survivedRoundTime, roundDuration);
+
+                // Multiplier: x1.0 mặc định, x1.25 nếu bật Extreme Mode.
+                float baseMultiplier = ScoreCalculator.GetMultiplier(hasRoundRecord && roundData.IsExtremeModeEnabled);
+
+                // Win Multiplier là x1.0 vì người chơi đã thua.
+                float winMultiplier = ScoreCalculator.DefaultMultiplier;
+
+                // Total Credits = Survival Score x Multiplier x Win Multiplier.
+                int totalCredits = ScoreCalculator.GetTotalCredits(survivalScore, baseMultiplier, winMultiplier);
+
+                // CHỈ trao credits và hiển thị Score Card CÁ NHÂN khi người chơi đạt điểm
+                // (tức là đã sống sót TRÊN 30 giây theo đồng hồ round -> survivalScore > 0).
+                // Nếu chết trước 30 giây: không được điểm và KHÔNG hiển thị Score Card.
+                if (isDuringActiveRound && survivalScore > 0)
+                {
+                    // B1. Đưa người chơi về Lobby TRƯỚC (teleport tới điểm spawn của sảnh chờ).
+                    // Yêu cầu: "player về lobby rồi mới hiện score card".
+                    RespawnPlayer(player);
+                    Debug.Log($"[PlayerManager] Player {player.GameObject.name} về Lobby (chết trong round).", player.GameObject);
+
+                    // B2. Trao credits và hiển thị Score Card dạng thua.
+                    GameEvents.TriggerAddCreditsRequest(totalCredits);
+
+                    ScoreCardData defeatScoreCard = new ScoreCardData
+                    {
+                        SurvivalScore = survivalScore,
+                        BaseMultiplier = baseMultiplier,
+                        WinMultiplier = winMultiplier,
+                        TotalCredits = totalCredits,
+                        IsWinner = false,
+                    };
+                    IUIManager.Instance?.ShowScoreCard(defeatScoreCard);
+                    Debug.Log($"[PlayerManager] Hiển thị Score Card cá nhân cho người thua {player.GameObject.name}: Survival {survivalScore}, Credits {totalCredits}.", player.GameObject);
+                }
+                else if (isDuringActiveRound)
+                {
+                    Debug.Log($"[PlayerManager] Player {player.GameObject.name} died before 30 seconds (round clock). Không đạt điểm, không hiển thị Score Card.", player.GameObject);
+                }
+
+                // Reset chuỗi thắng của người chơi về 0 (bằng cách xóa record; round sau sẽ tạo mới với WinStreak = 0).
+                _playerData.Remove(player);
+
                 _playersInRound.Remove(player);
                 // KHÔNG vô hiệu hóa GameObject ngay lập tức để hiệu ứng ragdoll có thể diễn ra.
             }
@@ -239,13 +358,19 @@ namespace Managers
             // Bất kể chết trong round hay ở lobby, bắt đầu cùng một quy trình hồi sinh.
             // Quy trình này sẽ cho phép ragdoll hiển thị, sau đó phá hủy và tạo lại người chơi.
             Debug.Log($"[PlayerManager] Player {player.GameObject.name} died. Starting universal respawn process...", player.GameObject);
-            StartCoroutine(UnifiedRespawnCoroutine(player, 3f)); // 3 giây là thời gian chờ hồi sinh
+            StartCoroutine(UnifiedRespawnCoroutine(player, 3f, diedDuringRound)); // 3 giây là thời gian chờ hồi sinh
         }
 
         /// <summary>
         /// Coroutine xử lý việc hồi sinh người chơi: phá hủy người chơi cũ, đợi, và tạo người chơi mới.
         /// </summary>
-        private IEnumerator UnifiedRespawnCoroutine(IPlayer playerToDestroy, float respawnDelay)
+        /// <param name="playerToDestroy">Người chơi cũ cần phá hủy.</param>
+        /// <param name="respawnDelay">Thời gian chờ trước khi hồi sinh.</param>
+        /// <param name="diedDuringRound">
+        /// True nếu người chơi chết TRONG round (được hồi sinh về lobby -> phát lại nhạc lobby).
+        /// False nếu chết ngay tại lobby (Reset character) -> giữ nguyên nhạc hiện tại.
+        /// </param>
+        private IEnumerator UnifiedRespawnCoroutine(IPlayer playerToDestroy, float respawnDelay, bool diedDuringRound)
         {
             // Xóa người chơi cũ khỏi danh sách quản lý chính.
             if (playerToDestroy != null)
@@ -265,6 +390,15 @@ namespace Managers
             // Hồi sinh một người chơi hoàn toàn mới ngay lập tức tại một điểm spawn ở lobby.
             Debug.Log("[PlayerManager] Respawning new player in lobby.");
             SpawnPlayer(); // SpawnPlayer sẽ tự tìm điểm spawn ngẫu nhiên.
+
+            // CHỈ phát lại nhạc sảnh chờ khi người chơi chết TRONG round và được hồi sinh về lobby.
+            // Nếu chết/reset ngay tại lobby thì giữ nguyên nhạc đang phát (thường là nhạc lobby),
+            // tránh việc nhạc bị phát lại từ đầu mỗi lần người chơi Reset character.
+            if (diedDuringRound)
+            {
+                BGMController.Instance?.PlayLobbyMusic();
+                Debug.Log("[PlayerManager] Player respawned into lobby after dying in round. Playing lobby music.");
+            }
         }
 
         /// <summary>
@@ -387,6 +521,30 @@ namespace Managers
             var playersToClear = new List<IPlayer>(_activePlayers);
             foreach (var player in playersToClear) Destroy(player.GameObject);
             _activePlayers.Clear();
+        }
+
+        /// <summary>
+        /// Handles the Roblox-style character reset request: the current player is told to die.
+        /// </summary>
+        private void HandleResetPlayerRequested()
+        {
+            var currentPlayer = GetCurrentPlayer();
+            if (currentPlayer == null)
+            {
+                Debug.LogWarning("[PlayerManager] No current player is available to reset.");
+                return;
+            }
+            GameEvents.TriggerPlayerResetRequested(currentPlayer);
+        }
+
+        /// <summary>
+        /// Called when the player returns to the Home screen (Back to Home).
+        /// Destroys all active players so pressing Play again does not spawn a duplicate.
+        /// </summary>
+        private void HandleReturnToHome()
+        {
+            Debug.Log("[PlayerManager] Return to Home requested. Clearing all active players.");
+            ClearAllPlayers();
         }
         #endregion
     }

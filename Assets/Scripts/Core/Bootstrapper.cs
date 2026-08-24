@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 
 namespace Core
@@ -19,6 +20,8 @@ namespace Core
         [SerializeField] private GameObject _blockPoolManagerPrefab;
         [SerializeField] private GameObject _floatingTextManagerPrefab;
         [SerializeField] private GameObject _undergroundGeneratorPrefab;
+        [SerializeField] private GameObject _playerDataManagerPrefab;
+        [SerializeField] private GameObject _collectiblePoolManagerPrefab;
 
         [Header("Gameplay Managers")]
         [Tooltip("Các manager gameplay phụ thuộc vào các hệ thống cốt lõi.")]
@@ -32,7 +35,7 @@ namespace Core
         // Cờ static để đảm bảo quá trình khởi tạo chỉ chạy một lần duy nhất.
         private static bool _hasBeenInitialized = false;
 
-        private void Start()
+        private void Awake()
         {
             // Ngăn bootstrapper chạy lại nếu nó vô tình tồn tại trong một scene được tải lại.
             if (_hasBeenInitialized)
@@ -40,6 +43,9 @@ namespace Core
                 Destroy(gameObject);
                 return;
             }
+
+            // Tăng giới hạn DOTween để tránh lỗi khi có nhiều VFX nổ cùng lúc
+            DOTween.SetTweensCapacity(500, 50);
 
             // Khởi tạo các manager từ prefab theo thứ tự logic để dễ theo dõi.
             // Nhóm 1: Core Systems & Pools (ít hoặc không có dependency)
@@ -51,6 +57,8 @@ namespace Core
             Instantiate(_blockPoolManagerPrefab);
             Instantiate(_floatingTextManagerPrefab);
             if (_undergroundGeneratorPrefab != null) Instantiate(_undergroundGeneratorPrefab);
+            if (_playerDataManagerPrefab != null) Instantiate(_playerDataManagerPrefab);
+            if (_collectiblePoolManagerPrefab != null) Instantiate(_collectiblePoolManagerPrefab);
 
             // Nhóm 2: Gameplay Managers (phụ thuộc vào nhóm 1)
             Instantiate(_playerManagerPrefab);

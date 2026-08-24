@@ -15,7 +15,6 @@ MonoBehaviour:
   id: bomb
   displayName: Bomb
   description: Bomb
-  bombPrefab: {fileID: 7474592950618020754, guid: 75f710d6e46bf43409268b3ee36c0b64, type: 3}
   radius: 6
   damage: 20
   damageFalloff:
@@ -167,19 +166,19 @@ MonoBehaviour:
         inWeight: 0.33333334
         outWeight: 0.33333334
       - serializedVersion: 3
-        time: 3
-        value: 20
+        time: 5
+        value: 100
         inSlope: 40
-        outSlope: 40
+        outSlope: 0
         tangentMode: 69
         weightedMode: 0
         inWeight: 0.33333334
         outWeight: 0.33333334
       - serializedVersion: 3
-        time: 5
+        time: 6
         value: 100
-        inSlope: 40
-        outSlope: 40
+        inSlope: 0
+        outSlope: 0
         tangentMode: 34
         weightedMode: 0
         inWeight: 0.33333334
@@ -213,16 +212,16 @@ MonoBehaviour:
         time: 4
         value: 10
         inSlope: 33.33334
-        outSlope: 40
+        outSlope: 15
         tangentMode: 69
         weightedMode: 0
         inWeight: 0.33333334
         outWeight: 0.33333334
       - serializedVersion: 3
-        time: 5
-        value: 50
-        inSlope: 40
-        outSlope: 40
+        time: 6
+        value: 40
+        inSlope: 15
+        outSlope: 15
         tangentMode: 34
         weightedMode: 0
         inWeight: 0.33333334
@@ -236,17 +235,17 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 1
       value: 100
-      inSlope: -15
-      outSlope: -15
+      inSlope: -12
+      outSlope: -12
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 5
+      time: 6
       value: 40
-      inSlope: -15
-      outSlope: -15
+      inSlope: -12
+      outSlope: -12
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
@@ -346,6 +345,5 @@ MonoBehaviour:
     enableScalePulse: 0
     pulseScaleMultiplier: 0
     pulseScaleDuration: 0
-  additionalGravity: 30
   tickingSoundPitch: 1
   tickingSound: {fileID: 0}

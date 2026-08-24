@@ -15,7 +15,6 @@ MonoBehaviour:
   id: fire-bomb
   displayName: Fire Bomb
   description: Fire Bomb
-  bombPrefab: {fileID: 7480504946259583760, guid: 172c4dc699f3d8e42b67c90e6cbdb47b, type: 3}
   radius: 9
   damage: 30
   damageFalloff:
@@ -48,7 +47,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1664
   applyForce: 0
-  force: 1000
+  force: 0
   forceMode: 1
   forceFalloff:
     serializedVersion: 2

@@ -51,11 +51,11 @@ MonoBehaviour:
   _roundDuration: 150
   _postRoundWaitDuration: 5
   _postCleanupStabilizationDuration: 2
-  _lateJoinDuration: 30
-  _intensityPerPlayer: 0.15
-  _intensityReductionOnDeath: 0.1
-  _minIntensity: 4.2
-  _maxIntensity: 5
-  _arenaSpawnAreaYOffset: -6
+  _minIntensity: 1
+  _maxIntensity: 6
+  _initialIntensity: 3
+  _intensityIncrementPerRound: 0.25
+  _intensityMaxDeathPenalty: 0.3
+  _arenaSpawnAreaYOffset: -9
   _bombSpawnerYOffset: 6
   _topBorderYOffset: 0

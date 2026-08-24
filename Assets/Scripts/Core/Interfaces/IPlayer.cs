@@ -66,6 +66,26 @@ namespace Core.Interfaces
         /// <param name="enabled">True để bật di chuyển, False để tắt.</param>
         void SetMovementEnabled(bool enabled);
         // Bạn có thể thêm các phương thức hoặc thuộc tính khác vào đây
+
+        /// <summary>
+        /// Áp dụng một hệ số nhân vào tốc độ di chuyển của người chơi.
+        /// </summary>
+        void ApplySpeedMultiplier(float multiplier);
+
+        /// <summary>
+        /// Gỡ bỏ một hệ số nhân khỏi tốc độ di chuyển của người chơi.
+        /// </summary>
+        void RemoveSpeedMultiplier(float multiplier);
+
+        /// <summary>
+        /// Áp dụng một hệ số nhân vào lực nhảy của người chơi.
+        /// </summary>
+        void ApplyJumpMultiplier(float multiplier);
+
+        /// <summary>
+        /// Gỡ bỏ một hệ số nhân khỏi lực nhảy của người chơi.
+        /// </summary>
+        void RemoveJumpMultiplier(float multiplier);
         
         /// <summary>
         /// Cho biết người chơi có đang bị đóng băng hay không.
@@ -93,5 +113,30 @@ namespace Core.Interfaces
         /// Yêu cầu người chơi dừng tất cả nhạc đang phát.
         /// </summary>
         void StopMusic();
+
+        /// <summary>
+        /// Tạm dừng nhạc nền hiện tại.
+        /// </summary>
+        void PauseMusic();
+
+        /// <summary>
+        /// Tiếp tục phát nhạc nền đã bị tạm dừng.
+        /// </summary>
+        void ResumeMusic();
+
+        /// <summary>
+        /// Reset toàn bộ chỉ số cộng dồn về trạng thái gốc.
+        /// </summary>
+        void ResetModifiers();
+
+        /// <summary>
+        /// Container Transform cho floating text liên quan đến HP.
+        /// </summary>
+        Transform HPTextContainer { get; }
+
+        /// <summary>
+        /// Container Transform cho floating text liên quan đến Coin.
+        /// </summary>
+        Transform CoinTextContainer { get; }
     }
 }

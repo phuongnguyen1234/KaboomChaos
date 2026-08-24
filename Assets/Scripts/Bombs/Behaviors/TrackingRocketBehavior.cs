@@ -2,7 +2,6 @@ using UnityEngine;
 using System.Linq;
 using Bombs.Data;
 using Core.Interfaces;
-using Managers; // Cần để truy cập PlayerManager
 
 namespace Bombs.Behaviors
 {
@@ -12,7 +11,6 @@ namespace Bombs.Behaviors
     public class TrackingRocketBehavior : IBombBehavior
     {
         private Transform _target;
-        private Rigidbody _targetRigidbody; // Thêm biến để lưu Rigidbody của mục tiêu
         private IPlayerManager _playerManager;
 
         public void OnSetup(BombController controller)
@@ -27,7 +25,7 @@ namespace Bombs.Behaviors
             }
 
             // Lấy instance của PlayerManager để tìm mục tiêu.
-            _playerManager = PlayerManager.Instance;
+            _playerManager = controller.PlayerManager;
         }
 
         public void OnActivate(BombController controller)
@@ -62,38 +60,29 @@ namespace Bombs.Behaviors
             // 2. Di chuyển và xoay
             if (_target != null)
             {
-                // --- LOGIC CẢI TIẾN: XOAY MƯỢT MÀ THEO HƯỚNG DI CHUYỂN ---
+                // Tính toán hướng bay thẳng đến mục tiêu.
                 Vector3 directionToTarget = (_target.position - controller.transform.position).normalized;
 
                 // Đặt vận tốc của tên lửa để nó bay theo hướng đó.
                 controller.BombRigidbody.linearVelocity = directionToTarget * rocketData.speed;
 
-                // Xoay tên lửa để mũi của nó (trục Y+) hướng theo hướng di chuyển (directionToTarget).
-                // Điều này đảm bảo tên lửa luôn "nhìn" về nơi nó đang bay tới.
+                // Xoay tên lửa để mũi của nó (trục Y+) hướng thẳng về mục tiêu ngay lập tức.
                 if (directionToTarget != Vector3.zero)
                 {
-                    // Tính toán góc xoay mục tiêu.
-                    // Chúng ta muốn trục Y+ (mũi tên lửa) hướng về phía mục tiêu.
-                    // Để làm điều này với LookRotation, chúng ta cần cung cấp một hướng 'forward' và 'up'.
-                    // Ta sẽ dùng 'directionToTarget' làm 'up'.
-                    // Hướng 'forward' phải vuông góc với 'up'. Ta có thể dùng cross product để tìm nó.
+                    // Quaternion.LookRotation tạo một góc xoay sao cho trục Z (forward) hướng về phía tham số đầu tiên,
+                    // và trục Y (up) hướng về phía tham số thứ hai.
+                    // Vì mũi tên lửa là trục Y+, chúng ta sẽ dùng directionToTarget làm tham số 'upwards'.
+                    // Chúng ta cần một vector 'forward' vuông góc với 'upwards'.
                     Vector3 newForward = Vector3.Cross(directionToTarget, controller.transform.right);
-                    // Nếu mục tiêu ở ngay trên hoặc dưới, cross product sẽ là zero.
                     if (newForward.sqrMagnitude < 0.001f)
                     {
-                        newForward = controller.transform.forward; // Giữ hướng forward cũ
+                        // Nếu mục tiêu thẳng hàng với trục right của tên lửa, tìm một vector forward khác.
+                        newForward = controller.transform.forward;
                     }
                     Quaternion targetRotation = Quaternion.LookRotation(newForward, directionToTarget);
 
-                    // Sử dụng Quaternion.RotateTowards để xoay mượt mà với tốc độ turnSpeed (độ/giây).
-                    Quaternion newRotation = Quaternion.RotateTowards(
-                        controller.BombRigidbody.rotation,
-                        targetRotation,
-                        rocketData.turnSpeed * Time.fixedDeltaTime
-                    );
-
-                    // Sử dụng MoveRotation để xoay Rigidbody một cách an toàn trong FixedUpdate.
-                    controller.BombRigidbody.MoveRotation(newRotation);
+                    // Áp dụng góc xoay ngay lập tức, không qua RotateTowards.
+                    controller.BombRigidbody.MoveRotation(targetRotation);
                 }
             }
             else
@@ -159,7 +148,6 @@ namespace Bombs.Behaviors
             if (validTargets.Count == 0) 
             { 
                 _target = null; 
-                _targetRigidbody = null; // Reset Rigidbody khi không có mục tiêu
                 return; 
             }
 
@@ -171,14 +159,12 @@ namespace Bombs.Behaviors
                 // Tìm một mục tiêu ngẫu nhiên mới và lưu lại cả transform và rigidbody.
                 IPlayer chosenPlayer = validTargets[Random.Range(0, validTargets.Count)];
                 _target = chosenPlayer.GameObject.transform;
-                _targetRigidbody = chosenPlayer.GameObject.GetComponent<Rigidbody>();
             }
             else // Chasing
             {
                 // Luôn tìm mục tiêu gần nhất và cập nhật transform/rigidbody.
                 IPlayer chosenPlayer = validTargets.OrderBy(p => (p.GameObject.transform.position - controller.transform.position).sqrMagnitude).First();
                 _target = chosenPlayer.GameObject.transform;
-                _targetRigidbody = chosenPlayer.GameObject.GetComponent<Rigidbody>();
             }
         }
     }

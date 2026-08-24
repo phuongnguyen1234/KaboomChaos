@@ -14,13 +14,14 @@ namespace Player
     [RequireComponent(typeof(PlayerAnimator))]
     [RequireComponent(typeof(RagdollController))] // Phụ thuộc vào RagdollController để kích hoạt hiệu ứng
     [RequireComponent(typeof(AudioSource))]
-    public class PlayerHealth : MonoBehaviour, IExplosionDamageable, IStatusEffectable
+    public class PlayerHealth : MonoBehaviour, IExplosionDamageable, IStatusEffectable, IHealable
     {
         #region Fields
 
         [Header("Health Settings")]
-        [SerializeField] private float _maxHealth = 100f;
+        [SerializeField] private float _baseMaxHealth = 100f;
         private float _currentHealth;
+        private float _maxHealth;
 
         [Header("Status Effect Settings")]
         [Tooltip("Sát thương mỗi tick từ hiệu ứng Burning/Electrified.")]
@@ -50,7 +51,8 @@ namespace Player
         private RagdollController _ragdollController;
         private AudioSource _audioSource;
         private IPlayer _player;
-        private Collider _collider; // Thêm để lấy vị trí hiển thị text sát thương
+        private Collider _collider; 
+        private IPlayerShieldController _shieldController;
 
         private Coroutine _statusEffectCoroutine;
 
@@ -77,7 +79,9 @@ namespace Player
             _audioSource = GetComponent<AudioSource>();
             _player = GetComponent<IPlayer>();
             _collider = GetComponent<Collider>();
+            _shieldController = GetComponent<IPlayerShieldController>();
 
+            _maxHealth = _baseMaxHealth;
             _currentHealth = _maxHealth;
             IsAlive = true;
 
@@ -89,6 +93,8 @@ namespace Player
         {
             // Đăng ký lắng nghe sự kiện reset cuối round
             GameEvents.OnRoundEndPlayerReset += ResetState;
+            // Listen for the character reset request (Roblox-style), so the player dies itself.
+            GameEvents.OnPlayerResetRequested += HandlePlayerResetRequested;
         }
 
         private void OnDisable()
@@ -101,6 +107,7 @@ namespace Player
 
             // Hủy đăng ký để tránh lỗi
             GameEvents.OnRoundEndPlayerReset -= ResetState;
+            GameEvents.OnPlayerResetRequested -= HandlePlayerResetRequested;
         }
 
         #endregion
@@ -114,20 +121,12 @@ namespace Player
         {
             if (!IsAlive) return;
 
-            // Nếu sát thương này sẽ gây chết, hãy truyền thông tin về lực cho phương thức Die.
-            if (_currentHealth - amount <= 0)
-            {
-                // Hiển thị số sát thương bay lên trước khi chết
-                ShowDamageNumber(amount);
-                _currentHealth = 0;
-                Die(force, point); // Die() không cần biết về bombData, nó chỉ cần lực.
-            }
-            else // Nếu không, xử lý sát thương và lực một cách riêng biệt.
-            {
-                TakeDamage(amount, DamageSourceType.Explosion);
-                // Yêu cầu RagdollController xử lý lực tác động.
-                _ragdollController?.OnExplosionHit(force, point, bombData);
-            }
+            bool wasAlive = IsAlive;
+            TakeDamage(amount, DamageSourceType.Explosion, bombData.Effect);
+            bool isNowDead = wasAlive && !IsAlive;
+
+            if (isNowDead) _ragdollController?.ShatterAndDie(force, point);
+            else if (IsAlive) _ragdollController?.OnExplosionHit(force, point, bombData);
         }
 
         /// <summary>
@@ -136,6 +135,14 @@ namespace Player
         public void TakeDamage(float amount, DamageSourceType sourceType = DamageSourceType.Generic, StatusEffectType effectContext = StatusEffectType.None)
         {
             if (!IsAlive) return;
+
+            // --- LOGIC KHIÊN ---
+            // Tất cả sát thương đều phải đi qua khiên trước.
+            float damageAfterShield = amount;
+            if (_shieldController != null && _shieldController.IsShieldActive)
+            {
+                damageAfterShield = _shieldController.ProcessDamage(amount, sourceType, effectContext);
+            }
 
             // KIỂM TRA MIỄN NHIỄM (LOGIC MỚI)
             bool isImmune = false;
@@ -156,8 +163,8 @@ namespace Player
             
             if (isImmune) return; // Nếu miễn nhiễm, không gây sát thương, không phát âm thanh, không hiện text nổi.
 
-            // Yêu cầu 2: Nếu sát thương bằng 0, không xử lý gì thêm (không phát âm thanh, không hiện text).
-            if (amount <= 0) return;
+            // Nếu sát thương sau khi qua khiên <= 0, không xử lý gì thêm.
+            if (damageAfterShield <= 0) return;
 
             // --- Logic chọn và phát âm thanh sát thương ---
             AudioClip clipToPlay = _takeDamageSfx; // Âm thanh mặc định
@@ -185,9 +192,9 @@ namespace Player
             }
 
             // Hiển thị số sát thương bay lên CHỈ KHI sát thương thực sự được áp dụng
-            ShowDamageNumber(amount);
+            ShowDamageNumber(damageAfterShield);
 
-            _currentHealth -= amount;
+            _currentHealth -= damageAfterShield;
 
             // Cập nhật UI
             GameEvents.TriggerPlayerHealthChanged(_player, _currentHealth, _maxHealth);
@@ -203,6 +210,15 @@ namespace Player
         /// </summary>
         public void ApplyStatusEffect(StatusEffectType effect, float duration)
         {
+            // --- LOGIC KHIÊN ---
+            // Kiểm tra xem khiên có chặn hiệu ứng này không.
+            if (_shieldController != null && _shieldController.IsShieldActive)
+            {
+                if (_shieldController.ProcessStatusEffect(effect))
+                {
+                    return; // Khiên đã chặn hiệu ứng.
+                }
+            }
             // Dừng hiệu ứng cũ nếu có
             if (_statusEffectCoroutine != null)
             {
@@ -251,6 +267,7 @@ namespace Player
             }
 
             // Phục hồi máu về giá trị tối đa.
+            _maxHealth = _baseMaxHealth;
             _currentHealth = _maxHealth;
 
             // Xóa lịch sử miễn nhiễm sát thương để không mang sang round mới.
@@ -261,9 +278,56 @@ namespace Player
             GameEvents.TriggerPlayerHealthChanged(_player, _currentHealth, _maxHealth);
         }
 
+        /// <summary>
+        /// Hồi một lượng máu cho người chơi.
+        /// </summary>
+        /// <param name="amount">Lượng máu cần hồi.</param>
+        /// <returns>Lượng máu thực tế đã được hồi.</returns>
+        public float Heal(float amount)
+        {
+            if (!IsAlive || amount <= 0) return 0f;
+
+            float previousHealth = _currentHealth;
+            _currentHealth = Mathf.Min(_currentHealth + amount, _maxHealth);
+
+            float healedAmount = _currentHealth - previousHealth;
+            if (healedAmount > 0)
+            {
+                GameEvents.TriggerPlayerHealthChanged(_player, _currentHealth, _maxHealth);
+            }
+
+            return healedAmount;
+        }
+
+        /// <summary>
+        /// Tăng máu tối đa của người chơi và hồi máu bằng lượng tương ứng.
+        /// </summary>
+        /// <param name="amount">Lượng máu tối đa cần tăng.</param>
+        public void IncreaseMaxHealth(float amount)
+        {
+            if (!IsAlive || amount <= 0) return;
+
+            _maxHealth += amount;
+            // Không tự động hồi máu ở đây. Việc hồi máu sẽ do behavior quyết định.
+            // Chỉ cần thông báo cho UI biết là max health đã thay đổi.
+            GameEvents.TriggerPlayerHealthChanged(_player, _currentHealth, _maxHealth);
+        }
+
         #endregion
 
         #region Private Methods
+
+        /// <summary>
+        /// Handle the character reset request (Roblox-style reset): the player dies itself.
+        /// </summary>
+        /// <param name="player">The player that is being reset.</param>
+        private void HandlePlayerResetRequested(IPlayer player)
+        {
+            if (!IsAlive || player == null) return;
+            if (player != _player) return;
+
+            Die();
+        }
 
         /// <summary>
         /// Xử lý khi người chơi chết, kích hoạt ragdoll.
@@ -276,10 +340,13 @@ namespace Player
 
             Debug.Log("[PlayerHealth] Player has died.", this);
 
+            // SỬA LỖI: Gỡ bỏ tất cả các khiên ngay khi người chơi chết.
+            _shieldController?.RemoveAllShields();
+
             // Phát âm thanh chết, nếu có
             if (_audioSource != null && _deathSfx != null)
             {
-                _audioSource.PlayOneShot(_deathSfx);
+                _audioSource.PlayOneShot(_deathSfx); // This will be called before ShatterAndDie
             }
 
             IsAlive = false;
@@ -289,7 +356,11 @@ namespace Player
             GameEvents.TriggerPlayerHealthChanged(_player, _currentHealth, _maxHealth);
             
             // Kích hoạt hiệu ứng chết "vỡ ra" bằng cách phá hủy các khớp.
-            _ragdollController?.ShatterAndDie(killingForce, hitPoint);
+            // Nếu không có lực, ShatterAndDie sẽ tự xử lý.
+            if (killingForce == default)
+            {
+                _ragdollController?.ShatterAndDie(killingForce, hitPoint);
+            }
             
             // Kích hoạt các sự kiện chết
             OnDied?.Invoke();
@@ -315,7 +386,7 @@ namespace Player
 
             // Gửi yêu cầu thông qua GameEvents.
             // Giả định rằng có một FloatingTextManager đang lắng nghe sự kiện này.
-            GameEvents.TriggerFloatingTextRequested(transform, offset, $"-{Mathf.RoundToInt(amount)}", Color.red);
+            GameEvents.TriggerFloatingTextRequested(transform, offset, $"-{Mathf.RoundToInt(amount)}", Color.red, _player.HPTextContainer, false); // Không hiển thị icon cho HP
         }
         #endregion
     }

@@ -142,11 +142,6 @@ namespace Bombs.Behaviors
                 }
             }
 
-            // Áp dụng trọng lực bổ sung nếu đang trôi tự do
-            if (controller.BombData is BombData fuseBombData && fuseBombData.additionalGravity > 0)
-            {
-                controller.BombRigidbody.AddForce(Vector3.down * fuseBombData.additionalGravity, ForceMode.Acceleration);
-            }
         }
 
         private void BecomeFreeFloating(BombController controller)

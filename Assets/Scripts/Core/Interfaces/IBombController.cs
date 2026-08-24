@@ -7,7 +7,7 @@ namespace Core.Interfaces
     /// Provides a contract for external systems to interact with bombs
     /// without needing to know their concrete implementation.
     /// </summary>
-    public interface IBombController
+    public interface IBombController : ISpawnableController<IBaseBombData>
     {
         /// <summary>
         /// Activates the bomb's primary function (e.g., starts the fuse, begins falling).
@@ -25,8 +25,13 @@ namespace Core.Interfaces
         void ResetState();
 
         /// <summary>
-        /// Gets the ScriptableObject data defining this bomb.
+        /// Khởi tạo bộ điều khiển bom với dữ liệu định nghĩa và các manager cần thiết.
         /// </summary>
-        IBaseBombData BombData { get; }
+        void Initialize(IBaseBombData bombData, IBombSpawnerManager bombSpawnerManager, IPlayerManager playerManager, IDestructionManager destructionManager);
+
+        // Các thuộc tính public để các strategy truy cập manager
+        IBombSpawnerManager BombSpawnerManager { get; }
+        IPlayerManager PlayerManager { get; }
+        IDestructionManager DestructionManager { get; }
     }
 }

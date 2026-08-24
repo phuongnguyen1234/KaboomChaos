@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b71afb582fe2f8f43964bfe84f2ac389, type: 3}
   m_Name: RestStop
   m_EditorClassIdentifier: Core::MapData
-  _id: basic-field
-  _mapName: Basic Field
+  _id: rest-stop
+  _mapName: Rest Stop
   _coverImage: {fileID: 0}
   _mapPrefab: {fileID: 6341782643626247249, guid: 4cacfcfacb7edd1438afad4789911f6a, type: 3}

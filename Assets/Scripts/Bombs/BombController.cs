@@ -21,10 +21,8 @@ namespace Bombs // Thay đổi
     public class BombController : MonoBehaviour, IBombController, IExplosionReactable
     {
         #region Fields
-
-        [Header("Data")]
-        [Tooltip("Dữ liệu ScriptableObject định nghĩa hành vi của quả bom này.")]
-        [SerializeField] private BaseBombData _bombData;
+        // Dữ liệu của bom, được "inject" vào bởi spawner thông qua hàm Initialize.
+        private IBaseBombData _bombData;
 
         [Header("Special Bomb Interactions")]
         [Tooltip("Prefab của khối Obsidian sẽ được tạo ra bởi bom băng khi nổ gần dung nham.")]
@@ -50,7 +48,10 @@ namespace Bombs // Thay đổi
         public Rigidbody BombRigidbody { get; private set; }
         public Collider BombCollider { get; private set; }
         private AudioSource _audioSource;
-        private IDestructionManager _destructionManager; // Thêm tham chiếu đến interface
+        // Manager references (injected)
+        private IDestructionManager _destructionManager;
+        private IBombSpawnerManager _bombSpawnerManager;
+        private IPlayerManager _playerManager;
 
         // State
         private bool _isActive;
@@ -101,10 +102,12 @@ namespace Bombs // Thay đổi
         /// <summary>
         /// Cung cấp quyền truy cập public vào dữ liệu của bom cho các strategy hành vi.
         /// </summary>
-        public IBaseBombData BombData => _bombData; // Thay đổi kiểu trả về thành interface
-
-        // Public getters for strategies
-        public IBombSpawnerManager BombSpawnerManager { get; private set; }
+        public IBaseBombData BombData => _bombData;
+        
+        // Public properties for strategies to access injected managers
+        public IBombSpawnerManager BombSpawnerManager => _bombSpawnerManager;
+        public IPlayerManager PlayerManager => _playerManager;
+        public IDestructionManager DestructionManager => _destructionManager;
         public int CurrentGeneration => _currentGeneration;
 
         /// <summary>
@@ -122,19 +125,7 @@ namespace Bombs // Thay đổi
             BombRigidbody = GetComponent<Rigidbody>();
             BombCollider = GetComponent<Collider>(); // Get any Collider component
             _audioSource = GetComponent<AudioSource>();
-            _destructionManager = Managers.DestructionManager.Instance; // Lấy instance của DestructionManager dưới dạng interface
-            BombSpawnerManager = Managers.BombSpawnerManager.Instance;
 
-            if (_bombData != null && _behaviorFactory.TryGetValue(_bombData.GetType(), out var factoryFunc))
-            { // _bombData là BaseBombData, nhưng GetType() sẽ trả về BombData hoặc MissileBombData
-                _behavior = factoryFunc();
-            }
-            else if (_bombData != null)
-            {
-                Debug.LogError($"[BombController] Không có strategy hành vi nào được định nghĩa cho loại bomb data '{_bombData.GetType()}'.", this);
-            }
-
-            _explosionStrategy = CreateExplosionStrategy(_bombData);
             // Cache original scales of parts to pulse for scale pulsing effect.
             _originalPartScales.Clear();
             foreach (var part in _partsToPulse)
@@ -146,7 +137,6 @@ namespace Bombs // Thay đổi
             }
 
             _originalLocalScale = transform.localScale;
-            InitializeEffectiveStats();
         }
 
         /// <summary>
@@ -164,25 +154,6 @@ namespace Bombs // Thay đổi
             if (data.ExplodeMultipleTimes)
                 return new MultiExplosionStrategy();
             return new DefaultExplosionStrategy();
-        }
-
-        private void Start()
-        {
-            if (_bombData == null)
-            {
-                Debug.LogError("BombData is not assigned! Disabling bomb controller.", this);
-                enabled = false;
-                return;
-            }
-
-            // Thiết lập ban đầu dựa trên hành vi
-            _behavior?.OnSetup(this);
-
-            // Play spawn sound if available
-            if (_bombData.SpawnSound != null && _audioSource != null)
-            {
-                _audioSource.PlayOneShot(_bombData.SpawnSound);
-            }
         }
 
         private void FixedUpdate()
@@ -212,6 +183,47 @@ namespace Bombs // Thay đổi
         #endregion
 
         #region Public Methods (IBombController)
+
+        /// <summary>
+        /// Initializes the bomb controller with its defining data.
+        /// This is called by the spawner after instantiation.
+        /// </summary>
+        /// <param name="bombData">The data defining the bomb's behavior.</param>
+        public void Initialize(IBaseBombData bombData, IBombSpawnerManager bombSpawnerManager, IPlayerManager playerManager, IDestructionManager destructionManager)
+        {
+            if (bombData == null)
+            {
+                Debug.LogError("Initialize được gọi với bombData là null! Hủy bom.", this);
+                GameEvents.TriggerBombDespawnRequest(gameObject);
+                return;
+            }
+            _bombSpawnerManager = bombSpawnerManager;
+            _playerManager = playerManager;
+            _destructionManager = destructionManager;
+            _bombData = bombData;
+
+            // Tạo các strategy dựa trên loại dữ liệu được inject.
+            if (_behaviorFactory.TryGetValue(_bombData.GetType(), out var factoryFunc))
+            {
+                _behavior = factoryFunc();
+            }
+            else
+            {
+                Debug.LogError($"[BombController] Không có strategy hành vi nào được định nghĩa cho loại bomb data '{_bombData.GetType()}'.", this);
+            }
+            _explosionStrategy = CreateExplosionStrategy(_bombData);
+
+            // Thiết lập ban đầu
+            InitializeEffectiveStats();
+            _behavior?.OnSetup(this);
+
+            // Play spawn sound if available
+            if (_bombData.SpawnSound != null && _audioSource != null)
+            {
+                _audioSource.PlayOneShot(_bombData.SpawnSound);
+            }
+        }
+
         /// <summary>
         /// Resets the bomb's internal state so it can be reused by an object pool.
         /// </summary>
@@ -222,8 +234,18 @@ namespace Bombs // Thay đổi
             _fuseTimer = 0f;
             _currentStageIndex = 0;
             _currentGeneration = 0;
+            
+            // Reset data-related fields
+            _bombData = null;
+            _behavior = null;
+            _explosionStrategy = null;
+
+            // Reset cached manager instances to null.
+            // This ensures that if managers are destroyed/recreated, we get the new valid instance on next Initialize.
+            _destructionManager = null;
+            _bombSpawnerManager = null; // Null out injected manager references
+            _playerManager = null; // Null out injected manager references
             transform.localScale = _originalLocalScale;
-            InitializeEffectiveStats();
             if (_activeCoroutine != null)
             {
                 StopCoroutine(_activeCoroutine);
@@ -587,13 +609,16 @@ namespace Bombs // Thay đổi
             // Đây là hệ thống riêng biệt với việc phá hủy các khối địa hình (DestructibleBlock).
             // CHỈ xử lý phá hủy kiến trúc nếu bom được cấu hình để áp dụng lực.
             // Điều này cho phép tạo ra các loại bom chỉ gây hiệu ứng mà không làm sập công trình.
-            if (_bombData.applyForce && _destructionManager != null)
-            {
-                _destructionManager.HandleExplosion(explosionCenter, _effectiveRadius, _effectiveForce);
-            }
-            else
-            {
-                Debug.LogWarning("[BombController] DestructionManager.Instance không được tìm thấy. Bỏ qua xử lý phá hủy kiến trúc.");
+            if (_bombData.ApplyForce)
+            { // Sử dụng trường đã được tiêm
+                if (_destructionManager != null)
+                {
+                    _destructionManager.HandleExplosion(explosionCenter, _effectiveRadius, _effectiveForce);
+                }
+                else
+                {
+                    Debug.LogWarning("[BombController] DestructionManager.Instance không được tìm thấy. Bỏ qua xử lý phá hủy kiến trúc.");
+                }
             }
 
             if (_effectiveRadius <= 0f) return;
@@ -627,17 +652,30 @@ namespace Bombs // Thay đổi
             for (int i = 0; i < hitCount; i++)
             {
                 var hit = _explosionHits[i];
-                Vector3 closestPoint;
+                Vector3 positionToCheck;
 
-                if (hit is BoxCollider || hit is SphereCollider || hit is CapsuleCollider || (hit is MeshCollider mc && mc.convex))
+                // --- LOGIC MỚI: Nếu là PrimaryTarget thì dùng tâm của bound, ngược lại dùng ClosestPoint ---
+                if (hit.TryGetComponent<IPrimaryExplosionTarget>(out _))
                 {
-                    closestPoint = hit.ClosestPoint(explosionCenter);
+                    positionToCheck = hit.bounds.center;
                 }
                 else
                 {
-                    closestPoint = hit.transform.position;
+                    if (hit is BoxCollider || hit is SphereCollider || hit is CapsuleCollider || (hit is MeshCollider mc && mc.convex))
+                    {
+                        positionToCheck = hit.ClosestPoint(explosionCenter);
+                    }
+                    else
+                    {
+                        positionToCheck = hit.transform.position;
+                    }
                 }
-                float distance = Vector3.Distance(explosionCenter, closestPoint);
+
+                float distance = Vector3.Distance(explosionCenter, positionToCheck);
+                
+                // Nếu vượt quá bán kính thì bỏ qua
+                if (distance > _effectiveRadius) continue;
+
                 float normalizedDistance = (_effectiveRadius > 0f) ? Mathf.Clamp01(distance / _effectiveRadius) : 0f;
 
                 // Chọn thuộc tính sát thương dựa trên đây là vụ nổ chính hay phụ
@@ -650,7 +688,7 @@ namespace Bombs // Thay đổi
 
                 float forceMultiplier = _bombData.ForceFalloff.Evaluate(normalizedDistance);
                 float forceToApply = _effectiveForce;
-                Vector3 direction = (closestPoint - explosionCenter).normalized;
+                Vector3 direction = (positionToCheck - explosionCenter).normalized;
                 if (direction == Vector3.zero) direction = Random.onUnitSphere;
                 // Sử dụng UpwardsModifier từ interface
                 direction = (direction + Vector3.up * _bombData.UpwardsModifier).normalized;
@@ -663,7 +701,7 @@ namespace Bombs // Thay đổi
                     // Ưu tiên xử lý bằng IExplosionDamageable nếu có.
                     if (damageableComponent is IExplosionDamageable explosionDamageable)
                     {
-                        explosionDamageable.TakeExplosionDamage(finalDamage, forceVector, closestPoint, _bombData);
+                        explosionDamageable.TakeExplosionDamage(finalDamage, forceVector, positionToCheck, _bombData);
                     }
                     else // Nếu không, chỉ áp dụng sát thương thông thường.
                     {
@@ -679,12 +717,12 @@ namespace Bombs // Thay đổi
                     {
                         // Để đối tượng tự xử lý phản ứng với vụ nổ.
                         // Đây là cách Dynamite được kích hoạt.
-                        explosionReactable.OnExplosionHit(forceVector, closestPoint, _bombData);
+                        explosionReactable.OnExplosionHit(forceVector, positionToCheck, _bombData);
                     }
                     else
                     {
                         // Nếu không có phản ứng đặc biệt, chỉ áp dụng lực thông thường.
-                        hit.attachedRigidbody.AddForceAtPosition(forceVector, closestPoint, _bombData.forceMode);
+                        hit.attachedRigidbody.AddForceAtPosition(forceVector, positionToCheck, _bombData.ForceMode);
                     }
                 }
 

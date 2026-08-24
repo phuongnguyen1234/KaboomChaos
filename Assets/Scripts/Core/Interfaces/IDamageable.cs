@@ -16,5 +16,7 @@ namespace Core.Interfaces
         /// Kiểm tra nếu đối tượng còn sống
         /// </summary>
         bool IsAlive { get; }
+
+        float CurrentHealth {get;}
     }
 }

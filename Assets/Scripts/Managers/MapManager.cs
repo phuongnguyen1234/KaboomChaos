@@ -63,7 +63,11 @@ namespace Managers
                 Instance = this;
                 DontDestroyOnLoad(gameObject);
             }
+        }
+        #endregion
 
+        private void Start()
+        {
             // Lấy tham chiếu đến các đối tượng trong scene từ Registry
             var registry = SceneObjectRegistry.Instance;
             if (registry != null)
@@ -74,20 +78,17 @@ namespace Managers
             }
             else Debug.LogError("[MapManager] SceneObjectRegistry.Instance is null!", this);
 
+            // Lấy tham chiếu đến manager trong Start() để đảm bảo nó đã được Bootstrapper khởi tạo.
+            _undergroundGenerator = UndergroundGenerator.Instance;
+            if (_undergroundGenerator == null) Debug.LogWarning("[MapManager] UndergroundGenerator.Instance is null. Underground will not be built.", this);
+
             // Khởi tạo dung nham một lần duy nhất và tắt nó đi.
+            // Phải thực hiện sau khi đã lấy được _lavaContainer từ Registry.
             if (_lavaPrefab != null && _lavaContainer != null && _lavaInstance == null)
             {
                 _lavaInstance = Instantiate(_lavaPrefab, _lavaContainer.transform);
                 _lavaInstance.SetActive(false);
             }
-        }
-        #endregion
-
-        private void Start()
-        {
-            // Lấy tham chiếu đến manager trong Start() để đảm bảo nó đã được Bootstrapper khởi tạo.
-            _undergroundGenerator = UndergroundGenerator.Instance;
-            if (_undergroundGenerator == null) Debug.LogWarning("[MapManager] UndergroundGenerator.Instance is null. Underground will not be built.", this);
         }
 
         #region IMapManager Implementation
@@ -216,7 +217,7 @@ namespace Managers
                 return "Invalid Map";
             }
 
-            return mapData.MapPrefab.name;
+            return mapData.MapName;
         }
         #endregion
 
@@ -237,7 +238,6 @@ namespace Managers
                 Debug.LogError("[MapManager] MapLoader container is not assigned. Cannot build map.", this);
                 yield break;
             }
-
             // Bước 1: Instantiate prefab map chính. Thao tác này nhanh vì các con của nó sẽ bị tắt đi.
             _mapInstance = Instantiate(mapPrefab, _mapContainer.transform); // Gán vào trường _mapInstance
             _mapInstance.name = mapPrefab.name; // Dọn dẹp tên "(Clone)" cho trường _mapInstance

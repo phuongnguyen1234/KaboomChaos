@@ -20,6 +20,6 @@ namespace Core.Interfaces
         /// </summary>
         /// <param name="text">Nội dung để hiển thị.</param>
         /// <param name="color">Màu sắc của text.</param>
-        void Trigger(string text, Color color);
+        void Trigger(string text, Color color, Transform containerOverride, bool showIcon);
     }
 }

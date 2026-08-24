@@ -99,11 +99,6 @@ namespace Bombs.Data
         public List<FuseStage> fuseStages = new();
         public IReadOnlyList<FuseStage> FuseStages => fuseStages.AsReadOnly(); // Triển khai interface (nếu có)
 
-        [Header("Vật lý (Fuse Bomb)")]
-        [Tooltip("Lực hấp dẫn bổ sung tác dụng lên bom để nó rơi nhanh hơn. Đặt là 0 để dùng trọng lực mặc định của Unity.")]
-        public float additionalGravity = 0f; // Giữ lại public field cho Inspector
-        public float AdditionalGravity => additionalGravity; // Triển khai interface (nếu có)
-
         [Header("Âm thanh Hẹn giờ")]
         [Tooltip("Âm thanh khi bom đang chạy (ticking). Có thể để trống.")]
         [Range(0.1f, 3f)] public float tickingSoundPitch = 1.0f;

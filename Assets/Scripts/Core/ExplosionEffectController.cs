@@ -74,10 +74,8 @@ namespace Core
 
         private void OnDisable()
         {
-            // Khi object được trả về pool (bị disable), hãy hủy sequence đang hoạt động.
-            // Đây là một biện pháp bảo vệ để ngăn một sequence từ "kiếp trước" của object
-            // hoàn thành và gọi OnComplete một cách không mong muốn.
             _activeSequence?.Kill();
+            transform.DOKill();
         }
 
         /// <summary>
@@ -87,12 +85,9 @@ namespace Core
         public void Trigger(float targetWorldRadius)
         {
             // Dừng bất kỳ animation nào đang chạy trên instance này.
-            // Điều này giúp component hoạt động ổn định hơn nếu nó được kích hoạt lại khi đang chạy dở.
             _activeSequence?.Kill();
 
             // Đảm bảo renderer được bật khi hiệu ứng được kích hoạt lại từ pool.
-            // Điều này khắc phục trường hợp renderer bị tắt bởi một hệ thống khác (ví dụ: BombController
-            // tắt tất cả renderer con khi nổ) trước khi hiệu ứng được trả về pool.
             if (_mainRenderer != null) {
                 _mainRenderer.enabled = true;
             }
@@ -105,7 +100,6 @@ namespace Core
             }
 
             // Lấy bán kính của mesh khi scale là (1,1,1).
-            // Giả định mesh gần giống hình cầu và lấy cạnh lớn nhất của bounding box làm đường kính.
             Vector3 meshSize = _mainRenderer.localBounds.size;
             float baseRadius = Mathf.Max(meshSize.x, meshSize.y, meshSize.z) / 2f;
 
@@ -126,6 +120,7 @@ namespace Core
 
             _activeSequence = DOTween.Sequence();
             _activeSequence.SetUpdate(UpdateType.Late, true);
+            _activeSequence.SetAutoKill(true);
 
             // Xây dựng sequence từ các stage đã định nghĩa
             foreach (var stage in _animationStages)
@@ -154,15 +149,12 @@ namespace Core
                         break;
 
                     case EffectAnimationStage.StageType.Hold:
-                        // 'Hold' không tạo ra tween, nó chỉ thêm một khoảng nghỉ vào sequence.
                         break;
                 }
 
-                // Thêm tween hoặc khoảng nghỉ vào sequence
                 if (stage.joinWithPrevious)
                 {
                     if (tween != null) _activeSequence.Join(tween);
-                    // Việc join một khoảng nghỉ không có ý nghĩa, nên ta bỏ qua.
                 }
                 else
                 {
@@ -177,14 +169,12 @@ namespace Core
             // Khi animation hoàn tất, trả object về pool thay vì hủy nó.
             _activeSequence.OnComplete(() =>
             {
-                // Gửi yêu cầu despawn thông qua hệ thống event.
-                // Nếu có pool manager đang lắng nghe, nó sẽ xử lý.
-                // Nếu không, object sẽ không được xử lý, nhưng điều này tuân thủ kiến trúc tách biệt.
-                // Để an toàn, chúng ta có thể thêm một bước kiểm tra.
                 if (GameEvents.IsVFXPoolListening())
                     GameEvents.TriggerVFXDespawnRequest(gameObject);
                 else
-                    Destroy(gameObject); // Fallback: Tự hủy nếu không có hệ thống pool.
+                {
+                    Destroy(gameObject);
+                }
             });
         }
     }

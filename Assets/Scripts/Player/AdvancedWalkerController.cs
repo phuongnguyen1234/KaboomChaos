@@ -1,4 +1,4 @@
-﻿﻿using UnityEngine;
+﻿﻿﻿﻿using UnityEngine;
 
 namespace Player
 {
@@ -22,7 +22,7 @@ namespace Player
 		//Movement speed;
 		[Header("Movement")]
 		[Tooltip("Tốc độ di chuyển của nhân vật trên mặt đất.")]
-		[SerializeField] private float _movementSpeed = 7f;
+		[SerializeField] protected float _movementSpeed = 7f;
 
 		//How fast the controller can change direction while in the air;
 		//Higher values result in more air control;
@@ -32,7 +32,7 @@ namespace Player
 		//Jump speed;
 		[Header("Jumping")]
 		[Tooltip("Lực nhảy ban đầu của nhân vật.")]
-		[SerializeField] protected float _jumpSpeed = 10f;
+		[SerializeField] protected float _jumpForce = 10f;
 
 		[Tooltip("Khoảng thời gian ngắn (tính bằng giây) sau khi rời khỏi mặt đất mà người chơi vẫn có thể nhảy. Giúp tăng 'game feel' khi nhảy ở rìa.")]
 		[SerializeField] private float _coyoteTimeDuration = 0.1f;
@@ -40,7 +40,7 @@ namespace Player
 		//Jump duration variables;
 		[Tooltip("Thời gian tối đa có thể giữ nút nhảy để đạt chiều cao tối đa. Cho phép thay đổi chiều cao nhảy.")]
 		[SerializeField] protected float _jumpDuration = 0.2f;
-		float currentJumpStartTime = 0f;
+		protected float currentJumpStartTime = 0f;
 
 		private float _groundContactLostTime;
 
@@ -472,6 +472,9 @@ namespace Player
 			}
 
 			//Add gravity to vertical momentum;
+			// CẢI TIẾN: Áp dụng trọng lực một cách nhất quán trong mọi trạng thái trên không (Jumping, Rising, Falling).
+			// Bằng cách loại bỏ việc ghi đè vận tốc trong trạng thái 'Jumping', cú nhảy sẽ có một
+			// đường cong parabolic tự nhiên hơn, chịu ảnh hưởng của trọng lực ngay từ đầu.
 			_verticalMomentum -= tr.up * _gravity * Time.deltaTime;
 
 			//Remove any downward force if the controller is grounded;
@@ -573,13 +576,6 @@ namespace Player
 				Vector3 _slideDirection = Vector3.ProjectOnPlane(-tr.up, mover.GetGroundNormal()).normalized;
 				momentum += _slideDirection * _slideGravity * Time.deltaTime;
 			}
-			
-			//If controller is jumping, override vertical velocity with jumpSpeed;
-			if(currentControllerState == ControllerState.Jumping)
-			{
-				momentum = VectorMath.RemoveDotVector(momentum, tr.up);
-				momentum += tr.up * _jumpSpeed;
-			}
 
 			if(_useLocalMomentum)
 				momentum = tr.worldToLocalMatrix * momentum;
@@ -595,7 +591,7 @@ namespace Player
 				momentum = tr.localToWorldMatrix * momentum;
 
 			//Add jump force to momentum;
-			momentum += tr.up * _jumpSpeed;
+			momentum += tr.up * _jumpForce;
 
 			//Set jump start time;
 			currentJumpStartTime = Time.time;

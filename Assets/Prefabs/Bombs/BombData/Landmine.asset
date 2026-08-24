@@ -15,7 +15,6 @@ MonoBehaviour:
   id: landmine
   displayName: Landmine
   description: Landmine
-  bombPrefab: {fileID: 5114733239519182131, guid: 30dcbc5dc89d73941a8d6c47651d2475, type: 3}
   radius: 6
   damage: 25
   damageFalloff:
@@ -80,7 +79,7 @@ MonoBehaviour:
     m_Bits: 1984
   triggerLayers:
     serializedVersion: 2
-    m_Bits: 1216
+    m_Bits: 1472
   canDestroyTerrain: 1
   terrainDestructionPowerFalloff:
     serializedVersion: 2
@@ -218,6 +217,5 @@ MonoBehaviour:
     enableScalePulse: 0
     pulseScaleMultiplier: 0
     pulseScaleDuration: 0
-  additionalGravity: 30
   tickingSoundPitch: 1
   tickingSound: {fileID: 0}

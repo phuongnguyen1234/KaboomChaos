@@ -15,10 +15,7 @@ namespace Managers
         public static FloatingTextManager Instance { get; private set; }
 
         [Header("Settings")]
-        [Tooltip("Prefab của đối tượng text nổi. Prefab này phải có component FloatingTextController.")]
         [SerializeField] private GameObject _floatingTextPrefab;
-        [Tooltip("Tag của container object bên trong đối tượng cha để chứa text. Nếu để trống hoặc không tìm thấy, text sẽ được gắn trực tiếp vào đối tượng cha.")]
-        [SerializeField] private string _containerTag = "FloatingTextContainer";
 
         protected override void Awake()
         {
@@ -70,49 +67,22 @@ namespace Managers
             }
         }
 
-        private void ShowFloatingText(Transform parent, Vector3 offset, string text, Color color)
+        private void ShowFloatingText(Transform parent, Vector3 offset, string text, Color color, Transform containerOverride = null, bool showIcon = false)
         {
             if (_floatingTextPrefab == null) return;
 
             // Sử dụng phương thức GetFromPool của lớp cơ sở.
             GameObject textInstance = GetFromPool(_floatingTextPrefab, Vector3.zero, Quaternion.identity);
             if (textInstance == null) return;
-
+            
             if (textInstance.TryGetComponent(out IFloatingTextController textController))
             {
                 Transform textTransform = textController.GameObject.transform;
-                Transform finalContainer = parent; // Mặc định là đối tượng gốc
+                Transform targetParent = containerOverride != null ? containerOverride : parent;
 
-                // Tìm một container được chỉ định bằng tag trong tất cả các đối tượng con (đệ quy).
-                if (!string.IsNullOrEmpty(_containerTag) && parent != null)
-                {
-                    // Sử dụng GetComponentsInChildren để tìm kiếm trong toàn bộ cây con.
-                    // Điều này có thể tốn một chút hiệu năng do cấp phát bộ nhớ, nhưng đảm bảo tìm được container dù nó nằm sâu đến đâu.
-                    var allDescendants = parent.GetComponentsInChildren<Transform>(true); // true để tìm cả các object không active
-                    foreach (var descendant in allDescendants)
-                    {
-                        // Bỏ qua chính đối tượng cha.
-                        if (descendant == parent) continue;
-
-                        if (descendant.CompareTag(_containerTag))
-                        {
-                            finalContainer = descendant;
-                            break;
-                        }
-                    }
-                }
-
-                // Gắn text vào container và thiết lập vị trí.
-                textTransform.SetParent(finalContainer);
-
-                // Nếu container là một object con (không phải là đối tượng gốc), chúng ta cần tính toán lại vị trí local.
-                // Điều này đảm bảo text xuất hiện ở đúng vị trí trong không gian thế giới, bất kể nó được gắn vào đâu.
-                Vector3 finalLocalPosition = (finalContainer != parent && parent != null)
-                    ? finalContainer.InverseTransformPoint(parent.TransformPoint(offset))
-                    : offset;
-
-                textTransform.SetLocalPositionAndRotation(finalLocalPosition, Quaternion.identity);
-                textController.Trigger(text, color);
+                textTransform.SetParent(targetParent);
+                textTransform.SetLocalPositionAndRotation(offset, Quaternion.identity);
+                textController.Trigger(text, color, containerOverride, showIcon);
             }
             else
             {

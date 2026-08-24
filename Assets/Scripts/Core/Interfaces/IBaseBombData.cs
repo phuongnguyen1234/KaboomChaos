@@ -16,12 +16,10 @@ namespace Core.Interfaces
     /// Interface cơ sở cho tất cả các loại dữ liệu bom.
     /// Chứa các thuộc tính chung liên quan đến vụ nổ, sát thương, hiệu ứng và thông tin game.
     /// </summary>
-    public interface IBaseBombData
+    public interface IBaseBombData : ISpawnableData
     {
-        string Id { get; }
         string DisplayName { get; }
         string Description { get; }
-        GameObject BombPrefab { get; }
 
         float Radius { get; }
         float Damage { get; }

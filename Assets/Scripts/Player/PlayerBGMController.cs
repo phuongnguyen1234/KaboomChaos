@@ -16,6 +16,9 @@ public class PlayerBGMController : MonoBehaviour
     private AudioSource _audioSource;
     private Coroutine _musicCoroutine;
     private AudioClip _lastPlayedClip;
+    
+    // Cờ để ngăn BGM phát khi đang có nhạc của khiên (ví dụ: Magic Shield)
+    private bool _isSuppressedByShield = false;
 
     private void Awake()
     {
@@ -23,6 +26,24 @@ public class PlayerBGMController : MonoBehaviour
         // Cấu hình AudioSource cho nhạc nền 2D, không bị ảnh hưởng bởi vị trí.
         _audioSource.spatialBlend = 0; 
         _audioSource.playOnAwake = false;
+    }
+
+    /// <summary>
+    /// Tạm dừng nhạc nền hiện tại.
+    /// </summary>
+    public void PauseMusic()
+    {
+        _isSuppressedByShield = true;
+        if (_audioSource.isPlaying) _audioSource.Pause();
+    }
+
+    /// <summary>
+    /// Tiếp tục phát nhạc nền đã bị tạm dừng.
+    /// </summary>
+    public void ResumeMusic()
+    {
+        _isSuppressedByShield = false;
+        if (!_audioSource.isPlaying) _audioSource.UnPause();
     }
 
     public void StopMusic()
@@ -40,12 +61,14 @@ public class PlayerBGMController : MonoBehaviour
 
     public void PlayLobbyMusic()
     {
+        if (_isSuppressedByShield) return;
         if (_bgmDatabase == null) return;
         PlayClip(_bgmDatabase.LobbyMusic, true);
     }
 
     public void PlayGameplayMusic(float intensity)
     {
+        if (_isSuppressedByShield) return;
         if (_bgmDatabase == null) return;
         StopMusic();
         List<AudioClip> playlist = intensity < 4 ? _bgmDatabase.NormalGameplayMusic : _bgmDatabase.IntenseGameplayMusic;
@@ -61,6 +84,7 @@ public class PlayerBGMController : MonoBehaviour
 
     public void PlayLast30sMusic(float intensity)
     {
+        if (_isSuppressedByShield) return;
         if (_bgmDatabase == null) return;
         AudioClip clipToPlay = intensity < 4 ? _bgmDatabase.Last30sNormalMusic : _bgmDatabase.Last30sIntenseMusic;
         PlayClip(clipToPlay, true);

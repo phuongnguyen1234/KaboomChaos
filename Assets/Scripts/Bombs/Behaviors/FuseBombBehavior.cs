@@ -31,13 +31,6 @@ namespace Bombs.Behaviors
 
         public void OnFixedUpdate(BombController controller)
         {
-            // Áp dụng trọng lực bổ sung bất kể bom đã được kích hoạt ngòi nổ hay chưa.
-            // Điều này đảm bảo bom mìn (landmine) rơi xuống đúng cách.
-            if (controller.BombData is BombData fuseBombData && fuseBombData.additionalGravity > 0)
-            {
-                // Bom hẹn giờ có thể có thêm trọng lực để rơi nhanh hơn
-                controller.BombRigidbody.AddForce(Vector3.down * fuseBombData.additionalGravity, ForceMode.Acceleration);
-            }
         }
 
         public void OnCollisionEnter(BombController controller, Collision collision)

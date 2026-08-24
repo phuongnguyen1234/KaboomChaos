@@ -142,7 +142,7 @@ namespace Player
                     {
                         // Kết hợp lực đẩy ra khỏi tường (_climbJumpForce) và lực nhảy lên trên (_jumpSpeed).
                         // Phải thực hiện trước khi reset normal.
-                        Vector3 jumpOffMomentum = (_climbableSurfaceNormal * _climbJumpForce) + (tr.up * _jumpSpeed);
+                        Vector3 jumpOffMomentum = (_climbableSurfaceNormal * _climbJumpForce) + (tr.up * _jumpForce);
                         AddMomentum(jumpOffMomentum);
                     }
 

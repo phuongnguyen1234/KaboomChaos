@@ -17,7 +17,6 @@ MonoBehaviour:
   description: 'Destroyer
 
 '
-  bombPrefab: {fileID: 2606226552607457878, guid: f7dcec90ef76b44438f7427af6fa81a4, type: 3}
   radius: 9
   damage: 50
   damageFalloff:
@@ -145,7 +144,84 @@ MonoBehaviour:
   minPlayerSpawnChance: 0
   maxPlayerSpawnChance: 5
   playerSpawnRadius: 2
-  possibleVariants: []
+  possibleVariants:
+  - variantBombData: {fileID: 11400000, guid: d73e63e4a58f60e43bcc744b096aa982, type: 2}
+    spawnChanceByDifficulty:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 3.99
+        value: 0
+        inSlope: -0
+        outSlope: 39.800995
+        tangentMode: 69
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 6
+        value: 80
+        inSlope: 39.800995
+        outSlope: 39.800995
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  - variantBombData: {fileID: 11400000, guid: b7bfce99f6d56de498398b51a7c369f3, type: 2}
+    spawnChanceByDifficulty:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 3.99
+        value: 0
+        inSlope: -0
+        outSlope: 9.803922
+        tangentMode: 69
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 4.5
+        value: 5
+        inSlope: 9.803922
+        outSlope: 30
+        tangentMode: 69
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 6
+        value: 50
+        inSlope: 30
+        outSlope: 30
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
   spawnWeightByDifficulty:
     serializedVersion: 2
     m_Curve:
@@ -180,7 +256,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   maxPerSpawnWave: 2
-  maxActiveInstances: 5
+  maxActiveInstances: 4
   fuseTime: 12
   isActivatedOnContact: 0
   changeColorOnFuse: 0
@@ -299,6 +375,5 @@ MonoBehaviour:
     enableScalePulse: 0
     pulseScaleMultiplier: 0
     pulseScaleDuration: 0
-  additionalGravity: 30
   tickingSoundPitch: 1
   tickingSound: {fileID: 0}

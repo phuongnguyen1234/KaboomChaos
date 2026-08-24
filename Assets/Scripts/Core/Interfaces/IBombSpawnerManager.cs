@@ -7,6 +7,11 @@ namespace Core.Interfaces
     /// </summary>
     public interface IBombSpawnerManager
     {
+        /// <summary>
+        /// Thể hiện Singleton toàn cục của IBombSpawnerManager.
+        /// </summary>
+        static IBombSpawnerManager Instance { get; }
+
         /// <summary> Bắt đầu chu trình sinh bom. </summary>
         void StartSpawning();
         /// <summary> Dừng chu trình sinh bom. </summary>
@@ -25,5 +30,19 @@ namespace Core.Interfaces
         /// </summary>
         /// <returns>Một instance của GameObject từ pool.</returns>
         GameObject GetBombFromPool(GameObject prefab, Vector3 position, Quaternion rotation);
+
+        /// <summary>
+        /// Lấy prefab tương ứng với một dữ liệu bom cụ thể.
+        /// </summary>
+        /// <param name="data">Dữ liệu bom cần tìm prefab.</param>
+        /// <returns>Prefab của bom, hoặc null nếu không tìm thấy.</returns>
+        GameObject GetPrefabForBombData(IBaseBombData data);
+
+        /// <summary>
+        /// Lấy prefab gốc của một instance bom đang hoạt động.
+        /// </summary>
+        /// <param name="instance">Instance của bom.</param>
+        /// <returns>Prefab gốc, hoặc null nếu không tìm thấy.</returns>
+        GameObject GetPrefabForInstance(GameObject instance);
     }
 }

@@ -1,8 +1,9 @@
 ﻿<Solution>
   <Project Path="Player.csproj" />
+  <Project Path="Collectibles.csproj" />
   <Project Path="Core.csproj" />
   <Project Path="Managers.csproj" />
   <Project Path="DOTween.Modules.csproj" />
-  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="Bombs.csproj" />
   <Project Path="UI.csproj" />
 </Solution>

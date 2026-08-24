@@ -30,8 +30,5 @@ namespace Bombs.Data
 
         [Tooltip("Tốc độ di chuyển của tên lửa (đơn vị/giây).")]
         public float speed = 15f;
-
-        [Tooltip("Tốc độ xoay của tên lửa (độ/giây). Giá trị cao hơn sẽ khiến tên lửa bám mục tiêu tốt hơn.")]
-        public float turnSpeed = 180f;
     }
 }

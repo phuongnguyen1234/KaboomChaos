@@ -9,6 +9,11 @@ namespace Core.Interfaces
     public interface IDestructionManager
     {
         /// <summary>
+        /// Thể hiện Singleton toàn cục của IDestructionManager.
+        /// </summary>
+        static IDestructionManager Instance { get; }
+
+        /// <summary>
         /// Xử lý một vụ nổ tại một vị trí, ảnh hưởng đến các mảnh vỡ trong bán kính.
         /// Đây là điểm khởi đầu của logic sụp đổ.
         /// </summary>

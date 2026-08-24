@@ -1,10 +1,16 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Core;
 
 namespace Core.Interfaces
 {
     public interface IPlayerManager
     {
+        /// <summary>
+        /// Thể hiện Singleton toàn cục của IPlayerManager.
+        /// </summary>
+        static IPlayerManager Instance { get; }
+
         int GetAlivePlayerCount();
         IPlayer GetCurrentPlayer();
         List<IPlayer> GetAllPlayers();
@@ -20,6 +26,18 @@ namespace Core.Interfaces
         void ReturnRoundSurvivorsToLobby();
         Vector3 GetRandomPlayerPosition();
         List<IPlayer> GetPlayersInRound();
+
+        /// <summary>
+        /// Lấy danh sách người chơi còn sống sót trong round hiện tại.
+        /// Danh sách này phải được lấy TRƯỚC khi gọi EndRound() vì EndRound() xóa danh sách người chơi trong round.
+        /// </summary>
+        List<IPlayer> GetSurvivors();
+
+        /// <summary>
+        /// Lấy (hoặc tạo mới) dữ liệu round của người chơi để theo dõi win streak,
+        /// thời điểm bắt đầu round và trạng thái Extreme Mode.
+        /// </summary>
+        PlayerRoundData GetPlayerRoundData(IPlayer player);
 
         // BGM Control Methods
         void SetGameplayMusicForRoundPlayers(float intensity);

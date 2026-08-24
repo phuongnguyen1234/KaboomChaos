@@ -415,7 +415,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5d6b45b9e9032345a474fad6d2f2d38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Core::Core.Miscellaneous.ConveyorBelt
-  _localVelocity: {x: 0, y: 0, z: 8}
+  _localVelocity: {x: 0, y: 0, z: 12}
 --- !u!1 &6192246886366129971
 GameObject:
   m_ObjectHideFlags: 0
@@ -654,7 +654,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5d6b45b9e9032345a474fad6d2f2d38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Core::Core.Miscellaneous.ConveyorBelt
-  _localVelocity: {x: 0, y: 0, z: 8}
+  _localVelocity: {x: 0, y: 0, z: 12}
 --- !u!1001 &155001264300287860
 PrefabInstance:
   m_ObjectHideFlags: 0

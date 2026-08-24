@@ -1,6 +1,5 @@
 using UnityEngine;
 using Core.Interfaces;
-using UnityEngine.Scripting;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -39,10 +38,6 @@ namespace Bombs.Data
         [Tooltip("Mô tả ngắn về bom.")]
         [TextArea] public string description = "Một quả bom cổ điển, quen thuộc.";
         public string Description => description; // Triển khai interface
-
-        [Tooltip("Prefab của quả bom này (phải có component BombController và đã gán sẵn Data).")]
-        public GameObject bombPrefab;
-        public GameObject BombPrefab => bombPrefab; // Triển khai interface
 
         [Header("Vụ nổ")]
         [Tooltip("Bán kính của vụ nổ (ảnh hưởng đến sát thương, hiệu ứng và phá hủy địa hình).")]
@@ -174,8 +169,8 @@ namespace Bombs.Data
         public List<IBombVariant> PossibleVariants => possibleVariants.Cast<IBombVariant>().ToList(); // Triển khai interface
 
         [Header("Thông tin Game & Xác suất xuất hiện")]
-        [Tooltip("Đường cong trọng số xuất hiện theo độ khó. Trục X là độ khó của game. Trục Y là trọng số tương đối (càng cao càng dễ xuất hiện). Mặc định được thiết lập cho độ khó từ 1-5, bom sẽ hiếm hơn khi độ khó tăng.")]
-        public AnimationCurve spawnWeightByDifficulty = AnimationCurve.Linear(1, 100, 5, 20);
+        [Tooltip("Đường cong trọng số xuất hiện theo độ khó. Trục X là độ khó của game. Trục Y là trọng số tương đối (càng cao càng dễ xuất hiện). Mặc định được thiết lập cho độ khó từ 1-6, bom sẽ hiếm hơn khi độ khó tăng.")]
+        public AnimationCurve spawnWeightByDifficulty = AnimationCurve.Linear(1, 100, 6, 20);
         public AnimationCurve SpawnWeightByDifficulty => spawnWeightByDifficulty; // Triển khai interface
 
         [Header("Giới hạn Sinh (Spawning Limits)")]

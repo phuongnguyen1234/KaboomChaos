@@ -42,7 +42,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _animationStages.Array.data[1].duration
-      value: 1.2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _animationStages.Array.data[0].targetValue
@@ -110,11 +110,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _animationStages.Array.data[1].easeCurve.m_Curve.Array.data[0].inSlope
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _animationStages.Array.data[1].easeCurve.m_Curve.Array.data[1].inSlope
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _animationStages.Array.data[0].easeCurve.m_Curve.Array.data[0].outSlope
@@ -126,11 +126,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _animationStages.Array.data[1].easeCurve.m_Curve.Array.data[0].outSlope
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _animationStages.Array.data[1].easeCurve.m_Curve.Array.data[1].outSlope
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _animationStages.Array.data[0].easeCurve.m_Curve.Array.data[0].tangentMode
@@ -142,11 +142,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _animationStages.Array.data[1].easeCurve.m_Curve.Array.data[0].tangentMode
-      value: 34
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _animationStages.Array.data[1].easeCurve.m_Curve.Array.data[1].tangentMode
-      value: 34
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4754107197624226471, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: m_IsActive

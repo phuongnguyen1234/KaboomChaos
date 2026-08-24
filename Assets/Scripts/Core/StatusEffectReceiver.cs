@@ -60,6 +60,7 @@ namespace Core
         private Rigidbody _rigidbody;
         private IDamageable _damageable; // Thêm để kiểm tra trạng thái IsAlive một cách trừu tượng
         private AudioSource _audioSource;
+        private IPlayerShieldController _shieldController;
         private Collider _objectCollider;
 
         // Trạng thái hiệu ứng
@@ -94,6 +95,7 @@ namespace Core
             _rigidbody = GetComponent<Rigidbody>();
             _damageable = GetComponent<IDamageable>(); // Lấy component IDamageable
             _audioSource = GetComponent<AudioSource>();
+            _shieldController = GetComponent<IPlayerShieldController>();
             _objectCollider = GetComponent<Collider>();
 
             if (_objectCollider != null)
@@ -193,6 +195,16 @@ namespace Core
         {
             if (newEffect == StatusEffectType.None) return;
 
+            // --- LOGIC KHIÊN ---
+            // Nếu đây là người chơi, kiểm tra xem khiên có chặn hiệu ứng này không.
+            if (_player != null && _shieldController != null && _shieldController.IsShieldActive)
+            {
+                if (_shieldController.ProcessStatusEffect(newEffect))
+                {
+                    return; // Khiên đã chặn hiệu ứng.
+                }
+            }
+
             // Nếu đây là người chơi và hiệu ứng là Đóng băng, sử dụng thời gian đóng băng riêng.
             if (_player != null && newEffect == StatusEffectType.Frozen)
             {
@@ -266,7 +278,15 @@ namespace Core
                     if (_statusEffectCoroutine != null)
                     {
                         StopCoroutine(_statusEffectCoroutine);
-                        RevertAllEffects();
+
+                        // SỬA LỖI: Nếu hiệu ứng mới giống hệt hiệu ứng cũ (ví dụ: liên tục đứng trong dung nham),
+                        // chúng ta chỉ muốn "làm mới" thời gian tồn tại của nó. Việc gọi RevertAllEffects()
+                        // sẽ xóa hiệu ứng hình ảnh và gây ra hiện tượng nhấp nháy khi nó được áp dụng lại.
+                        // Thay vào đó, chúng ta chỉ hoàn tác nếu hiệu ứng mới là một hiệu ứng *khác*.
+                        if (_currentEffect != newEffect)
+                        {
+                            RevertAllEffects();
+                        }
                     }
                 }
             }
@@ -294,11 +314,17 @@ namespace Core
         /// </summary>
         private IEnumerator StatusEffectRoutine(StatusEffectType effect, float duration)
         {
+            // Chỉ áp dụng lại hình ảnh và thuộc tính gameplay nếu đây là một hiệu ứng mới,
+            // hoặc nếu hiệu ứng hiện tại là None.
+            bool isEffectChanging = (_currentEffect != effect);
             _currentEffect = effect;
 
-            ApplyGameplayProperties(effect);
-            ApplyEffectMaterialWithRandomOffset(effect);
-            ApplyPermanentEffectVFX(effect);
+            if (isEffectChanging)
+            {
+                ApplyGameplayProperties(effect);
+                ApplyEffectMaterialWithRandomOffset(effect);
+                ApplyPermanentEffectVFX(effect);
+            }
 
             yield return new WaitForSeconds(duration);
 

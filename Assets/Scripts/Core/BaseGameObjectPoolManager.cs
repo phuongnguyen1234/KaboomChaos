@@ -81,7 +81,7 @@ namespace Core
             }
             else
             {
-                Debug.LogWarning($"[{GetType().Name}] Nhận được yêu cầu trả về pool một đối tượng không được theo dõi: '{instance.name}'. Đối tượng sẽ bị hủy.", instance);
+                //Debug.LogWarning($"[{GetType().Name}] Nhận được yêu cầu trả về pool một đối tượng không được theo dõi: '{instance.name}'. Đối tượng sẽ bị hủy.", instance);
                 Destroy(instance);
             }
         }

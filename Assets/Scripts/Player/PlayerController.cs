@@ -18,6 +18,10 @@ namespace Player
         [Tooltip("Độ mượt khi xoay nhân vật theo hướng di chuyển ở góc nhìn thứ ba.")]
         [SerializeField] private float _rotationSmoothTime = 0.1f;
 
+        [Header("Floating Text Containers")]
+        [SerializeField] private Transform _hpTextContainer;
+        [SerializeField] private Transform _coinTextContainer;
+
         private float _rotationVelocity;
 
         private CameraController _cameraController;
@@ -31,6 +35,10 @@ namespace Player
         public bool IsFrozen => _isFrozen;
 
         #endregion
+        private float _speedBonus = 0f;
+        private float _jumpBonus = 0f;
+        private const float BaseSpeed = 1.0f; // Giả định base là 1.0
+
 
         #region IPlayer Implementation
 
@@ -143,11 +151,68 @@ namespace Player
             }
             this.enabled = enabled;
         }
+
+        /// <summary>
+        /// Áp dụng một hệ số nhân vào tốc độ di chuyển của người chơi.
+        /// </summary>
+        public void ApplySpeedMultiplier(float multiplier)
+        {
+            float bonus = multiplier - 1.0f;
+            _speedBonus += bonus;
+            _movementSpeed += bonus;
+        }
+
+        /// <summary>
+        /// Gỡ bỏ một hệ số nhân khỏi tốc độ di chuyển của người chơi.
+        /// </summary>
+        public void RemoveSpeedMultiplier(float multiplier)
+        {
+            float bonus = multiplier - 1.0f;
+            _speedBonus -= bonus;
+            _movementSpeed -= bonus;
+        }
+
+        /// <summary>
+        /// Áp dụng một hệ số nhân vào lực nhảy của người chơi.
+        /// </summary>
+        public void ApplyJumpMultiplier(float multiplier)
+        {
+            float bonus = multiplier - 1.0f;
+            _jumpBonus += bonus;
+            _jumpForce += bonus; // Giả định _jumpForce là biến được dùng trong Controller
+        }
+
+        /// <summary>
+        /// Gỡ bỏ một hệ số nhân khỏi lực nhảy của người chơi.
+        /// </summary>
+        public void RemoveJumpMultiplier(float multiplier)
+        {
+            float bonus = multiplier - 1.0f;
+            _jumpBonus -= bonus;
+            _jumpForce -= bonus;
+        }
+        /// <inheritdoc/>
+        public Transform HPTextContainer => _hpTextContainer;
+
+        /// <inheritdoc/>
+        public Transform CoinTextContainer => _coinTextContainer;
+
         #endregion
 
         #region BGM Control (IPlayer Implementation)
 
         /// <summary>
+        /// <summary>
+        /// Reset toàn bộ chỉ số cộng dồn về trạng thái gốc.
+        /// </summary>
+        public void ResetModifiers()
+        {
+            _movementSpeed -= _speedBonus;
+            _jumpForce -= _jumpBonus;
+            _speedBonus = 0f;
+            _jumpBonus = 0f;
+        }
+
         /// Yêu cầu BGM controller của người chơi này phát nhạc sảnh chờ.
         /// </summary>
         public void PlayLobbyMusic()
@@ -178,6 +243,22 @@ namespace Player
         public void StopMusic()
         {
             _bgmController?.StopMusic();
+        }
+
+        /// <summary>
+        /// Tạm dừng nhạc nền hiện tại.
+        /// </summary>
+        public void PauseMusic()
+        {
+            _bgmController?.PauseMusic();
+        }
+
+        /// <summary>
+        /// Tiếp tục phát nhạc nền đã bị tạm dừng.
+        /// </summary>
+        public void ResumeMusic()
+        {
+            _bgmController?.ResumeMusic();
         }
 
         #endregion
@@ -269,7 +350,11 @@ namespace Player
             if (_useLocalMomentum)
                 momentum = tr.localToWorldMatrix * momentum;
 
-            momentum += tr.up * _jumpSpeed;
+            momentum += tr.up * _jumpForce;
+
+            // Gán lại thời gian bắt đầu nhảy. Điều này rất quan trọng để logic trong
+            // DetermineControllerState hoạt động đúng (ví dụ: hết thời gian _jumpDuration).
+            currentJumpStartTime = Time.time;
 
             OnJump?.Invoke(momentum);
 

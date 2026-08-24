@@ -306,12 +306,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2816007186768753140}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.6, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 6415730543822700039}
+  m_Father: {fileID: 9058404962083530424}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4141190779602590162
 GameObject:
@@ -610,6 +610,7 @@ GameObject:
   - component: {fileID: 152607269323249147}
   - component: {fileID: 3042991768119852323}
   - component: {fileID: -1234592264942504701}
+  - component: {fileID: 6560203491661103311}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -634,6 +635,8 @@ Transform:
   - {fileID: 6728300626546613372}
   - {fileID: 6062938417285825333}
   - {fileID: 643955105398045}
+  - {fileID: 6114507798074661896}
+  - {fileID: 3035265922190168773}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!136 &5569519737715321138
@@ -886,29 +889,31 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Player::Player.CMFPlayerAdapter
   _movementSpeed: 10
-  _airControlRate: 5
-  _jumpSpeed: 25
+  _airControlRate: 8
+  _jumpForce: 28
   _coyoteTimeDuration: 0.1
   _jumpDuration: 0.1
-  _airFriction: 20
+  _airFriction: 50
   _groundFriction: 100
   _slipperyPhysicsMaterial: {fileID: 13400000, guid: 624cc8f3fbd14344a90b69d2df285867, type: 2}
   _slipperyFriction: 0.6
   _iceControlRate: 20
-  _gravity: 60
+  _gravity: 80
   _slideGravity: 5
   _slopeLimit: 80
   _useLocalMomentum: 0
   cameraTransform: {fileID: 0}
   _climbableTag: Climbable
-  _climbSpeed: 4
+  _climbSpeed: 8
   _maxClimbAngle: 45
   _climbJumpForce: 5
   _climbCapsuleHeight: 0.7
   _climbCapsuleCenterY: 1
   _climbDetectionDistance: 0.2
   _climbDetectionRadius: 0.24
-  _rotationSmoothTime: 0.15
+  _rotationSmoothTime: 0.12
+  _hpTextContainer: {fileID: 6114507798074661896}
+  _coinTextContainer: {fileID: 3035265922190168773}
 --- !u!114 &-3142878197026154125
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -948,7 +953,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a975e513c507b54fb1671b45d27c367, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Player::Player.PlayerHealth
-  _maxHealth: 250
+  _baseMaxHealth: 100
   _statusDamagePerTick: 5
   _statusEffectDOTInterval: 1
   _contactDamageImmunityDuration: 1
@@ -1022,12 +1027,24 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5972301456437702894}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e681d99b2fee17b4daf9571511da31a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Player::PlayerBGMController
   _bgmDatabase: {fileID: 11400000, guid: 5ad4e4a513883e84b916198f2ff20e53, type: 2}
+--- !u!114 &6560203491661103311
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5972301456437702894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26bad44072d41454e8da88b3e8ec9e16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Player::Player.PlayerShieldController
 --- !u!1 &6134688723021336778
 GameObject:
   m_ObjectHideFlags: 0
@@ -1310,6 +1327,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f939b6690c89a624ba0f12818e8291af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Player::PrimaryTarget
+--- !u!1 &7123181805930719173
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3035265922190168773}
+  m_Layer: 6
+  m_Name: FloatingCoinTextContainer
+  m_TagString: FloatingTextContainer
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3035265922190168773
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7123181805930719173}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 1, y: 2.2, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9058404962083530424}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7176821858139646439
 GameObject:
   m_ObjectHideFlags: 0
@@ -1692,7 +1740,6 @@ Transform:
   m_Children:
   - {fileID: 5399528530761328526}
   - {fileID: 9010361388460078409}
-  - {fileID: 6114507798074661896}
   m_Father: {fileID: 7678030116290802555}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &8340573526381223733

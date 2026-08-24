@@ -1,8 +1,11 @@
 using UnityEngine;
-using Core.Interfaces;
-using TMPro; // Cần cho TextMeshPro
+using UnityEngine.UI;
+using TMPro;
 using System.Collections;
 using DG.Tweening;
+using Core.Interfaces.UI;
+using Core;
+using UnityEngine.InputSystem;
 
 namespace UI
 {
@@ -12,7 +15,7 @@ namespace UI
     /// </summary>
     public class UIManager : MonoBehaviour, IUIManager
     {
-        private static WaitForSeconds _waitForSeconds1 = new WaitForSeconds(1f);
+        private static WaitForSeconds _waitForSeconds1 = new(1f);
         #region Fields
         [Header("Notification Panel")]
         [Tooltip("Panel chứa thông báo chung.")]
@@ -36,7 +39,7 @@ namespace UI
         
         [Header("Intensity Bar Animation")]
         [Tooltip("Vị trí bắt đầu của thanh cường độ (ngoài màn hình, tính từ vị trí gốc).")]
-        [SerializeField] private Vector2 _intensityBarStartOffset = new Vector2(0, 200f);
+        [SerializeField] private Vector2 _intensityBarStartOffset = new(0, 200f);
         [Tooltip("Thời gian cho hiệu ứng trượt vào của thanh cường độ.")]
         [SerializeField] private float _intensityBarSlideInDuration = 0.5f;
         [Tooltip("Ease type cho hiệu ứng trượt vào.")]
@@ -64,8 +67,35 @@ namespace UI
         [Tooltip("CanvasGroup của crosshair cho góc nhìn thứ nhất. GameObject chứa nó phải có component CanvasGroup.")]
         [SerializeField] private CanvasGroup _firstPersonCrosshairCanvasGroup;
 
+        [Header("Dependencies")]
+        [Tooltip("Kéo thả HomeScreen GameObject vào đây")]
+        [SerializeField] private HomeScreen _homeScreenBehaviour;
+
+        [Header("Pause Menu")]
+        [Tooltip("Kéo thả PauseMenu GameObject vào đây")]
+        [SerializeField] private PauseMenu _pauseMenuBehaviour;
+        [Tooltip("Phím để mở Pause Menu (Mặc định: ESC)")]
+        [SerializeField] private InputAction _pauseAction = new(type: InputActionType.Button, binding: "<Keyboard>/escape");
+
+        [Header("Score Card")]
+        [Tooltip("Kéo thả ScoreCard GameObject vào đây để hiển thị bảng điểm sau mỗi round (thắng/thua).")]
+        [SerializeField] private ScoreCard _scoreCardBehaviour;
+
+        [Header("Main HUD")]
+        [Tooltip("Main HUD (thanh máu, năng lượng...) hiển thị khi bắt đầu vào chơi, ẩn khi quay về Home.")]
+        [SerializeField] private GameObject _mainHUD;
+
+        [Header("Pause Menu Button")]
+        [Tooltip("Nút mở Pause Menu (thường đặt trong Main HUD). Ngoài phím ESC.")]
+        [SerializeField] private Button _pauseMenuButton;
+
         // Coroutine đang chạy để có thể dừng lại nếu cần
         private Coroutine _notificationCoroutine;
+
+        // Dependencies
+        private IHomeScreen _homeScreen;
+        private IPauseMenu _pauseMenu;
+        private IScoreCard _scoreCard;
 
         // Cache vị trí gốc của thanh intensity để dùng cho animation
         private Vector2 _intensityBarOriginalPosition;
@@ -78,10 +108,71 @@ namespace UI
             {
                 Destroy(gameObject);
             }
-            else
+                        else
             {
                 IUIManager.Instance = this;
                 DontDestroyOnLoad(gameObject);
+            }
+
+            // Inject IHomeScreen
+            if (_homeScreenBehaviour != null)
+            {
+                _homeScreen = _homeScreenBehaviour;
+                if (_homeScreen != null)
+                {
+                    // Subscribe vào event - pattern giống Vue parent-child communication
+                    _homeScreen.OnPlayClicked += HandleHomeScreenPlayClicked;
+                }
+            }
+
+            if (_pauseMenuBehaviour != null)
+            {
+                _pauseMenu = _pauseMenuBehaviour;
+            }
+
+            // Inject IScoreCard
+            if (_scoreCardBehaviour != null)
+            {
+                _scoreCard = _scoreCardBehaviour;
+            }
+
+            // Gán sự kiện cho nút mở Pause Menu thủ công (bên cạnh phím ESC)
+            if (_pauseMenuButton != null)
+            {
+                _pauseMenuButton.onClick.AddListener(TogglePauseMenu);
+            }
+        }
+
+        private void OnEnable()
+        {
+            _pauseAction.Enable();
+            GameEvents.OnReturnToHomeRequest += HandleReturnToHome;
+        }
+
+        private void OnDisable()
+        {
+            _pauseAction.Disable();
+            GameEvents.OnReturnToHomeRequest -= HandleReturnToHome;
+        }
+
+        private void OnDestroy()
+        {
+            // Unsubscribe để tránh memory leak
+            if (_homeScreen != null)
+            {
+                _homeScreen.OnPlayClicked -= HandleHomeScreenPlayClicked;
+            }
+            if (_pauseMenuButton != null)
+            {
+                _pauseMenuButton.onClick.RemoveListener(TogglePauseMenu);
+            }
+        }
+
+        private void Update()
+        {
+            if (_pauseAction.WasPressedThisFrame())
+            {
+                TogglePauseMenu();
             }
         }
 
@@ -98,6 +189,13 @@ namespace UI
             }
             if (_countdownPanel != null) _countdownPanel.SetActive(false);
             if (_currentIntensityPanel != null) _currentIntensityPanel.SetActive(false);
+            if (_scoreCard != null) _scoreCard.Hide();
+            if (_mainHUD != null) _mainHUD.SetActive(false);          // Main HUD bắt đầu ẩn (chỉ hiện khi ấn Play)
+            if (_pauseMenu != null) _pauseMenu.Hide();                 // Pause Menu bắt đầu ẩn
+
+            // ConfirmationPopup đã được khởi tạo + đăng ký Instance trong Awake (phải active lúc boot),
+            // nhưng cần ẩn ngay khi UI bắt đầu để không hiển thị lung tung.
+            if (IConfirmationPopup.Instance != null) IConfirmationPopup.Instance.Hide();
 
             // Sử dụng alpha để ẩn crosshair thay vì SetActive(false)
             // Điều này giúp tránh giật lag khi bật/tắt nhanh (spam)
@@ -191,7 +289,21 @@ namespace UI
             yield return new WaitForSeconds(_intensityBarSlideInDuration);
 
             // 3. Hiệu ứng mũi tên chạy
-            float normalizedValue = Mathf.InverseLerp(minIntensity, maxIntensity, currentIntensity);
+            // SỬA LỖI: Mathf.InverseLerp trả về 0 khi min == max (tránh chia cho 0),
+            // khiến mũi tên luôn đứng ở mép trái (vị trí số 1) dù intensity của round là bao nhiêu
+            // (ví dụ test min = max = 6 thì mũi tên vẫn chỉ số 1 thay vì số 6).
+            float normalizedValue;
+            if (Mathf.Approximately(minIntensity, maxIntensity))
+            {
+                // Toàn bộ thanh chỉ đại diện cho MỘT giá trị duy nhất:
+                // đạt đúng giá trị đó -> đẩy mũi tên hết cỡ về phía max, ngược lại giữ ở min.
+                normalizedValue = currentIntensity >= maxIntensity ? 1f : 0f;
+            }
+            else
+            {
+                // Clamp01 để chống trường hợp currentIntensity nằm ngoài khoảng [min, max].
+                normalizedValue = Mathf.Clamp01((currentIntensity - minIntensity) / (maxIntensity - minIntensity));
+            }
             float rangeWidth = _intensityRange.rect.width;
             float arrowTargetX = normalizedValue * rangeWidth;
             DOTween.To(() => _intensityArrow.anchoredPosition, pos => _intensityArrow.anchoredPosition = pos, new Vector2(arrowTargetX, _intensityArrow.anchoredPosition.y), _arrowMoveDuration).SetEase(_arrowMoveEase);
@@ -226,6 +338,23 @@ namespace UI
         public void HideCurrentIntensity()
         {
             if (_currentIntensityPanel != null) _currentIntensityPanel.SetActive(false);
+        }
+
+        /// <inheritdoc/>
+        public void ShowScoreCard(ScoreCardData data)
+        {
+            if (_scoreCard == null)
+            {
+                Debug.LogWarning("[UIManager] ScoreCard is not assigned. Cannot show Score Card.", this);
+                return;
+            }
+            _scoreCard.Show(data);
+        }
+
+        /// <inheritdoc/>
+        public void HideScoreCard()
+        {
+            _scoreCard?.Hide();
         }
 
         /// <inheritdoc/>
@@ -275,6 +404,40 @@ namespace UI
             }
         }
 
+        public void TogglePauseMenu()
+        {
+            if (_pauseMenu != null)
+            {
+                _pauseMenu.Toggle();
+            }
+        }
+
+        #endregion
+
+        #region Event Handlers
+        private void HandleHomeScreenPlayClicked()
+        {
+            // UIManager nhận event từ HomeScreen (HomeScreen đã tự ẩn trước khi emit event).
+            // Hiện Main HUD và đảm bảo Pause Menu bị ẩn khi bắt đầu chơi.
+            if (_mainHUD != null) _mainHUD.SetActive(true);
+            _pauseMenu?.Hide();
+
+            // Bắn event yêu cầu chạy game
+            Debug.Log("[UIManager] HomeScreen PlayClicked event received. Triggering GameEvents.OnStartGameRequest.");
+            GameEvents.TriggerStartGameRequest();
+        }
+
+        /// <summary>
+        /// Xử lý khi người chơi xác nhận "Back To Home" (từ PauseMenu → ConfirmationPopup):
+        /// ẩn Main HUD + các panel gameplay, hiện lại HomeScreen (kèm chuỗi loading).
+        /// </summary>
+        private void HandleReturnToHome()
+        {
+            Debug.Log("[UIManager] ReturnToHomeRequest received. Hiding Main HUD and showing HomeScreen.");
+            HideGameplayPanels();
+            _pauseMenu?.Hide();
+            _homeScreen?.Show(true); // Quay straight to Home - without loading overlay.
+        }
         #endregion
 
         #region Private Methods & Coroutines
@@ -286,6 +449,24 @@ namespace UI
             yield return new WaitForSeconds(duration);
             _notificationPanel.SetActive(false);
             _notificationCoroutine = null;
+        }
+
+        /// <summary>
+        /// Ẩn toàn bộ các panel gameplay/HUD khi thoát về Home hoặc lúc khởi động.
+        /// </summary>
+        private void HideGameplayPanels()
+        {
+            if (_notificationPanel != null) _notificationPanel.SetActive(false);
+            if (_timerPanel != null) _timerPanel.SetActive(false);
+            if (_intensityBarPanel != null) _intensityBarPanel.SetActive(false);
+            if (_countdownPanel != null) _countdownPanel.SetActive(false);
+            if (_currentIntensityPanel != null) _currentIntensityPanel.SetActive(false);
+            if (_mainHUD != null) _mainHUD.SetActive(false);
+            if (_scoreCard != null) _scoreCard.Hide();
+
+            // Ẩn crosshair (dùng alpha để tránh giật lag khi bật/tắt nhanh)
+            if (_shiftLockCrosshairCanvasGroup != null) _shiftLockCrosshairCanvasGroup.alpha = 0f;
+            if (_firstPersonCrosshairCanvasGroup != null) _firstPersonCrosshairCanvasGroup.alpha = 0f;
         }
         #endregion
     }

@@ -40,19 +40,22 @@ namespace Bombs.Behaviors
             {
                 Debug.Log($"[DynamiteBehavior] Dynamite triggered by contact with a hot object '{contactObject.name}'. Starting fuse.");
                 controller.StartFuse();
+                return; // Đã kích hoạt, không cần kiểm tra thêm
+            }
+
+            // Kiểm tra xem đối tượng va chạm có phải là người chơi có Fire Shield không
+            IPlayerShieldController shieldController = contactObject.GetComponentInParent<IPlayerShieldController>();
+            if (shieldController != null && shieldController.HasFireShield)
+            {
+                Debug.Log($"[DynamiteBehavior] Dynamite triggered by contact with a Fire Shield player '{contactObject.name}'. Starting fuse.");
+                controller.StartFuse();
             }
         }
 
         /// <summary>
         /// Áp dụng trọng lực để nó rơi xuống như một vật thể thông thường.
         /// </summary>
-        public void OnFixedUpdate(BombController controller)
-        {
-            if (controller.BombData is BombData data && data.additionalGravity > 0)
-            {
-                controller.BombRigidbody.AddForce(Vector3.down * data.additionalGravity, ForceMode.Acceleration);
-            }
-        }
+        public void OnFixedUpdate(BombController controller) { }
 
         public void OnSetup(BombController controller)
         {
