@@ -34,7 +34,7 @@ public class ExampleClass : MonoBehaviour
 { ... }
 ```
 
-- Comment bằng tiếng việt không dấu, không comment bằng tiếng anh. Kệ các comment tiếng việt có dấu đã có sẵn
+- Comment bằng tiếng việt không dấu, không comment bằng tiếng anh. Kệ các comment tiếng việt có dấu đã có sẵn (nhằm tránh để Agent gặp lỗi các ký tự unicode)
 
 ### 2.2 Regions & Code Organization
 
@@ -277,6 +277,7 @@ public class ExampleBehaviour : MonoBehaviour
 - Ngoại lệ: Các class nhỏ phục vụ cho class chính (ví dụ: custom EventArgs)
 - **Đặt tên file trùng với tên type** (ví dụ: `IDamageable.cs`, `PlayerMovement.cs`)
 - Group các file theo tính năng, không theo kiểu (ví dụ: Bombs/Explosion.cs, Bombs/Bomb.cs)
+- Không được phép tự sửa các file yaml của Unity, nhắc nhở người dùng tự gán tham chiếu
 
 ---
 

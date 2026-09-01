@@ -44,6 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b48f6d01f0edf8419deb63cd3d0a463, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Managers::Managers.GameplayManager
+  _welcomeDuration: 5
   _votingDuration: 20
   _mapRevealDuration: 3
   _postBuildStabilizationDuration: 3
@@ -53,7 +54,7 @@ MonoBehaviour:
   _postCleanupStabilizationDuration: 2
   _minIntensity: 1
   _maxIntensity: 6
-  _initialIntensity: 3
+  _initialIntensity: 4
   _intensityIncrementPerRound: 0.25
   _intensityMaxDeathPenalty: 0.3
   _arenaSpawnAreaYOffset: -9

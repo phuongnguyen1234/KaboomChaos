@@ -61,6 +61,12 @@ namespace Core.Interfaces
         void Teleport(Vector3 position);
 
         /// <summary>
+        /// Them luc quan tinh (momentum) vao nguoi choi de day hoac hất tung ho.
+        /// </summary>
+        /// <param name="momentum">Vector luc momentum muon add.</param>
+        void AddMomentum(Vector3 momentum);
+
+        /// <summary>
         /// Bật hoặc tắt khả năng di chuyển của người chơi.
         /// </summary>
         /// <param name="enabled">True để bật di chuyển, False để tắt.</param>

@@ -15,7 +15,6 @@ MonoBehaviour:
   id: nuke
   displayName: Nuke
   description: Nuke
-  bombPrefab: {fileID: 5712356794409419925, guid: 665d454c0c130ba42b30d518c2811049, type: 3}
   radius: 9
   damage: 50
   damageFalloff:
@@ -110,7 +109,7 @@ MonoBehaviour:
   minNumberOfExplosions: 5
   maxNumberOfExplosions: 7
   spawnSound: {fileID: 8300000, guid: 8b514b8162f3b754f842b9176e4d078b, type: 3}
-  delayBetweenExplosions: 0.2
+  delayBetweenExplosions: 0.4
   explosionSpreadRadius: 3
   subExplosionDamage: 35
   subExplosionDamageFalloff:
@@ -140,8 +139,8 @@ MonoBehaviour:
   explosionVFX: {fileID: 7387641680929074750, guid: fdd70fa6eb0a8e149ba17067174cb01e, type: 3}
   explosionSoundPitch: 1
   explosionSound: {fileID: 8300000, guid: b4a33f5902ca2ee4cbff08eaaca96b3b, type: 3}
-  minPlayerSpawnChance: 5
-  maxPlayerSpawnChance: 30
+  minPlayerSpawnChance: 30
+  maxPlayerSpawnChance: 60
   playerSpawnRadius: 2
   possibleVariants:
   - variantBombData: {fileID: 11400000, guid: a84561e8764d43641a7e82f19aebbfc9, type: 2}

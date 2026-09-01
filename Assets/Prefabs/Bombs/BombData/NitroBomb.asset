@@ -15,7 +15,6 @@ MonoBehaviour:
   id: nitro-bomb
   displayName: Nitro Bomb
   description: Nitro Bomb
-  bombPrefab: {fileID: 1948470642424037743, guid: 77dad62c764ff0e479565ded5414ebaa, type: 3}
   radius: 9
   damage: 25
   damageFalloff:
@@ -140,9 +139,9 @@ MonoBehaviour:
   explosionVFX: {fileID: 2096552461435851326, guid: c3b2951fae4969c4394711b604af4208, type: 3}
   explosionSoundPitch: 1
   explosionSound: {fileID: 8300000, guid: 84bc0c6ab87183a4d8ba6955f79ed2b1, type: 3}
-  minPlayerSpawnChance: 0
-  maxPlayerSpawnChance: 0
-  playerSpawnRadius: 0
+  minPlayerSpawnChance: 30
+  maxPlayerSpawnChance: 60
+  playerSpawnRadius: 3
   possibleVariants: []
   spawnWeightByDifficulty:
     serializedVersion: 2
@@ -188,8 +187,7 @@ MonoBehaviour:
     decalPulseColor: {r: 0, g: 0, b: 0, a: 0}
     decalPulseDuration: 0
     enableScalePulse: 1
-    pulseScaleMultiplier: 1
+    pulseScaleMultiplier: 1.5
     pulseScaleDuration: 4
-  additionalGravity: 30
   tickingSoundPitch: 1
   tickingSound: {fileID: 0}

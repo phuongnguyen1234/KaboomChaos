@@ -611,6 +611,9 @@ GameObject:
   - component: {fileID: 3042991768119852323}
   - component: {fileID: -1234592264942504701}
   - component: {fileID: 6560203491661103311}
+  - component: {fileID: 9056540687263027051}
+  - component: {fileID: -1604854025949315160}
+  - component: {fileID: -723320863185783158}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -1045,6 +1048,48 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26bad44072d41454e8da88b3e8ec9e16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Player::Player.PlayerShieldController
+--- !u!114 &9056540687263027051
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5972301456437702894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a47323b1a35bc043b78469bd91379f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Player::Player.PlayerEnergy
+  _baseMaxEnergy: 100
+  _defaultRechargeDuration: 10
+--- !u!114 &-1604854025949315160
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5972301456437702894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf505ccbbcc2d714a92684f0ea16da27, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Skills::Skills.PlayerSkillController
+  _useSkillKey: 19
+  _skillDatabase: {fileID: 11400000, guid: a1771a839d3cb8e42aee99b65fc11392, type: 2}
+  _skillSfxSource: {fileID: 5271153991751326465}
+--- !u!114 &-723320863185783158
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5972301456437702894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72ffb89090aa2a7448d55b4680ab946b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Player::Player.PlayerPerkController
+  _perkDatabase: {fileID: 11400000, guid: ac5f3e0f3c9b3df4a8718406e45e6985, type: 2}
 --- !u!1 &6134688723021336778
 GameObject:
   m_ObjectHideFlags: 0

@@ -15,7 +15,6 @@ MonoBehaviour:
   id: tnt-crate
   displayName: TNT Crate
   description: TNT Crate
-  bombPrefab: {fileID: 7713800426918867564, guid: 4954db507222c4848a18738c2374ed13, type: 3}
   radius: 6
   damage: 20
   damageFalloff:
@@ -140,8 +139,8 @@ MonoBehaviour:
   explosionVFX: {fileID: 2096552461435851326, guid: 0370a55c632d008479e1f08df1cd39f1, type: 3}
   explosionSoundPitch: 0.9
   explosionSound: {fileID: 8300000, guid: 4ec13aac2d907984e95c171c4ae6317d, type: 3}
-  minPlayerSpawnChance: 20
-  maxPlayerSpawnChance: 40
+  minPlayerSpawnChance: 55
+  maxPlayerSpawnChance: 80
   playerSpawnRadius: 2
   possibleVariants:
   - variantBombData: {fileID: 11400000, guid: 392f8b3bcf3fabd419af47182f8e93a9, type: 2}
@@ -303,6 +302,5 @@ MonoBehaviour:
     enableScalePulse: 1
     pulseScaleMultiplier: 1.2
     pulseScaleDuration: 0.2
-  additionalGravity: 35
   tickingSoundPitch: 1
   tickingSound: {fileID: 0}

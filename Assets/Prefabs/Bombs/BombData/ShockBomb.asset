@@ -15,7 +15,6 @@ MonoBehaviour:
   id: shock-bomb
   displayName: Shock Bomb
   description: Shock Bomb
-  bombPrefab: {fileID: 7480504946259583760, guid: defdf172908ff5e48bf73911a271d06a, type: 3}
   radius: 9
   damage: 5
   damageFalloff:
@@ -140,9 +139,9 @@ MonoBehaviour:
   explosionVFX: {fileID: 4115158409028047315, guid: e0d31c364f02f8747a6fbeb6603cbe88, type: 3}
   explosionSoundPitch: 1
   explosionSound: {fileID: 8300000, guid: 919d2fde6741a2f4c8c69e431a100ad7, type: 3}
-  minPlayerSpawnChance: 0
-  maxPlayerSpawnChance: 10
-  playerSpawnRadius: 2
+  minPlayerSpawnChance: 50
+  maxPlayerSpawnChance: 80
+  playerSpawnRadius: 3
   possibleVariants: []
   spawnWeightByDifficulty:
     serializedVersion: 2
@@ -241,6 +240,5 @@ MonoBehaviour:
     enableScalePulse: 0
     pulseScaleMultiplier: 0
     pulseScaleDuration: 0
-  additionalGravity: 40
   tickingSoundPitch: 1
   tickingSound: {fileID: 0}

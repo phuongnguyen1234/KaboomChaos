@@ -30,7 +30,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customAlpha
-      value: 0.3
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customBaseColor.b
@@ -61,8 +61,12 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customFresnelPower
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customEmissionIntensity
-      value: 1
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _initialScale.x
@@ -60962,19 +60966,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customAlpha
-      value: 0.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customBaseColor.b
-      value: 0.5294118
+      value: 0.020754695
       objectReference: {fileID: 0}
     - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customBaseColor.g
-      value: 0.9054963
+      value: 0.804151
       objectReference: {fileID: 0}
     - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customBaseColor.r
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customFresnelPower
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customEmissionIntensity

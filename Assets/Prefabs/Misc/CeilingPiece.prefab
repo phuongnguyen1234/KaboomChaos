@@ -64,6 +64,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: CeilingPiece
       objectReference: {fileID: 0}
+    - target: {fileID: 4748077163201547103, guid: 66a1e523b3c8e5540bcae4d3a288d6aa, type: 3}
+      propertyPath: _customBaseColor.b
+      value: 0.23921569
+      objectReference: {fileID: 0}
+    - target: {fileID: 4748077163201547103, guid: 66a1e523b3c8e5540bcae4d3a288d6aa, type: 3}
+      propertyPath: _customBaseColor.g
+      value: 0.23921569
+      objectReference: {fileID: 0}
+    - target: {fileID: 4748077163201547103, guid: 66a1e523b3c8e5540bcae4d3a288d6aa, type: 3}
+      propertyPath: _customBaseColor.r
+      value: 0.23921569
+      objectReference: {fileID: 0}
     - target: {fileID: 7970886418288540440, guid: 66a1e523b3c8e5540bcae4d3a288d6aa, type: 3}
       propertyPath: m_Enabled
       value: 1

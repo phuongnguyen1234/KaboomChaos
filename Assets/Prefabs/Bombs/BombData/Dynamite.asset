@@ -15,7 +15,6 @@ MonoBehaviour:
   id: dynamite
   displayName: Dynamite
   description: Dynamite
-  bombPrefab: {fileID: 448381104180378329, guid: 49af01407d524a64e9764c453a6e4441, type: 3}
   radius: 6
   damage: 20
   damageFalloff:
@@ -140,9 +139,9 @@ MonoBehaviour:
   explosionVFX: {fileID: 2096552461435851326, guid: 0370a55c632d008479e1f08df1cd39f1, type: 3}
   explosionSoundPitch: 1
   explosionSound: {fileID: 8300000, guid: 4ec13aac2d907984e95c171c4ae6317d, type: 3}
-  minPlayerSpawnChance: 0
-  maxPlayerSpawnChance: 0
-  playerSpawnRadius: 0
+  minPlayerSpawnChance: 25
+  maxPlayerSpawnChance: 40
+  playerSpawnRadius: 2
   possibleVariants: []
   spawnWeightByDifficulty:
     serializedVersion: 2
@@ -190,6 +189,5 @@ MonoBehaviour:
     enableScalePulse: 0
     pulseScaleMultiplier: 0
     pulseScaleDuration: 0
-  additionalGravity: 30
   tickingSoundPitch: 1
   tickingSound: {fileID: 8300000, guid: d13250b3c68a83a4aa9d16d8a1252137, type: 3}

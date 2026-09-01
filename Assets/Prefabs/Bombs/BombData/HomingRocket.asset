@@ -15,7 +15,6 @@ MonoBehaviour:
   id: homing-rocket
   displayName: Homing Rocket
   description: Homing Rocket
-  bombPrefab: {fileID: 7581575776737430788, guid: bf9199ab5c9046f4ca0f36faf6dd5783, type: 3}
   radius: 6
   damage: 15
   damageFalloff:
@@ -179,19 +178,19 @@ MonoBehaviour:
     m_RotationOrder: 4
   maxPerSpawnWave: 2
   maxActiveInstances: 3
-  fuseTime: 15
+  fuseTime: 20
   isActivatedOnContact: 0
   changeColorOnFuse: 0
   fuseColor: {r: 1, g: 0, b: 0, a: 1}
   persistentFuseVFX: {fileID: 0}
   fuseStages:
-  - startTime: 10
+  - startTime: 15
     visualEffect: {fileID: 0}
     stageSoundPitch: 0.1
     stageSound: {fileID: 0}
     vfxRadius: 0
     enableBaseColorPulse: 1
-    basePulseColor: {r: 0.31764707, g: 0.827451, b: 0.32156864, a: 1}
+    basePulseColor: {r: 0.40664062, g: 1.0592737, b: 0.41166085, a: 1}
     basePulseDuration: 0.2
     enableDecalColorPulse: 0
     decalPulseColor: {r: 0, g: 0, b: 0, a: 0}
@@ -199,13 +198,13 @@ MonoBehaviour:
     enableScalePulse: 0
     pulseScaleMultiplier: 0
     pulseScaleDuration: 0
-  - startTime: 12
+  - startTime: 17
     visualEffect: {fileID: 0}
     stageSoundPitch: 0.1
     stageSound: {fileID: 0}
     vfxRadius: 0
     enableBaseColorPulse: 1
-    basePulseColor: {r: 0.31764707, g: 0.827451, b: 0.32156864, a: 1}
+    basePulseColor: {r: 0.40664062, g: 1.0592737, b: 0.41166085, a: 1}
     basePulseDuration: 0.2
     enableDecalColorPulse: 0
     decalPulseColor: {r: 0, g: 0, b: 0, a: 0}
@@ -213,13 +212,13 @@ MonoBehaviour:
     enableScalePulse: 0
     pulseScaleMultiplier: 0
     pulseScaleDuration: 0
-  - startTime: 13.5
+  - startTime: 18.5
     visualEffect: {fileID: 0}
     stageSoundPitch: 0.1
     stageSound: {fileID: 0}
     vfxRadius: 0
     enableBaseColorPulse: 1
-    basePulseColor: {r: 0.31764707, g: 0.827451, b: 0.32156864, a: 1}
+    basePulseColor: {r: 0.40664062, g: 1.0592737, b: 0.41166085, a: 1}
     basePulseDuration: 0.2
     enableDecalColorPulse: 0
     decalPulseColor: {r: 0, g: 0, b: 0, a: 0}
@@ -227,13 +226,13 @@ MonoBehaviour:
     enableScalePulse: 0
     pulseScaleMultiplier: 0
     pulseScaleDuration: 0
-  - startTime: 14.5
+  - startTime: 19.5
     visualEffect: {fileID: 0}
     stageSoundPitch: 0
     stageSound: {fileID: 0}
     vfxRadius: 0
     enableBaseColorPulse: 1
-    basePulseColor: {r: 0.31764707, g: 0.827451, b: 0.32156864, a: 1}
+    basePulseColor: {r: 0.40664062, g: 1.0592737, b: 0.41166085, a: 1}
     basePulseDuration: 0.2
     enableDecalColorPulse: 0
     decalPulseColor: {r: 0, g: 0, b: 0, a: 0}
@@ -241,9 +240,7 @@ MonoBehaviour:
     enableScalePulse: 0
     pulseScaleMultiplier: 0
     pulseScaleDuration: 0
-  additionalGravity: 0
   tickingSoundPitch: 1
   tickingSound: {fileID: 0}
   trackingType: 0
   speed: 6
-  turnSpeed: 270

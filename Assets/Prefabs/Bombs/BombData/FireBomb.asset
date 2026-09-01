@@ -139,9 +139,9 @@ MonoBehaviour:
   explosionVFX: {fileID: 4115158409028047315, guid: 0bb7cbc4ad1459648850111cbf4cdded, type: 3}
   explosionSoundPitch: 1
   explosionSound: {fileID: 8300000, guid: 3262456d329f6f24f870960ef42369bd, type: 3}
-  minPlayerSpawnChance: 0
-  maxPlayerSpawnChance: 0
-  playerSpawnRadius: 0
+  minPlayerSpawnChance: 45
+  maxPlayerSpawnChance: 70
+  playerSpawnRadius: 3
   possibleVariants: []
   spawnWeightByDifficulty:
     serializedVersion: 2
@@ -268,6 +268,5 @@ MonoBehaviour:
     enableScalePulse: 0
     pulseScaleMultiplier: 0
     pulseScaleDuration: 0
-  additionalGravity: 40
   tickingSoundPitch: 1
   tickingSound: {fileID: 0}

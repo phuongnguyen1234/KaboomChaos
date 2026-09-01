@@ -15,7 +15,6 @@ MonoBehaviour:
   id: cluster-missile
   displayName: Cluster Missile
   description: Cluster Missile
-  bombPrefab: {fileID: 6864766510979675116, guid: 95129ff9a6c1a294c8f4479abaa41c86, type: 3}
   radius: 6
   damage: 10
   damageFalloff:
@@ -140,8 +139,8 @@ MonoBehaviour:
   explosionVFX: {fileID: 7387641680929074750, guid: 7b5a52ed286cb3841b13916a4ae5a9d5, type: 3}
   explosionSoundPitch: 1
   explosionSound: {fileID: 8300000, guid: 7eb6bffa1fa7ac8448bf97314da3dce4, type: 3}
-  minPlayerSpawnChance: 20
-  maxPlayerSpawnChance: 40
+  minPlayerSpawnChance: 50
+  maxPlayerSpawnChance: 80
   playerSpawnRadius: 2
   possibleVariants: []
   spawnWeightByDifficulty:
@@ -179,7 +178,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   maxPerSpawnWave: 3
   maxActiveInstances: 5
-  fallSpeed: 7.25
+  fallSpeed: 7.75
   landingLightVFX: {fileID: 1805167288089911798, guid: 41a1b5e54e513e84e9defb3a091a203a, type: 3}
   landingLightColor: {r: 0, g: 0.13583624, b: 1, a: 1}
   submunitionBombData: {fileID: 11400000, guid: fc431e68b38024843a419e87799d352a, type: 2}

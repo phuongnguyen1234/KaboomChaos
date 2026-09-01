@@ -22,8 +22,23 @@ namespace Core.Interfaces.UI
         /// <summary> Ẩn thông báo hiện tại ngay lập tức. </summary>
         void HideNotification();
 
+        /// <summary>
+        /// Hien thi thong bao tren man hinh va GIU NGUYEN khong tu dong an.
+        /// Panel thong bao se luon hien thi cho den khi co thong bao moi thay the
+        /// hoac khi roi khoi gameloop (vi du quay ve Home).
+        /// </summary>
+        /// <param name="message">Noi dung thong bao.</param>
+        void ShowPersistentNotification(string message);
+
         /// <summary> Cập nhật và hiển thị thời gian trên timer. </summary>
         void UpdateTimer(int seconds);
+
+        /// <summary>
+        /// Bat/tat trang thai cam bao (danger) cua TimerPanel: doi mau text + icon thanh do va phat SFX canh bao.
+        /// Dung khi con 30 giay cuoi round.
+        /// </summary>
+        /// <param name="danger">True de bat trang thai do, False de tro lai mau binh thuong.</param>
+        void SetTimerDangerState(bool danger);
 
         /// <summary> Ẩn panel của timer. </summary>
         void HideTimer();

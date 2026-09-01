@@ -28,6 +28,25 @@ namespace UI
         [SerializeField] private GameObject _timerPanel;
         [Tooltip("Text hiển thị thời gian.")]
         [SerializeField] private TextMeshProUGUI _timerText;
+        [Tooltip("Icon (Image) cua TimerPanel, thường la dong ho. Doi mau thanh do khi con 30 giay cuoi round.")]
+        [SerializeField] private Image _timerIcon;
+
+        [Header("Timer Danger State (30s cuoi round)")]
+        [Tooltip("Mau binh thuong cua text timer (khong trong trang thai do).")]
+        [SerializeField] private Color _timerTextNormalColor = Color.white;
+        [Tooltip("Mau do cua text timer khi con 30 giay cuoi round.")]
+        [SerializeField] private Color _timerTextDangerColor = Color.red;
+        [Tooltip("Mau binh thuong cua icon timer.")]
+        [SerializeField] private Color _timerIconNormalColor = Color.white;
+        [Tooltip("Mau do cua icon timer khi con 30 giay cuoi round.")]
+        [SerializeField] private Color _timerIconDangerColor = Color.red;
+        [Tooltip("SFX canh bao phat song song khi bat dau 30 giay cuoi round (chi phat 1 lan).")]
+        [SerializeField] private AudioClip _timerDangerSfx;
+        [Tooltip("AudioSource dung de phat SFX canh bao timer. Neu de trong se tu tim AudioSource tren GameObject.")]
+        [SerializeField] private AudioSource _timerSfxSource;
+
+        // Tranh phat SFX lap lai moi lan goi SetTimerDangerState(true).
+        private bool _timerDangerSfxPlayed;
 
         [Header("Intensity Bar")]
         [Tooltip("Panel chứa thanh cường độ.")]
@@ -89,6 +108,21 @@ namespace UI
         [Tooltip("Nút mở Pause Menu (thường đặt trong Main HUD). Ngoài phím ESC.")]
         [SerializeField] private Button _pauseMenuButton;
 
+        [Header("Main Menu Buttons & Popups")]
+        [Tooltip("Nút Shop trên UI chính. Mở popup Shop (dạng tab).")]
+        [SerializeField] private Button _shopButton;
+        [Tooltip("Nút Inventory trên UI chính. Mở popup Inventory (dạng tab).")]
+        [SerializeField] private Button _inventoryButton;
+        [Tooltip("Nút Option trên UI chính. Mở popup Option (không tab).")]
+        [SerializeField] private Button _optionButton;
+
+        [Tooltip("Popup Shop - là PopupTab, quản lý việc mua bán vật phẩm.")]
+        [SerializeField] private ShopPopup _shopPopup;
+        [Tooltip("Popup Inventory - là PopupTab, hiển thị vật phẩm người chơi sở hữu.")]
+        [SerializeField] private InventoryPopup _inventoryPopup;
+        [Tooltip("Popup Option - hiển thị các thiết lập của game.")]
+        [SerializeField] private OptionPopup _optionPopup;
+
         // Coroutine đang chạy để có thể dừng lại nếu cần
         private Coroutine _notificationCoroutine;
 
@@ -141,6 +175,26 @@ namespace UI
             {
                 _pauseMenuButton.onClick.AddListener(TogglePauseMenu);
             }
+
+            // Gán sự kiện cho các nút Shop / Inventory / Option trên UI chính
+            if (_shopButton != null)
+            {
+                _shopButton.onClick.AddListener(OpenShopPopup);
+            }
+            if (_inventoryButton != null)
+            {
+                _inventoryButton.onClick.AddListener(OpenInventoryPopup);
+            }
+            if (_optionButton != null)
+            {
+                _optionButton.onClick.AddListener(OpenOptionPopup);
+            }
+
+            // Tu tim AudioSource de phat SFX canh bao timer neu chua gan.
+            if (_timerSfxSource == null)
+            {
+                _timerSfxSource = GetComponent<AudioSource>();
+            }
         }
 
         private void OnEnable()
@@ -165,6 +219,18 @@ namespace UI
             if (_pauseMenuButton != null)
             {
                 _pauseMenuButton.onClick.RemoveListener(TogglePauseMenu);
+            }
+            if (_shopButton != null)
+            {
+                _shopButton.onClick.RemoveListener(OpenShopPopup);
+            }
+            if (_inventoryButton != null)
+            {
+                _inventoryButton.onClick.RemoveListener(OpenInventoryPopup);
+            }
+            if (_optionButton != null)
+            {
+                _optionButton.onClick.RemoveListener(OpenOptionPopup);
             }
         }
 
@@ -192,6 +258,7 @@ namespace UI
             if (_scoreCard != null) _scoreCard.Hide();
             if (_mainHUD != null) _mainHUD.SetActive(false);          // Main HUD bắt đầu ẩn (chỉ hiện khi ấn Play)
             if (_pauseMenu != null) _pauseMenu.Hide();                 // Pause Menu bắt đầu ẩn
+            CloseMainPopups();                                        // Dam bao khong mo san popup nao luc khoi dong
 
             // ConfirmationPopup đã được khởi tạo + đăng ký Instance trong Awake (phải active lúc boot),
             // nhưng cần ẩn ngay khi UI bắt đầu để không hiển thị lung tung.
@@ -235,6 +302,30 @@ namespace UI
         }
 
         /// <summary>
+        /// Hien thi thong bao tren man hinh va GIU NGUYEN (khong tu dong an sau khoang thoi gian).
+        /// Dung cho cac thong bao ben trong gameloop de panel luon hien thi xuyen suot vong lap game.
+        /// </summary>
+        /// <param name="message">Noi dung thong bao.</param>
+        public void ShowPersistentNotification(string message)
+        {
+            if (_notificationPanel == null || _notificationText == null)
+            {
+                Debug.LogWarning("[UIManager] Notification panel or text is not assigned.", this);
+                return;
+            }
+
+            // Dung coroutine cu (neu co) de tranh viec no tu dong an panel sau khi het thoi gian.
+            if (_notificationCoroutine != null)
+            {
+                StopCoroutine(_notificationCoroutine);
+                _notificationCoroutine = null;
+            }
+
+            _notificationText.text = message;
+            _notificationPanel.SetActive(true);
+        }
+
+        /// <summary>
         /// Cập nhật và hiển thị thời gian trên timer.
         /// </summary>
         /// <param name="seconds">Số giây còn lại để hiển thị.</param>
@@ -254,6 +345,50 @@ namespace UI
         public void HideTimer()
         {
             if (_timerPanel != null) _timerPanel.SetActive(false);
+
+            // Reset trang thai cam bao khi an timer (ket thuc round), de round moi bat dau mau binh thuong.
+            ApplyTimerDangerVisual(false);
+            _timerDangerSfxPlayed = false;
+        }
+
+        /// <inheritdoc/>
+        public void SetTimerDangerState(bool danger)
+        {
+            ApplyTimerDangerVisual(danger);
+
+            if (danger && !_timerDangerSfxPlayed)
+            {
+                _timerDangerSfxPlayed = true;
+                PlayTimerDangerSfx();
+            }
+        }
+
+        /// <summary>
+        /// Doi mau text + icon cua TimerPanel theo trang thai cam bao (danger hay binh thuong).
+        /// </summary>
+        /// <param name="danger">True = mau do, False = mau binh thuong.</param>
+        private void ApplyTimerDangerVisual(bool danger)
+        {
+            if (_timerText != null)
+            {
+                _timerText.color = danger ? _timerTextDangerColor : _timerTextNormalColor;
+            }
+
+            if (_timerIcon != null)
+            {
+                _timerIcon.color = danger ? _timerIconDangerColor : _timerIconNormalColor;
+            }
+        }
+
+        /// <summary>
+        /// Phat SFX canh bao 30 giay cuoi (phan bo doc lap, song song voi nhac nen 30 giay cuoi).
+        /// Chi phat neu co cau hinh AudioClip va tim duoc AudioSource.
+        /// </summary>
+        private void PlayTimerDangerSfx()
+        {
+            if (_timerDangerSfx == null || _timerSfxSource == null) return;
+
+            _timerSfxSource.PlayOneShot(_timerDangerSfx);
         }
 
         /// <inheritdoc/>
@@ -414,6 +549,81 @@ namespace UI
 
         #endregion
 
+        #region Main Menu Popups
+        /// <summary>
+        /// An tat ca cac popup chinh (Shop, Inventory, Option) de chi mot popup active tai mot thoi diem.
+        /// </summary>
+        private void CloseMainPopups()
+        {
+            if (_shopPopup != null)
+            {
+                _shopPopup.Hide();
+            }
+            if (_inventoryPopup != null)
+            {
+                _inventoryPopup.Hide();
+            }
+            if (_optionPopup != null)
+            {
+                _optionPopup.Hide();
+            }
+        }
+
+        /// <summary>
+        /// Mo popup Shop khi nguoi choi nhan nut Shop tren UI chinh.
+        /// Dong het cac popup khac truoc khi mo de tranh nhieu popup cung hien thi.
+        /// </summary>
+        private void OpenShopPopup()
+        {
+            CloseMainPopups();
+
+            if (_shopPopup != null)
+            {
+                _shopPopup.Show();
+            }
+            else
+            {
+                Debug.LogWarning("[UIManager] _shopPopup chua duoc gan tren Inspector.");
+            }
+        }
+
+        /// <summary>
+        /// Mo popup Inventory khi nguoi choi nhan nut Inventory tren UI chinh.
+        /// Dong het cac popup khac truoc khi mo de tranh nhieu popup cung hien thi.
+        /// </summary>
+        private void OpenInventoryPopup()
+        {
+            CloseMainPopups();
+
+            if (_inventoryPopup != null)
+            {
+                _inventoryPopup.Show();
+            }
+            else
+            {
+                Debug.LogWarning("[UIManager] _inventoryPopup chua duoc gan tren Inspector.");
+            }
+        }
+
+        /// <summary>
+        /// Mo popup Option khi nguoi choi nhan nut Option tren UI chinh.
+        /// Dong het cac popup khac truoc khi mo de tranh nhieu popup cung hien thi.
+        /// </summary>
+        private void OpenOptionPopup()
+        {
+            CloseMainPopups();
+
+            if (_optionPopup != null)
+            {
+                _optionPopup.Show();
+            }
+            else
+            {
+                Debug.LogWarning("[UIManager] _optionPopup chua duoc gan tren Inspector.");
+            }
+        }
+        #endregion
+
         #region Event Handlers
         private void HandleHomeScreenPlayClicked()
         {
@@ -421,8 +631,11 @@ namespace UI
             // Hiện Main HUD và đảm bảo Pause Menu bị ẩn khi bắt đầu chơi.
             if (_mainHUD != null) _mainHUD.SetActive(true);
             _pauseMenu?.Hide();
+            CloseMainPopups();
 
-            // Bắn event yêu cầu chạy game
+            // Bắn event yêu cầu chạy game ngay lập tức.
+            // Player duoc spawn ngay; giai doan chao mung "Welcome to Kaboom Chaos!" 
+            // duoc xu ly ben trong GameloopManager nhu mot stage dau tien cua game loop.
             Debug.Log("[UIManager] HomeScreen PlayClicked event received. Triggering GameEvents.OnStartGameRequest.");
             GameEvents.TriggerStartGameRequest();
         }
@@ -436,6 +649,7 @@ namespace UI
             Debug.Log("[UIManager] ReturnToHomeRequest received. Hiding Main HUD and showing HomeScreen.");
             HideGameplayPanels();
             _pauseMenu?.Hide();
+            CloseMainPopups();
             _homeScreen?.Show(true); // Quay straight to Home - without loading overlay.
         }
         #endregion

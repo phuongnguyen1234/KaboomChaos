@@ -37,6 +37,19 @@ namespace Managers
         [Tooltip("Đường cong xác định số lượng bom TỐI ĐA thả mỗi lần, dựa trên độ khó. Trục X là độ khó, trục Y là số lượng.")]
         [SerializeField] private AnimationCurve _maxBombsPerSpawnByDifficulty = AnimationCurve.Linear(1, 1, 5, 5);
 
+        [Header("Naval Mine Settings")]
+        [Tooltip("Khoảng cách dọc (theo trục Y) mà thủy lôi được đặt lệch về phía trên so với điểm neo (anchor). Thủy lôi sẽ được đặt tại vị trí anchor + offset này để có thể trôi lên đúng cơ chế.")]
+        [SerializeField] private float _navalMineAnchorSpawnOffset = 0.5f;
+        [Tooltip("Khoảng cách NGANG (trên mặt phẳng XZ) tối thiểu giữa điểm neo của thủy lôi và chân người chơi. Giúp tránh việc mìn spawn ngay tại chân player rồi chạm và nổ tức thì (không công bằng). 0 = tắt kiểm tra này.")]
+        [SerializeField] private float _navalMineMinPlayerHorizontalDistance = 1.5f;
+        [Tooltip("Chiều cao (theo trục Y) của 'hành lang' phía trên điểm neo mà thủy lôi cần được thoáng (rỗng) để có thể trôi lên và kích hoạt. Nếu phía trên anchor bị khối chặn, mìn sẽ kẹt trong đất và không bao giờ arm được.")]
+        [SerializeField] private float _navalMineClearanceHeight = 4f;
+        [Tooltip("Nửa chiều rộng (trên mặt phẳng XZ) của 'hành lang' phía trên điểm neo mà thủy lôi yêu cầu được thoáng. Nên lớn hơn bán kính collider của mìn một chút.")]
+        [SerializeField] private float _navalMineClearanceHalfWidth = 0.8f;
+
+        // Buffer không-alloc tái sử dụng để kiểm tra khoảng trống phía trên anchor khi spawn thủy lôi.
+        private readonly Collider[] _navalMineClearanceHits = new Collider[32];
+
         // Scene References (obtained from SceneObjectRegistry)
         private BoxCollider _spawnArea;
 
@@ -181,6 +194,26 @@ namespace Managers
                     if (bombInstance.TryGetComponent<IBombController>(out var bombController))
                     {
                         bombController.Initialize(bombData, this, _playerManager, _destructionManager); // Truyền các Manager vào
+
+                        // Thủy lôi (và các loại bom yêu cầu anchor) cần được gắn vào một điểm neo hợp lệ trên cấu trúc map.
+                        if (bombController.RequiresAnchorForSpawn)
+                        {
+                            GameObject anchor = FindNearestValidAnchor(bombInstance.transform.position, _navalMineMinPlayerHorizontalDistance);
+                            if (anchor == null)
+                            {
+                                // Không tìm thấy điểm neo hợp lệ -> không thể spawn thủy lôi. Hủy và trả về pool.
+                                Debug.LogWarning("[BombSpawnerManager] Không tìm thấy điểm neo hợp lệ (DestructibleBlock hoặc DestructiblePart còn Intact) cho thủy lôi. Bỏ qua lần spawn này.", this);
+                                waveSpawnCount[bombData] = Mathf.Max(0, waveSpawnCount[bombData] - 1);
+                                GameEvents.TriggerBombDespawnRequest(bombInstance);
+                                continue;
+                            }
+
+                            // Gán anchor cho hành vi thủy lôi thông qua BehaviorData.
+                            bombController.BehaviorData = anchor;
+                            // Đặt thủy lôi lệch lên phía trên anchor để nó có thể "trôi lên" đúng cơ chế.
+                            bombInstance.transform.position = anchor.transform.position + Vector3.up * _navalMineAnchorSpawnOffset;
+                        }
+
                         bombController.Activate();
                     }
                 }
@@ -584,6 +617,115 @@ namespace Managers
             Vector3 newPosition = _spawnArea.transform.position;
             newPosition.y = newTransformY;
             _spawnArea.transform.position = newPosition;
+        }
+
+        /// <summary>
+        /// Tìm điểm neo hợp lệ gần nhất cho thủy lôi (Naval Mine): một <see cref="DestructibleBlock"/>
+        /// hoặc một <see cref="DestructiblePart"/> còn nguyên vẹn (<see cref="PartState.Intact"/>) đang active trong scene.
+        /// Ưu tiên anchor gần vị trí tham chiếu (vốn đã được lệch về phía người chơi), nhưng LOẠI TRỪ các anchor
+        /// nằm trong bán kính ngang quanh chân người chơi để tránh mìn nổ ngay tại chân player.
+        /// </summary>
+        /// <param name="fromPosition">Vị trí tham chiếu để chọn anchor gần nhất.</param>
+        /// <param name="minPlayerHorizontalDist">Khoảng cách ngang tối thiểu với chân người chơi (0 = không kiểm tra).</param>
+        /// <returns>GameObject của anchor hợp lệ, hoặc null nếu không tìm thấy.</returns>
+        private GameObject FindNearestValidAnchor(Vector3 fromPosition, float minPlayerHorizontalDist)
+        {
+            // Gom tất cả anchor hợp lệ kèm khoảng cách đến vị trí tham chiếu.
+            var candidates = new List<(DestructibleBlock block, DestructiblePart part, float dist)>();
+            float sqrMinPlayerDist = minPlayerHorizontalDist * minPlayerHorizontalDist;
+
+            foreach (var block in FindObjectsByType<DestructibleBlock>(FindObjectsInactive.Exclude))
+            {
+                if (block == null || block.gameObject == null || !block.gameObject.activeInHierarchy) continue;
+                float dist = Vector3.Distance(block.transform.position, fromPosition);
+                candidates.Add((block, null, dist));
+            }
+
+            foreach (var part in FindObjectsByType<DestructiblePart>(FindObjectsInactive.Exclude))
+            {
+                if (part == null || part.gameObject == null || !part.gameObject.activeInHierarchy) continue;
+                if (part.CurrentState != PartState.Intact) continue; // Chỉ neo vào các mảnh còn nguyên vẹn
+                float dist = Vector3.Distance(part.transform.position, fromPosition);
+                candidates.Add((null, part, dist));
+            }
+
+            if (candidates.Count == 0) return null;
+
+            // Thu thập vị trí chân của các người chơi đang trong round (chỉ so sánh khoảng cách ngang XZ).
+            List<Vector3> playerFeet = null;
+            if (sqrMinPlayerDist > 0f && _playerManager != null)
+            {
+                var players = _playerManager.GetPlayersInRound();
+                var playersToUse = players != null && players.Count > 0 ? players : _playerManager.GetAllPlayers();
+                if (playersToUse != null && playersToUse.Count > 0)
+                {
+                    playerFeet = new List<Vector3>(playersToUse.Count);
+                    foreach (var player in playersToUse)
+                    {
+                        if (player != null && player.GameObject != null)
+                            playerFeet.Add(player.GameObject.transform.position);
+                    }
+                }
+            }
+
+            bool IsNearAnyPlayerFeet(Vector3 position)
+            {
+                if (playerFeet == null || playerFeet.Count == 0) return false;
+                foreach (var feet in playerFeet)
+                {
+                    Vector2 delta = new Vector2(position.x - feet.x, position.z - feet.z);
+                    if (delta.sqrMagnitude < sqrMinPlayerDist) return true;
+                }
+                return false;
+            }
+
+            // Sắp xếp theo khoảng cách tăng dần để ưu tiên anchor gần fromPosition (vốn gần player) nhất.
+            candidates.Sort((a, b) => a.dist.CompareTo(b.dist));
+
+            // Chọn anchor đầu tiên thỏa mãn CẢ HAI điều kiện:
+            // 1. Không nằm trong vùng chân của bất kỳ người chơi nào.
+            // 2. Khoảng trống PHÍA TRÊN anchor đủ rộng và thoáng để mìn có thể trôi lên và kích hoạt (arm).
+            foreach (var c in candidates)
+            {
+                Vector3 candidatePos = c.block != null ? c.block.transform.position : c.part.transform.position;
+                if (IsNearAnyPlayerFeet(candidatePos)) continue;
+                if (!HasClearSpaceAbove(candidatePos)) continue;
+                return c.block != null ? c.block.gameObject : c.part.gameObject;
+            }
+
+            // Không có anchor nào vừa thoáng phía trên vừa cách chân player -> bỏ qua spawn.
+            // Nếu ép chọn anchor bị bao quanh, mìn sẽ kẹt trong đất, không bao giờ arm được (vô hình).
+            return null;
+        }
+
+        /// <summary>
+        /// Kiểm tra xem "hành lang" phía trên vị trí đã cho có thoáng (không bị khối chặn) hay không.
+        /// Một thủy lôi chỉ có thể trôi lên và kích hoạt nếu không gian phía trên điểm neo của nó trống rỗng.
+        /// </summary>
+        /// <param name="anchorPosition">Vị trí điểm neo (world) cần kiểm tra phía trên.</param>
+        /// <returns>True nếu phía trên thoáng, False nếu bị khối chặn.</returns>
+        private bool HasClearSpaceAbove(Vector3 anchorPosition)
+        {
+            if (_navalMineClearanceHeight <= 0f) return true; // Tắt kiểm tra này nếu chiều cao = 0
+
+            float halfHeight = _navalMineClearanceHeight * 0.5f;
+            float halfWidth = Mathf.Max(_navalMineClearanceHalfWidth, 0.01f);
+
+            // Tâm box kiểm tra nằm phía trên anchor (từ ngay trên anchor đến đỉnh hành lang).
+            Vector3 center = anchorPosition + Vector3.up * (halfHeight + _navalMineAnchorSpawnOffset);
+            Vector3 halfExtents = new Vector3(halfWidth, halfHeight, halfWidth);
+
+            int hitCount = Physics.OverlapBoxNonAlloc(center, halfExtents, _navalMineClearanceHits, Quaternion.identity, ~0, QueryTriggerInteraction.Ignore);
+            for (int i = 0; i < hitCount; i++)
+            {
+                var hit = _navalMineClearanceHits[i];
+                if (hit == null || hit.gameObject == null) continue;
+
+                // Chỉ coi là vật cản nếu là khối phá hủy được hoặc mảnh vỡ còn nguyên vẹn trong khu vực thoáng.
+                if (hit.GetComponent<DestructibleBlock>() != null) return false;
+                if (hit.TryGetComponent<DestructiblePart>(out var part) && part.CurrentState == PartState.Intact) return false;
+            }
+            return true;
         }
 
         /// <summary>

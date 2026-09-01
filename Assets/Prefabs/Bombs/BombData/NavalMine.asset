@@ -1,0 +1,295 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 320f34f4c5589034daeee4d16c12e046, type: 3}
+  m_Name: NavalMine
+  m_EditorClassIdentifier: Bombs::Bombs.Data.NavalMineData
+  id: naval-mine
+  displayName: Naval Mine
+  description: Naval Mine
+  radius: 12
+  damage: 25
+  damageFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  effect: 0
+  effectDuration: 0
+  statusEffectLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  applyForce: 1
+  force: 30
+  forceMode: 1
+  forceFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: -1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  upwardsModifier: 0.5
+  affectedLayers:
+    serializedVersion: 2
+    m_Bits: 1984
+  triggerLayers:
+    serializedVersion: 2
+    m_Bits: 64
+  canDestroyTerrain: 1
+  terrainDestructionPowerFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 5
+      inSlope: -3
+      outSlope: -3
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 2
+      inSlope: -3
+      outSlope: -3
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  explodeMultipleTimes: 0
+  minNumberOfExplosions: 1
+  maxNumberOfExplosions: 3
+  spawnSound: {fileID: 0}
+  delayBetweenExplosions: 0.5
+  explosionSpreadRadius: 2
+  subExplosionDamage: 25
+  subExplosionDamageFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: -1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  explosionVFX: {fileID: 2096552461435851326, guid: 0370a55c632d008479e1f08df1cd39f1, type: 3}
+  explosionSoundPitch: 1
+  explosionSound: {fileID: 8300000, guid: 65dd13b9c43d18642a90c2d556bc15a9, type: 3}
+  minPlayerSpawnChance: 20
+  maxPlayerSpawnChance: 40
+  playerSpawnRadius: 2
+  possibleVariants: []
+  spawnWeightByDifficulty:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 2.99
+      value: 0
+      inSlope: -0
+      outSlope: 13.289037
+      tangentMode: 69
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 6
+      value: 40
+      inSlope: 13.289037
+      outSlope: 13.289037
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  maxPerSpawnWave: 2
+  maxActiveInstances: 8
+  fuseTime: 1
+  isActivatedOnContact: 0
+  changeColorOnFuse: 0
+  fuseColor: {r: 1, g: 0, b: 0, a: 1}
+  persistentFuseVFX: {fileID: 0}
+  fuseStages:
+  - startTime: 0
+    visualEffect: {fileID: 0}
+    stageSoundPitch: 1
+    stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
+    vfxRadius: 0
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 1.0299743, g: 0.052470308, b: 0.052470308, a: 1}
+    basePulseDuration: 0
+    enableDecalColorPulse: 0
+    decalPulseColor: {r: 0, g: 0, b: 0, a: 0}
+    decalPulseDuration: 0
+    enableScalePulse: 0
+    pulseScaleMultiplier: 0
+    pulseScaleDuration: 0
+  - startTime: 0.125
+    visualEffect: {fileID: 0}
+    stageSoundPitch: 1
+    stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
+    vfxRadius: 0
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 1.0299743, g: 0.052470308, b: 0.052470308, a: 1}
+    basePulseDuration: 0
+    enableDecalColorPulse: 0
+    decalPulseColor: {r: 0, g: 0, b: 0, a: 0}
+    decalPulseDuration: 0
+    enableScalePulse: 0
+    pulseScaleMultiplier: 0
+    pulseScaleDuration: 0
+  - startTime: 0.25
+    visualEffect: {fileID: 0}
+    stageSoundPitch: 1
+    stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
+    vfxRadius: 0
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 1.0299743, g: 0.052470308, b: 0.052470308, a: 1}
+    basePulseDuration: 0
+    enableDecalColorPulse: 0
+    decalPulseColor: {r: 0, g: 0, b: 0, a: 0}
+    decalPulseDuration: 0
+    enableScalePulse: 0
+    pulseScaleMultiplier: 0
+    pulseScaleDuration: 0
+  - startTime: 0.375
+    visualEffect: {fileID: 0}
+    stageSoundPitch: 1
+    stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
+    vfxRadius: 0
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 1.0299743, g: 0.052470308, b: 0.052470308, a: 1}
+    basePulseDuration: 0
+    enableDecalColorPulse: 0
+    decalPulseColor: {r: 0, g: 0, b: 0, a: 0}
+    decalPulseDuration: 0
+    enableScalePulse: 0
+    pulseScaleMultiplier: 0
+    pulseScaleDuration: 0
+  - startTime: 0.5
+    visualEffect: {fileID: 0}
+    stageSoundPitch: 1
+    stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
+    vfxRadius: 0
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 1.0299743, g: 0.052470308, b: 0.052470308, a: 1}
+    basePulseDuration: 0
+    enableDecalColorPulse: 0
+    decalPulseColor: {r: 0, g: 0, b: 0, a: 0}
+    decalPulseDuration: 0
+    enableScalePulse: 0
+    pulseScaleMultiplier: 0
+    pulseScaleDuration: 0
+  - startTime: 0.625
+    visualEffect: {fileID: 0}
+    stageSoundPitch: 1
+    stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
+    vfxRadius: 0
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 1.0299743, g: 0.052470308, b: 0.052470308, a: 1}
+    basePulseDuration: 0
+    enableDecalColorPulse: 0
+    decalPulseColor: {r: 0, g: 0, b: 0, a: 0}
+    decalPulseDuration: 0
+    enableScalePulse: 0
+    pulseScaleMultiplier: 0
+    pulseScaleDuration: 0
+  - startTime: 0.875
+    visualEffect: {fileID: 0}
+    stageSoundPitch: 1
+    stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
+    vfxRadius: 0
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 1.0299743, g: 0.052470308, b: 0.052470308, a: 1}
+    basePulseDuration: 0
+    enableDecalColorPulse: 0
+    decalPulseColor: {r: 0, g: 0, b: 0, a: 0}
+    decalPulseDuration: 0
+    enableScalePulse: 0
+    pulseScaleMultiplier: 0
+    pulseScaleDuration: 0
+  tickingSoundPitch: 1
+  tickingSound: {fileID: 0}
+  ascendSpeed: 2
+  chainMinLength: 5
+  chainMaxLength: 10
+  safeRadius: 3
+  chainPrefab: {fileID: 8437196208069075511, guid: 6ad01e9d0f3e7044388f2b3c03dec187, type: 3}
+  buoyancyForce: 10
+  chainTensionForce: 50
+  armClearanceBuffer: 0.3
+  safeClearFrames: 3

@@ -199,6 +199,10 @@ namespace Player
             // Cập nhật UI
             GameEvents.TriggerPlayerHealthChanged(_player, _currentHealth, _maxHealth);
 
+            // Thông báo sát thương thực tế đã được áp dụng (đã qua khien và miễn nhiễm).
+            // Dùng cho perk theo doi sat thuong nhan duoc (Regeneration, Anti-Freeze).
+            GameEvents.TriggerPlayerDamageTaken(_player, damageAfterShield, sourceType, effectContext);
+
             if (_currentHealth <= 0)
             {
                 Die();

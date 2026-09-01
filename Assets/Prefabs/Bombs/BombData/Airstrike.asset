@@ -15,7 +15,6 @@ MonoBehaviour:
   id: airstrike
   displayName: Airstrike
   description: Airstrike
-  bombPrefab: {fileID: 6864766510979675116, guid: 4e1b4402e28e2304295fbfaf98a7641a, type: 3}
   radius: 6
   damage: 25
   damageFalloff:
@@ -140,8 +139,8 @@ MonoBehaviour:
   explosionVFX: {fileID: 2096552461435851326, guid: c3b2951fae4969c4394711b604af4208, type: 3}
   explosionSoundPitch: 1
   explosionSound: {fileID: 8300000, guid: 7eb6bffa1fa7ac8448bf97314da3dce4, type: 3}
-  minPlayerSpawnChance: 20
-  maxPlayerSpawnChance: 40
+  minPlayerSpawnChance: 50
+  maxPlayerSpawnChance: 75
   playerSpawnRadius: 2
   possibleVariants:
   - variantBombData: {fileID: 11400000, guid: dc74e019add22de46868146c20b71e89, type: 2}

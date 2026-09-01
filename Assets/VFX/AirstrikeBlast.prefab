@@ -38,11 +38,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customBaseColor.g
-      value: 1.5348837
+      value: 2.2993162
       objectReference: {fileID: 0}
     - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customBaseColor.r
-      value: 2
+      value: 2.9960785
       objectReference: {fileID: 0}
     - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customDecalColor.a
@@ -438,7 +438,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customEmissionIntensity
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

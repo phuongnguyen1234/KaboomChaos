@@ -1,7 +1,7 @@
 using UnityEngine;
 using Core.Interfaces;
 using System.Collections;
-using Core.Utils;
+using Core.Utilities;
 using System.Collections.Generic;
 
 namespace Core
@@ -208,6 +208,13 @@ namespace Core
             // Nếu đây là người chơi và hiệu ứng là Đóng băng, sử dụng thời gian đóng băng riêng.
             if (_player != null && newEffect == StatusEffectType.Frozen)
             {
+                // PERK INTERCEPTION: Neu perk (vi du Anti-Freeze) chan hieu ung dong bang
+                // (tra ve true tu TriggerQueryPlayerStatusEffectBlocked) thi bo qua hoan toan.
+                if (GameEvents.TriggerQueryPlayerStatusEffectBlocked(_player, newEffect))
+                {
+                    return;
+                }
+
                 duration = _playerFrozenDuration;
             }
 

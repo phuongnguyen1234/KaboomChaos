@@ -33,5 +33,18 @@ namespace Core.Interfaces
         IBombSpawnerManager BombSpawnerManager { get; }
         IPlayerManager PlayerManager { get; }
         IDestructionManager DestructionManager { get; }
+
+        /// <summary>
+        /// Dữ liệu chung để các strategy hành vi nhận cấu hình khởi tạo cụ thể từ nhà sinh bom.
+        /// Ví dụ: Thủy lôi (Naval Mine) cần nhận một <see cref="UnityEngine.GameObject"/> làm điểm neo (anchor).
+        /// </summary>
+        object BehaviorData { get; set; }
+
+        /// <summary>
+        /// Cho biết loại bom này có yêu cầu phải được gắn vào một điểm neo trên cấu trúc map
+        /// trước khi kích hoạt hay không (ví dụ: Thủy lôi).
+        /// Spawner sẽ tìm một anchor hợp lệ và gán vào <see cref="BehaviorData"/> trước khi gọi <see cref="Activate"/>.
+        /// </summary>
+        bool RequiresAnchorForSpawn { get; }
     }
 }

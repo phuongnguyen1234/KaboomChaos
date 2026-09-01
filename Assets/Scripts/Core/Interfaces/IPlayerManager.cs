@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using Core;
 
@@ -8,8 +8,10 @@ namespace Core.Interfaces
     {
         /// <summary>
         /// Thể hiện Singleton toàn cục của IPlayerManager.
+        /// Được gán bởi lớp cụ thể (PlayerManager) trong Awake(); các assembly khác (ví dụ UI)
+        /// chỉ đọc giá trị này qua interface để tránh tham chiếu trực tiếp tới assembly Managers.
         /// </summary>
-        static IPlayerManager Instance { get; }
+        static IPlayerManager Instance { get; set; }
 
         int GetAlivePlayerCount();
         IPlayer GetCurrentPlayer();

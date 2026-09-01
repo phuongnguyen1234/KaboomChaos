@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad1368e87d9cfc842a599c41182cc552, type: 3}
+  m_Name: Heal
+  m_EditorClassIdentifier: Skills::Skills.Data.HealSkillData
+  _id: heal
+  _displayName: Heal
+  _description: Heavily damaged? Heal some of your lost HP!
+  _icon: {fileID: 21300000, guid: 372d2aec6ff24ab408705f29571293f5, type: 3}
+  _type: 1
+  _duration: 1
+  _rechargeTime: 40
+  _price: 0
+  _healAmount: 25

@@ -12,6 +12,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: BlueBlast
       objectReference: {fileID: 0}
+    - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customBaseColor.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customBaseColor.g
+      value: 0.079677224
+      objectReference: {fileID: 0}
+    - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customBaseColor.r
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customEmissionIntensity
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _initialScale.x
       value: 1
@@ -142,7 +158,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4754107197624226471, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5488013012343082406, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: m_LocalPosition.x
@@ -190,15 +206,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customBaseColor.b
-      value: 1.4980392
+      value: 2.1185474
       objectReference: {fileID: 0}
     - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customBaseColor.g
-      value: 0.13154802
+      value: 0.18603699
       objectReference: {fileID: 0}
     - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customBaseColor.r
-      value: 0.08762108
+      value: 0.12391491
       objectReference: {fileID: 0}
     - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customEmissionIntensity

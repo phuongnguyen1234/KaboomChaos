@@ -29,5 +29,13 @@ namespace Bombs.Data
 
         [Tooltip("Lực kéo mìn về phía điểm neo khi dây xích bị căng.")]
         public float chainTensionForce = 50.0f;
+
+        [Header("Kích hoạt an toàn")]
+        [Tooltip("Lớp đệm (clearance) cộng thêm vào kích thước collider thật của mìn để tính bán kính an toàn khi bật collider. Giúp mìn KHÔNG bị kẹt trong các khối lân cận khi kích hoạt. Bán kính an toàn thực tế = max(safeRadius, bán kính collider + lớp đệm này).")]
+        public float armClearanceBuffer = 0.3f;
+
+        [Min(1)]
+        [Tooltip("Số frame liên tiếp được coi là 'an toàn' trước khi mìn được phép bật collider. Giúp tránh bật collider quá sớm khi có một khối nằm sát rìa vùng an toàn bị phát hiện chập chờn.")]
+        public int safeClearFrames = 3;
     }
 }

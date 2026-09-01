@@ -50,7 +50,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2491673492827861911, guid: d7242b76d53eb67439a68fdc6d9b9440, type: 3}
       propertyPath: _customAlpha
-      value: 0.3
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2491673492827861911, guid: d7242b76d53eb67439a68fdc6d9b9440, type: 3}
       propertyPath: _customBaseColor.b
@@ -64,9 +64,21 @@ PrefabInstance:
       propertyPath: _customBaseColor.r
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2491673492827861911, guid: d7242b76d53eb67439a68fdc6d9b9440, type: 3}
+      propertyPath: _customFresnelPower
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2491673492827861911, guid: d7242b76d53eb67439a68fdc6d9b9440, type: 3}
+      propertyPath: _customEmissionIntensity
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5432491707936817209, guid: d7242b76d53eb67439a68fdc6d9b9440, type: 3}
       propertyPath: m_Name
       value: RedBeep
+      objectReference: {fileID: 0}
+    - target: {fileID: 8946405694031255360, guid: d7242b76d53eb67439a68fdc6d9b9440, type: 3}
+      propertyPath: _animationStages.Array.data[1].targetValue
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

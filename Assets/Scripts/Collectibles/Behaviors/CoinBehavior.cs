@@ -15,6 +15,10 @@ namespace Collectibles.Behaviors
             // 1. Cộng credit cho người chơi
             GameEvents.TriggerAddCreditsRequest(data.CreditValue);
 
+            // 1b. Thông báo sự kiện nhặt coin kèm BonusHP (đã cấu hình trong CoinData).
+            // Perk Big Saver lắng nghe sự kiện này để hồi HP cho player.
+            GameEvents.TriggerPlayerCoinCollected(player, data.BonusHP);
+
             // 2. Hiển thị floating text
             if (data.CreditValue > 0)
             {

@@ -1,6 +1,7 @@
-using UnityEngine;
+﻿using UnityEngine;
 using Core.Interfaces;
 using Core;
+using Core.Enums;
 using Core.Utilities;
 using Core.Interfaces.UI;
 using System.Collections;
@@ -50,6 +51,10 @@ namespace Managers
             else
             {
                 Instance = this;
+                // Gán luôn qua interface để các assembly khác (UI) có thể truy cập qua IPlayerManager.Instance.
+                // Nếu không có dòng này, IPlayerManager.Instance (static của interface) sẽ luôn null vì nó không
+                // tự động nhận giá trị từ static của lớp PlayerManager.
+                IPlayerManager.Instance = this;
                 DontDestroyOnLoad(gameObject);
             }
         }

@@ -66,7 +66,14 @@ namespace Bombs.Behaviors
         {
             _isAscending = true;
             var mineData = (NavalMineData)controller.BombData;
+
+            // Bán kính an toàn tối thiểu phải đủ lớn để bao trùm cả phần thân collider của mìn,
+            // tránh việc bật collider lên quá sớm khiến mìn bị kẹt trong các khối lân cận.
+            // safeRadius có thể nhỏ hơn kích thước thật của collider, nên ta lấy giá trị lớn hơn.
+            float clearanceRadius = Mathf.Max(mineData.safeRadius, GetColliderClearance(controller) + mineData.armClearanceBuffer);
+
             float currentLength = 0f;
+            int consecutiveSafeFrames = 0;
 
             while (currentLength < mineData.chainMaxLength)
             {
@@ -83,14 +90,25 @@ namespace Bombs.Behaviors
                 {
                     bool isSafe = !Physics.CheckSphere(
                         controller.transform.position,
-                        mineData.safeRadius,
+                        clearanceRadius,
                         mineData.AffectedLayers | mineData.TriggerLayers,
                         QueryTriggerInteraction.Ignore
                     );
 
+                    // Yêu cầu một vài frame LIÊN TIẾP an toàn trước khi bật collider.
+                    // Nếu chỉ cần một frame, một khối nằm sát rìa vùng an toàn có thể gây ra
+                    // "kết quả dương tính giả" (clear rồi lại chạm ngay) khi mìn tiếp tục trôi lên.
                     if (isSafe)
                     {
-                        break;
+                        consecutiveSafeFrames++;
+                        if (consecutiveSafeFrames >= mineData.safeClearFrames)
+                        {
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        consecutiveSafeFrames = 0;
                     }
                 }
 
@@ -102,6 +120,19 @@ namespace Bombs.Behaviors
                 ArmMine(controller);
             }
             _isAscending = false;
+        }
+
+        /// <summary>
+        /// Tính "bán kính thân" của mìn dựa trên extents (nửa kích thước) lớn nhất của collider hiện tại.
+        /// Dùng để đảm bảo khoảng cách an toàn khi bật collider đủ lớn để mìn không chui vào khối khác.
+        /// </summary>
+        /// <param name="controller">Bomb controller chứa collider của mìn.</param>
+        /// <returns>Bán kính ước lượng của collider (0 nếu không có collider).</returns>
+        private float GetColliderClearance(BombController controller)
+        {
+            if (controller.BombCollider == null) return 0f;
+            Vector3 extents = controller.BombCollider.bounds.extents;
+            return Mathf.Max(extents.x, Mathf.Max(extents.y, extents.z));
         }
 
         private void ArmMine(BombController controller)

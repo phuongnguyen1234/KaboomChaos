@@ -44,6 +44,16 @@ public class MaterialEffectController : MonoBehaviour
     [Tooltip("Cường độ phát sáng của material. Yêu cầu shader có thuộc tính '_EmissionIntensity'.")]
     private float _customEmissionIntensity = 0;
 
+    [Header("Fresnel Power")]
+    [SerializeField, Range(0, 20)]
+    [Tooltip("Độ mạnh hiệu ứng Fresnel")]
+    private float _customFresnelPower = 1f;
+
+    [Header("Border thickness")]
+    [SerializeField, Range(0, 1)]
+    [Tooltip("Độ dày viền")]
+    private float _customThickness = 0.6f;
+
     [Header("Hiệu ứng Trạng thái")]
     [Tooltip("Danh sách các material sẽ được áp dụng cho các hiệu ứng trạng thái.")]
     [SerializeField] private List<StatusEffectProfile> _statusEffectProfiles = new();
@@ -52,6 +62,8 @@ public class MaterialEffectController : MonoBehaviour
     private const string DECAL_COLOR_PROPERTY_NAME = "_DecalColor";
     private const string ALPHA_PROPERTY_NAME = "_Alpha";
     private const string EMISSION_INTENSITY_PROPERTY_NAME = "_EmissionIntensity";
+    private const string FRESNEL_POWER_PROPERTY_NAME = "_FresnelPower";
+    private const string THICKNESS_PROPERTY_NAME = "_Thickness";
     private static readonly int BaseMapProperty = Shader.PropertyToID("_BaseMap");
 
     private MaterialPropertyBlock _propBlock;
@@ -443,6 +455,8 @@ public class MaterialEffectController : MonoBehaviour
             _propBlock.SetFloat(EMISSION_INTENSITY_PROPERTY_NAME, _customEmissionIntensity);
             _propBlock.SetFloat(ALPHA_PROPERTY_NAME, _customAlpha);
             _propBlock.SetColor(BASE_COLOR_PROPERTY_NAME, finalBaseColor);
+            _propBlock.SetFloat(FRESNEL_POWER_PROPERTY_NAME, _customFresnelPower);
+            _propBlock.SetFloat(THICKNESS_PROPERTY_NAME, _customThickness);
             _propBlock.SetColor(DECAL_COLOR_PROPERTY_NAME, finalDecalColor);
         }
         else

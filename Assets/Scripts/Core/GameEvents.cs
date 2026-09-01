@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Core.Interfaces;
 
@@ -13,7 +14,7 @@ namespace Core
         #region Event Declarations
 
         #region Player Events
-                /// <summary>
+        /// <summary>
         /// Được gọi khi một người chơi yêu cầu tự reset (tự sát).
         /// </summary>
         public static event Action<IPlayer> OnPlayerResetRequested;
@@ -44,6 +45,48 @@ namespace Core
         /// Được gọi khi một hiệu ứng trạng thái trên người chơi được hoàn tác.
         /// </summary>
         public static event Action<IPlayer, StatusEffectType> OnPlayerStatusEffectReverted;
+        /// <summary>
+        /// Duoc goi khi nang luong (energy) cua nguoi choi thay doi.
+        /// Tham so: nguoi choi, energy hien tai, energy toi da.
+        /// </summary>
+        public static event Action<IPlayer, float, float> OnPlayerEnergyChanged;
+        /// <summary>
+        /// Duoc goi khi nguoi choi tieu toan bo energy de su dung Skill.
+        /// Luc nay energy ve 0 va bat dau qua trinh tu sac.
+        /// </summary>
+        public static event Action<IPlayer> OnPlayerSkillEnergyConsumed;
+        /// <summary>
+        /// Duoc goi khi energy cua nguoi choi da sac day tro lai 100%,
+        /// nghia la Skill da san sang duoc su dung lan tiep theo.
+        /// </summary>
+        public static event Action<IPlayer> OnPlayerEnergyFullyCharged;
+
+        /// <summary>
+        /// Được gọi khi skill hoặc perk của người chơi thay đổi trạng thái trang bi
+        /// (trang bi hoặc gỡ bỏ), dùng để UI (HUD) cập nhật icon trang bi hiển thị.
+        /// </summary>
+        public static event Action OnPlayerEquipmentChanged;
+
+        /// <summary>
+        /// Yeu cau kiem tra xem hieu ung trang thai dinh huong vao player co bi chan hay khong.
+        /// Dung cho perk thay doi rule (vi du Anti-Freeze chan dong bang).
+        /// Tra ve: true neu hieu ung bi chan (khong ap dung), false neu tiep tuc ap dung binh thuong.
+        /// </summary>
+        public static event Func<IPlayer, StatusEffectType, bool> OnQueryPlayerStatusEffectBlocked;
+
+        /// <summary>
+        /// Duoc goi khi player thuc su nhan sat thuong (da qua duoc khien va kiem tra mien nhiem).
+        /// Dung cho perk theo doi luong sat thuong nhan duoc (Regeneration, Anti-Freeze).
+        /// Tham so: player, luong sat thuong thuc te, nguon sat thuong, loai hieu ung (context).
+        /// </summary>
+        public static event Action<IPlayer, float, DamageSourceType, StatusEffectType> OnPlayerDamageTaken;
+
+        /// <summary>
+        /// Duoc goi khi player nhat mot dong coin. Tham so thu hai la luong BonusHP
+        /// da cau hinh san trong CoinData (0 neu coin khong co bonus HP).
+        /// Dung cho perk Big Saver de hoi HP khi nhat coin.
+        /// </summary>
+        public static event Action<IPlayer, float> OnPlayerCoinCollected;
         #endregion
 
         #region Bomb Events
@@ -141,6 +184,78 @@ namespace Core
         /// Yêu cầu lấy số credits hiện tại. Trả về: int (số credits hiện tại).
         /// </summary>
         public static event Func<int> OnRequestCurrentCredits;
+
+        /// <summary>
+        /// Được gọi khi danh sách skill mà người chơi sở hữu thay đổi.
+        /// Tham số: IReadOnlyList<string> (danh sách ID skill hiện tại).
+        /// </summary>
+        public static event Action<IReadOnlyList<string>> OnOwnedSkillsChanged;
+
+        /// <summary>
+        /// Yêu cầu lấy danh sách ID các skill mà người chơi đang sở hữu.
+        /// Trả về: IReadOnlyList<string> (danh sách ID).
+        /// </summary>
+        public static event Func<IReadOnlyList<string>> OnRequestOwnedSkillIds;
+
+        /// <summary>
+        /// Yêu cầu thêm một skill vào danh sách sở hữu của người chơi
+        /// (thường được gọi khi mua skill trong Shop).
+        /// Tham số: string (ID của skill).
+        /// </summary>
+        public static event Action<string> OnAddOwnedSkill;
+
+        /// <summary>
+        /// Được gọi khi danh sách perk mà người chơi sở hữu thay đổi.
+        /// Tham số: IReadOnlyList<string> (danh sách ID perk hiện tại).
+        /// </summary>
+        public static event Action<IReadOnlyList<string>> OnOwnedPerksChanged;
+
+        /// <summary>
+        /// Yêu cầu lấy danh sách ID các perk mà người chơi đang sở hữu.
+        /// Trả về: IReadOnlyList<string> (danh sách ID).
+        /// </summary>
+        public static event Func<IReadOnlyList<string>> OnRequestOwnedPerkIds;
+
+        /// <summary>
+        /// Yêu cầu thêm một perk vào danh sách sở hữu của người chơi
+        /// (thường được gọi khi mua perk trong Shop).
+        /// Tham số: string (ID của perk).
+        /// </summary>
+        public static event Action<string> OnAddOwnedPerk;
+
+        /// <summary>
+        /// Yêu cầu lấy tổng số lần quay thưởng (mua skill) đã thực hiện ở Shop.
+        /// Trả về: int (số lần quay).
+        /// </summary>
+        public static event Func<int> OnRequestSkillSpinCount;
+
+        /// <summary>
+        /// Yêu cầu tăng tổng số lần quay thưởng skill lên 1 và lưu lại.
+        /// Dùng để tăng giá các nhóm skill (mỗi nhóm tăng theo hệ số riêng).
+        /// </summary>
+        public static event Action OnIncreaseSkillSpinCount;
+
+        /// <summary>
+        /// Duoc goi khi skill dang trang bi cua nguoi choi thay doi (null/rong = go trang bi).
+        /// PlayerDataManager lang nghe de luu lai trang thai trang bi.
+        /// </summary>
+        public static event Action<string> OnEquippedSkillIdChanged;
+
+        /// <summary>
+        /// Yeu cau lay ID skill dang duoc trang bi (da luu).
+        /// </summary>
+        public static event Func<string> OnRequestEquippedSkillId;
+
+        /// <summary>
+        /// Duoc goi khi perk dang trang bi cua nguoi choi thay doi.
+        /// PlayerDataManager lang nghe de luu lai trang thai trang bi.
+        /// </summary>
+        public static event Action<string> OnEquippedPerkIdChanged;
+
+        /// <summary>
+        /// Yeu cau lay ID perk dang duoc trang bi (da luu).
+        /// </summary>
+        public static event Func<string> OnRequestEquippedPerkId;
         #endregion
 
         #region Collectible Events
@@ -169,6 +284,18 @@ namespace Core
         public static void TriggerRoundEndPlayerReset() => OnRoundEndPlayerReset?.Invoke();
         public static void TriggerPlayerStatusEffectApplied(IPlayer player, StatusEffectType effect) => OnPlayerStatusEffectApplied?.Invoke(player, effect);
         public static void TriggerPlayerStatusEffectReverted(IPlayer player, StatusEffectType effect) => OnPlayerStatusEffectReverted?.Invoke(player, effect);
+        public static void TriggerPlayerEnergyChanged(IPlayer player, float currentEnergy, float maxEnergy) => OnPlayerEnergyChanged?.Invoke(player, currentEnergy, maxEnergy);
+        public static void TriggerPlayerSkillEnergyConsumed(IPlayer player) => OnPlayerSkillEnergyConsumed?.Invoke(player);
+        public static void TriggerPlayerEnergyFullyCharged(IPlayer player) => OnPlayerEnergyFullyCharged?.Invoke(player);
+
+        public static bool TriggerQueryPlayerStatusEffectBlocked(IPlayer player, StatusEffectType effect)
+            => OnQueryPlayerStatusEffectBlocked != null ? OnQueryPlayerStatusEffectBlocked(player, effect) : false;
+
+        public static void TriggerPlayerDamageTaken(IPlayer player, float amount, DamageSourceType sourceType, StatusEffectType effectContext)
+            => OnPlayerDamageTaken?.Invoke(player, amount, sourceType, effectContext);
+
+        public static void TriggerPlayerCoinCollected(IPlayer player, float bonusHp)
+            => OnPlayerCoinCollected?.Invoke(player, bonusHp);
         #endregion
 
         #region Bomb Triggers
@@ -204,6 +331,41 @@ namespace Core
         public static void TriggerAddCreditsRequest(int amount) => OnAddCreditsRequest?.Invoke(amount);
         public static void TriggerCreditsChanged(int newTotal) => OnCreditsChanged?.Invoke(newTotal);
         public static int TriggerRequestCurrentCredits() => OnRequestCurrentCredits?.Invoke() ?? 0;
+        public static IReadOnlyList<string> TriggerRequestOwnedSkillIds() => OnRequestOwnedSkillIds?.Invoke() ?? new List<string>();
+        public static void TriggerAddOwnedSkill(string skillId) => OnAddOwnedSkill?.Invoke(skillId);
+        public static void TriggerOwnedSkillsChanged(IReadOnlyList<string> ownedSkillIds) => OnOwnedSkillsChanged?.Invoke(ownedSkillIds);
+        public static IReadOnlyList<string> TriggerRequestOwnedPerkIds() => OnRequestOwnedPerkIds?.Invoke() ?? new List<string>();
+        public static void TriggerAddOwnedPerk(string perkId) => OnAddOwnedPerk?.Invoke(perkId);
+        public static void TriggerOwnedPerksChanged(IReadOnlyList<string> ownedPerkIds) => OnOwnedPerksChanged?.Invoke(ownedPerkIds);
+        public static int TriggerRequestSkillSpinCount() => OnRequestSkillSpinCount?.Invoke() ?? 0;
+        public static void TriggerIncreaseSkillSpinCount() => OnIncreaseSkillSpinCount?.Invoke();
+
+        /// <summary>
+        /// Bao hieu rang skill dang trang bi da thay doi de PlayerDataManager luu lai.
+        /// </summary>
+        /// <param name="skillId">ID skill moi dang trang bi, hoac null/rong neu go trang bi.</param>
+        public static void TriggerEquippedSkillIdChanged(string skillId) => OnEquippedSkillIdChanged?.Invoke(skillId);
+
+        /// <summary>
+        /// Yeu cau lay ID skill dang duoc trang bi tu PlayerDataManager.
+        /// </summary>
+        public static string TriggerRequestEquippedSkillId() => OnRequestEquippedSkillId?.Invoke();
+
+        /// <summary>
+        /// Bao hieu rang perk trang bi da thay doi de PlayerDataManager luu lai.
+        /// </summary>
+        /// <param name="perkId">ID perk moi dang duoc trang bi, hoac null/rong neu go trang bi.</param>
+        public static void TriggerEquippedPerkIdChanged(string perkId) => OnEquippedPerkIdChanged?.Invoke(perkId);
+
+        /// <summary>
+        /// Yeu cau lay ID perk dang duoc trang bi tu PlayerDataManager.
+        /// </summary>
+        public static string TriggerRequestEquippedPerkId() => OnRequestEquippedPerkId?.Invoke();
+
+        /// <summary>
+        /// Thông báo rằng trạng thái trang bi (skill/perk) của người chơi đã thay đổi để UI đồng bộ lại.
+        /// </summary>
+        public static void TriggerPlayerEquipmentChanged() => OnPlayerEquipmentChanged?.Invoke();
         #endregion
 
         #region Collectible Triggers

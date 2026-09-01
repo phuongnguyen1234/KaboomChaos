@@ -15,7 +15,6 @@ MonoBehaviour:
   id: poison-bomb
   displayName: Poison Bomb
   description: Poison Bomb
-  bombPrefab: {fileID: 7480504946259583760, guid: 1469bed90f9b4ef44b7cb172216d0edd, type: 3}
   radius: 2
   damage: 0
   damageFalloff:
@@ -140,9 +139,9 @@ MonoBehaviour:
   explosionVFX: {fileID: 7840201564702482395, guid: 044f86d62d078554aac2ff0b23d94a00, type: 3}
   explosionSoundPitch: 1
   explosionSound: {fileID: 8300000, guid: 6275bc005ca081d4b8e0f8a2b90284d0, type: 3}
-  minPlayerSpawnChance: 0
-  maxPlayerSpawnChance: 10
-  playerSpawnRadius: 2
+  minPlayerSpawnChance: 50
+  maxPlayerSpawnChance: 80
+  playerSpawnRadius: 3
   possibleVariants: []
   spawnWeightByDifficulty:
     serializedVersion: 2
@@ -241,6 +240,5 @@ MonoBehaviour:
     enableScalePulse: 0
     pulseScaleMultiplier: 0
     pulseScaleDuration: 0
-  additionalGravity: 40
   tickingSoundPitch: 1
   tickingSound: {fileID: 0}

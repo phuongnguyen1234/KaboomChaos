@@ -1,5 +1,6 @@
 using UnityEngine;
 using Core;
+using Core.Enums;
 using Core.Interfaces;
 using Core.Utilities;
 using System.Collections;
@@ -12,27 +13,8 @@ namespace Managers
     /// Quản lý luồng chơi chính (Game Loop), bao gồm việc khởi tạo, bắt đầu và kết thúc game.
     /// Lớp này đóng vai trò điều phối các Manager khác (như PlayerManager, SpawnManager, v.v.).
     /// </summary>
-    
-    /// <summary>
-    /// Các trạng thái của vòng lặp game.
-    /// </summary>
-    public enum GameState
-    {
-        /// <summary>Trạng thái không xác định hoặc khởi tạo.</summary>
-        None,
-        /// <summary>Giai đoạn người chơi bỏ phiếu cho map tiếp theo.</summary>
-        MapVoting,
-        /// <summary>Giai đoạn map đang được xây dựng.</summary>
-        Building,
-        /// <summary>Giai đoạn chuẩn bị trước round đấu (dịch chuyển, đếm ngược).</summary>
-        PreRound,
-        /// <summary>Giai đoạn round đấu đang diễn ra.</summary>
-        RoundActive,
-        /// <summary>Giai đoạn kết thúc round đấu (hiển thị kết quả, dọn dẹp).</summary>
-        PostRound
-    }
 
-    public class GameloopManager : MonoBehaviour, IGameloopManager
+    public class GameloopManager : MonoBehaviour, IGameloopManager, IGameStateProvider
     {
         private static WaitForSeconds _waitForSeconds3 = new(3f);
         private static readonly WaitForSeconds _waitForSeconds2 = new(2f);
@@ -95,6 +77,8 @@ namespace Managers
         private Coroutine _activeStageCoroutine;
 
         [Header("Game Loop Settings")]
+        [Tooltip("Thời gian (giây) cho giai đoạn chào mừng 'Welcome to Kaboom Chaos!' khi bấm Play. Player đã được spawn, đồng hồ hiển thị 0:00 trong giai đoạn này.")]
+        [SerializeField] private float _welcomeDuration = 5f;
         [Tooltip("Thời gian (giây) cho giai đoạn bỏ phiếu map.")]
         [SerializeField] private int _votingDuration = 15;
         [Tooltip("Thời gian (giây) hiển thị tên map đã được chọn.")]
@@ -161,6 +145,8 @@ namespace Managers
             else
             {
                 Instance = this;
+                // Gan luon qua interface de cac assembly khac (UI) co the truy cap qua IGameStateProvider.Instance.
+                IGameStateProvider.Instance = this;
                 DontDestroyOnLoad(gameObject); // Giữ Manager tồn tại khi chuyển đổi giữa các scene.
             }
         }
@@ -259,6 +245,13 @@ namespace Managers
         /// </summary>
         private IEnumerator GameLoopCoroutine()
         {
+            // --- Giai đoạn 0: Chào mừng ---
+            // Chay dung mot lan moi phien choi (sau khi bam Play), truoc khi buoc vao vong lap map.
+            // Player da duoc spawn trong StartGame() va co the di chuyen binh thuong.
+            _activeStageCoroutine = StartCoroutine(WelcomeStage());
+            yield return _activeStageCoroutine;
+            _activeStageCoroutine = null;
+
             while (_gameLoopActive)
             {
                 // Track each stage so StopGameLoop() can cancel it if the player leaves mid-stage.
@@ -307,6 +300,25 @@ namespace Managers
         #region Game Loop Stages
 
         /// <summary>
+        /// Giai đoạn chào mừng (chạy 1 lần sau khi bấm Play): hiển thị thông báo
+        /// "Welcome to Kaboom Chaos!" và đồng hồ 0:00 trong khoảng _welcomeDuration giây,
+        /// sau đó mới bước vào vòng lặp map (voting/build/round) thực sự.
+        /// Player đã được spawn bởi StartGame() trước khi stage này chạy.
+        /// </summary>
+        /// <returns>IEnumerator để chạy như một coroutine.</returns>
+        private IEnumerator WelcomeStage()
+        {
+            // Hien thi thong bao chao mung (khong tu dong an, dung persistent).
+            _uiManager?.ShowPersistentNotification("Welcome to Kaboom Chaos!");
+
+            // Hien thi dong ho 0:00 trong luc chao mung.
+            _uiManager?.UpdateTimer(0);
+
+            Debug.Log($"[GameloopManager] Giai đoạn 0: Chào mừng trong {_welcomeDuration} giây.");
+            yield return new WaitForSeconds(_welcomeDuration);
+        }
+
+        /// <summary>
         /// Giai đoạn 1: Xử lý việc bỏ phiếu cho map. Hiển thị timer, chọn map ngẫu nhiên và thông báo kết quả.
         /// </summary>
         /// <returns>IEnumerator để chạy như một coroutine.</returns>
@@ -315,7 +327,7 @@ namespace Managers
             // --- Giai đoạn 1: Bỏ phiếu Map ---
             CurrentState = GameState.MapVoting;
             Debug.Log("[GameloopManager] Giai đoạn 1: Bỏ phiếu Map");
-            _uiManager?.ShowNotification("Voting for the next map...", _votingDuration);
+            _uiManager?.ShowPersistentNotification("Voting for the next map...");
 
             // Bắt đầu vòng lặp đếm ngược cho giai đoạn voting, đồng thời hiển thị timer.
             float votingTimer = _votingDuration;
@@ -355,7 +367,7 @@ namespace Managers
 
             // Thông báo map đã được chọn
             _uiManager?.HideTimer(); // Ẩn timer của voting trước khi hiện thông báo map
-            _uiManager?.ShowNotification($"Map selected: {selectedMapName}", _mapRevealDuration);
+            _uiManager?.ShowPersistentNotification($"Map selected: {selectedMapName}");
             yield return new WaitForSeconds(_mapRevealDuration);
         }
 
@@ -368,7 +380,7 @@ namespace Managers
             // --- Giai đoạn 2: Xây dựng Map ---
             CurrentState = GameState.Building;
             Debug.Log("[GameloopManager] Giai đoạn 2: Xây dựng Map");
-            _uiManager?.ShowNotification("Building map...", 1000f); // Hiển thị lâu, sẽ bị ẩn sau khi build xong
+            _uiManager?.ShowPersistentNotification("Building map...");
 
             // Xây dựng map đã chọn một cách bất đồng bộ
             yield return StartCoroutine(BuildSelectedMap(_selectedMapIndex, _selectedUndergroundIndex));
@@ -383,7 +395,8 @@ namespace Managers
             Debug.Log($"[GameloopManager] Map đã xây xong. Chờ ổn định trong {_postBuildStabilizationDuration} giây.");
             yield return new WaitForSeconds(_postBuildStabilizationDuration);
 
-            _uiManager?.HideNotification();
+            // Yeu cau: khong an notification panel, giu nguyen hien thi va doi noi dung thanh Get ready.
+            _uiManager?.ShowPersistentNotification("Get ready...");
         }
 
         /// <summary>
@@ -445,11 +458,16 @@ namespace Managers
             // --- Giai đoạn 5: Round đang diễn ra ---
             CurrentState = GameState.RoundActive;
             _bombSpawnerManager?.StartSpawning();
+            // Yeu cau: sau khi dem nguoc ket thuc va round bat dau, doi noi dung notification thanh Survive the bombs.
+            _uiManager?.ShowPersistentNotification("Survive the bombs!");
             Debug.Log("[GameloopManager] Giai đoạn 5: Round đang diễn ra");
 
             // Khởi tạo đồng hồ round (giây còn lại). Đồng hồ này là nguồn tính Survival Score theo thời gian của round.
             _roundTimeRemaining = _roundDuration;
             int lastDisplayedSecond = Mathf.CeilToInt(_roundTimeRemaining);
+
+            // Reset trang thai cam bao cua timer ve mau binh thuong truoc khi chay round moi.
+            _uiManager?.SetTimerDangerState(false);
 
             // Lấy số người chơi lúc bắt đầu round để xác định điều kiện thắng.
             // Điều kiện kết thúc round: khi không còn người chơi nào sống sót (số người chơi còn lại là 0).
@@ -475,6 +493,10 @@ namespace Managers
                                         // Kích hoạt nhạc 30 giây cuối (qua BGMController toàn cục)
                     BGMController.Instance?.PlayLast30sMusic(CurrentIntensity);
                     last30sMusicTriggered = true;
+
+                    // Doi mau text + icon TimerPanel thanh do va phat SFX canh bao song song.
+                    _uiManager?.SetTimerDangerState(true);
+
                     Debug.Log("[GameloopManager] 30 seconds left. Playing final music.");
                 }
                 yield return null;
@@ -546,7 +568,7 @@ namespace Managers
             BGMController.Instance?.PlayLobbyMusic();
 
             // Hiển thị thông báo kết thúc round
-            _uiManager?.ShowNotification("Round Over!", _postRoundWaitDuration);
+            _uiManager?.ShowPersistentNotification("Round Over!");
 
             yield return new WaitForSeconds(_postRoundWaitDuration);
 
@@ -555,7 +577,7 @@ namespace Managers
             Debug.Log("[GameloopManager] Triggered Round End Cleanup event for stray effects.");
 
             // Hiển thị thông báo đang dọn dẹp
-            _uiManager?.ShowNotification("Cleaning up the play area...", 1000f); // Hiển thị lâu, sẽ bị ẩn sau khi dọn xong
+            _uiManager?.ShowPersistentNotification("Cleaning up the play area...");
             Debug.Log("[GameloopManager] Bắt đầu dọn dẹp map.");
 
             yield return StartCoroutine(CleanupRoundAsync());
@@ -565,8 +587,8 @@ namespace Managers
             Debug.Log($"[GameloopManager] Chờ ổn định FPS trong {_postCleanupStabilizationDuration} giây.");
             yield return new WaitForSeconds(_postCleanupStabilizationDuration);
 
-            // Ẩn thông báo sau khi đã ổn định
-            _uiManager?.HideNotification();
+            // Yeu cau: giu nguyen notification panel hien thi xuyen suot vong lap game,
+            // khong an o day; vong lap moi se tu cap nhat noi dung moi o MapVotingStage.
         }
 
         #endregion

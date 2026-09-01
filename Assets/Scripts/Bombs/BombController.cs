@@ -115,6 +115,12 @@ namespace Bombs // Thay đổi
         /// </summary>
         public object BehaviorData { get; set; }
 
+        /// <summary>
+        /// Xác định loại bom này có cần điểm neo gắn vào cấu trúc map hay không.
+        /// Chỉ thủy lôi (NavalMineBehavior) hiện tại yêu cầu điều này.
+        /// </summary>
+        public bool RequiresAnchorForSpawn => _behavior is Bombs.Behaviors.NavalMineBehavior;
+
 
         #endregion
 
@@ -239,6 +245,7 @@ namespace Bombs // Thay đổi
             _bombData = null;
             _behavior = null;
             _explosionStrategy = null;
+            BehaviorData = null; // Reset dữ liệu hành vi để tránh tái sử dụng anchor cũ khi lấy từ pool
 
             // Reset cached manager instances to null.
             // This ensures that if managers are destroyed/recreated, we get the new valid instance on next Initialize.

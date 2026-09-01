@@ -117,8 +117,8 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 3
-      minScalar: 2
+      scalar: 2.5
+      minScalar: 1.6
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -1249,8 +1249,8 @@ ParticleSystem:
     curve:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 1.0471976
-      minScalar: -1.0471976
+      scalar: 1.5707963
+      minScalar: -1.5707963
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -4854,4 +4854,6 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
