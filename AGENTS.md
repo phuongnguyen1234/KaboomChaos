@@ -6,14 +6,12 @@
 
 ## 1. Unity Version & API Conventions
 
-- **Unity Version**: 6000.5.0f1 (Unity 6)
-- Sử dụng các API mới nhất của Unity 6000.5, bao gồm:
+- **Unity Version**: 6000.5.0f1 (Unity 6.5)
+- Sử dụng các API mới nhất của Unity 6000.6, bao gồm:
   - `InputSystem` package (UnityEngine.InputSystem)
-  - `UIToolkit` (UnityEngine.UIElements) cho UI system
+  - `uGUI` (UnityEngine.UI) cho UI system
   - Modern `MonoBehaviour` patterns (Awake/Start/Update, không dùng SendMessage)
-  - Entity Component System (nếu cần hiệu suất cao)
-  - Addressables system cho việc load tài nguyên (nếu cần)
-- Không sử dụng các API legacy/obsolete như:
+  - Không sử dụng các API legacy/obsolete như:
   - `UnityEngine.Network` (dùng Unity Gaming Services hoặc Netcode for GameObjects)
   - `WWW` (dùng `UnityWebRequest`)
   - Old Input System (dùng InputSystem Package)

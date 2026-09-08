@@ -43,5 +43,12 @@ namespace Core
         /// Duoc luu de khoi phuc lai trang thai trang bi khi vao game.
         /// </summary>
         public string EquippedPerkId;
+
+        /// <summary>
+        /// Trang thai Extreme Mode cua nguoi choi (bat/tat).
+        /// Duoc luu de khoi phuc logic (max HP, vô hiệu perk) va UI khi vao game.
+        /// Khi bat: player chi co max HP = 35, perk bi vô hiệu nhưng van equip/ hien thi duoc.
+        /// </summary>
+        public bool ExtremeModeEnabled;
     }
 }

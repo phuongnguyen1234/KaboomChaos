@@ -46,5 +46,12 @@ namespace Core.Interfaces
         /// Spawner sẽ tìm một anchor hợp lệ và gán vào <see cref="BehaviorData"/> trước khi gọi <see cref="Activate"/>.
         /// </summary>
         bool RequiresAnchorForSpawn { get; }
+
+        /// <summary>
+        /// Cho biết bom này có phải là tên lửa (missile) hay không.
+        /// Dùng bởi Bubble Barrier để giữ tư thế đâm thẳng xuống khi bị đẩy ra.
+
+        /// </summary>
+        bool IsProjectile { get; }
     }
 }

@@ -17,5 +17,11 @@ namespace Core.Interfaces
         /// </summary>
         /// <param name="amount">Lượng máu tối đa cần tăng.</param>
         void IncreaseMaxHealth(float amount);
+
+        /// <summary>
+        /// Cho biết đối tượng đang có máu đầy hay không (máu hiện tại đạt tối đa).
+        /// Dùng để chặn việc sử dụng skill hồi máu khi không cần thiết.
+        /// </summary>
+        bool IsHealthFull { get; }
     }
 }

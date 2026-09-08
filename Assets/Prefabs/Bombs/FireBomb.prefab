@@ -175,7 +175,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0.5
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -227,7 +227,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fdcc6663c22f0ad4892f61ffaa935049, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bombs.BombController
-  _bombData: {fileID: 11400000, guid: c0ecc81f7c5d9f14c9df4500287b90c5, type: 2}
   _obsidianBlockPrefab: {fileID: 0}
   _lavaInteractionRadius: 3
   _lavaLayer:
@@ -337,6 +336,8 @@ MonoBehaviour:
   _customDecalColor: {r: 1, g: 0.6092078, b: 0, a: 1}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1001 &6145409461584856146
 PrefabInstance:
@@ -432,6 +433,8 @@ MonoBehaviour:
   _customDecalColor: {r: 1, g: 1, b: 1, a: 1}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!4 &5963425772724708281 stripped
 Transform:
@@ -532,6 +535,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!4 &7770262446909035237 stripped
 Transform:

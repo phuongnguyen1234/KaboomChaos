@@ -20,4 +20,6 @@ MonoBehaviour:
   _duration: 1
   _rechargeTime: 40
   _price: 0
+  _castSfx: {fileID: 8300000, guid: 076cae69e8a0c824d845e421ecf273fb, type: 3}
+  _castVfx: {fileID: 0}
   _healAmount: 25

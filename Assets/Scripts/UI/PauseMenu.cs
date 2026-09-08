@@ -16,6 +16,14 @@ namespace UI
         [SerializeField] private Button _resumeButton;
         [SerializeField] private Button _backToHomeButton;
         [SerializeField] private Button _resetCharacterButton;
+        [Tooltip("Nut mo Settings (settings de Music/SFX si use skill key rebind).")]
+        [SerializeField] private Button _settingsButton;
+
+        [Header("Settings")]
+        [Tooltip("(Option 1) Panel SettingsUI tamplasar direct tan Pause Menu (in-place panel).")]
+        [SerializeField] private SettingsUI _settingsUI;
+        [Tooltip("(Option 2) Popup Settings chung (SettingsPopup) de deschide suprapus. Neu _settingsUI nu khong, khong se usa.")]
+        [SerializeField] private SettingsPopup _settingsPopup;
 
         public bool IsVisible => gameObject.activeSelf;
 
@@ -24,6 +32,7 @@ namespace UI
             if (_resumeButton != null) _resumeButton.onClick.AddListener(Hide);
             if (_backToHomeButton != null) _backToHomeButton.onClick.AddListener(OnBackToHomeClicked);
             if (_resetCharacterButton != null) _resetCharacterButton.onClick.AddListener(OnResetCharacterClicked);
+            if (_settingsButton != null) _settingsButton.onClick.AddListener(OnSettingsClicked);
         }
 
                 public void Show()
@@ -36,8 +45,50 @@ namespace UI
         public void Hide()
         {
             gameObject.SetActive(false);
+
+            // Cancel orice rebind in curs cand user dong Pause Menu (si khong inchide popup).
+            if (_settingsUI != null)
+            {
+                _settingsUI.CancelRebind();
+            }
+
             Time.timeScale = 1f; // Tiếp tục game
             GameEvents.IsPauseMenuVisible = false;
+        }
+
+        /// <summary>
+        /// Xu ly nut Settings din Pause Menu: neu co SettingsUI in-place, duoc mo/toggle
+        /// in panel; neu khong, deschide popup Settings (SettingsPopup chung).
+        /// </summary>
+        private void OnSettingsClicked()
+        {
+            if (_settingsUI != null)
+            {
+                bool wasVisible = _settingsUI.gameObject.activeSelf;
+                _settingsUI.gameObject.SetActive(!wasVisible);
+
+                if (wasVisible)
+                {
+                    _settingsUI.CancelRebind();
+                }
+                else
+                {
+                    _settingsUI.Refresh();
+                }
+                return;
+            }
+
+            if (_settingsPopup != null)
+            {
+                if (_settingsPopup.IsVisible)
+                {
+                    _settingsPopup.Hide();
+                }
+                else
+                {
+                    _settingsPopup.Show();
+                }
+            }
         }
 
         public void Toggle()

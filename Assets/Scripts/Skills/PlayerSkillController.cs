@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 using Core;
 using Core.Interfaces;
 using Skills.Data;
+using System;
 
 namespace Skills
 {
@@ -15,8 +16,13 @@ namespace Skills
 
         private BaseSkillData _equippedSkillData;
 
-        [Tooltip("Phim kich hoat skill su dung he thong InputSystem.")]
+        [Tooltip("Phim kich hoat skill su dung he thong InputSystem.\nMac dinh = E. Co the thay doi trong Settings (UseSkillKey).")]
         [SerializeField] private Key _useSkillKey = Key.E;
+
+        // Cache key dang duoc sync tu SettingsManager.Instance.UseSkillKey de lam giam viec parse moi frame.
+        // Parse lai chi khi ten key trong settings thay doi.
+        private Key _cachedUseSkillKey = Key.E;
+        private string _lastUseSkillKeyName;
 
         [Header("Skill Database")]
         [Tooltip("Doi tuong implement ISkillDatabase (ScriptableObject SkillDatabase o assembly Skills). Dung de khoi phuc skill equip da luu khi vao game.")]
@@ -171,6 +177,14 @@ namespace Skills
                 return;
             }
 
+            // Cho phep skill tu chan viec su dung tuong ung voi dieu kien hien tai
+            // (vi du: Heal khong dung duoc khi player dang day HP).
+            if (_equippedSkillData.CanActivate(_player) == false)
+            {
+                Debug.Log($"[PlayerSkillController] Khong the su dung skill {_equippedSkillData.DisplayName} trong dieu kien hien tai.");
+                return;
+            }
+
             // Kiem tra va tieu thu energy.
             // Neu Skill co Duration: rut energy tu tu theo dung thoi gian duy tri, het duration moi sac.
             // Neu Skill khong co Duration: rut can ngay va sac luon.
@@ -199,8 +213,11 @@ namespace Skills
                 _equippedSkillData.Behavior.Activate(_player);
             }
 
-            // Phat SFX + VFX khi dung skill tren vi tri Player.
-            PlayCastEffects();
+            // Phat SFX + VFX ngay tai thoi diem kich hoat skill (neu duoc cau hinh PlayCastOnActivate).
+            if (_equippedSkillData.PlayCastOnActivate)
+            {
+                PlayCastEffects();
+            }
         }
 
         /// <summary>
@@ -220,11 +237,36 @@ namespace Skills
             // Spawn VFX qua pool (do VFXPoolManager quan ly - Goi qua GameEvents de tranh phu thuoc assembly Managers).
             if (_equippedSkillData.CastVfx != null && _player != null && _player.GameObject != null)
             {
-                Vector3 spawnPos = _player.GameObject.transform.position;
-                GameObject vfx = GameEvents.TriggerVFXSpawnRequest(_equippedSkillData.CastVfx, spawnPos, Quaternion.identity);
+                GameObject vfx = GameEvents.TriggerVFXSpawnRequest(_equippedSkillData.CastVfx, _player.GameObject.transform.position, Quaternion.identity);
+                if (vfx == null)
+                {
+                    // Neu khong co VFX pool lang nghe, dung Instantiate thuong de khong mat hieu ung.
+                    vfx = UnityEngine.Object.Instantiate(_equippedSkillData.CastVfx, _player.GameObject.transform.position, Quaternion.identity);
+                }
+
                 if (vfx != null)
                 {
-                    Debug.Log($"[PlayerSkillController] Da spawn VFX skill: {_equippedSkillData.DisplayName}.");
+                    // Tuy thuoc vao cau hinh spawn mode tu BaseSkillData:
+                    // - LocalPlayer: gan VFX lam con cua Player de luon di cung player (giong cach Shield parent VFX len Player).
+                    // - World: giu VFX trong world space tai vi tri Player, khong gan theo de tranh bi nho do scale
+                    //   cua Player, dong thoi cho phep VFX tu quan ly vong doi (LifetimeController/ExplosionEffectController).
+                    if (_equippedSkillData.CastVfxSpawnMode == BaseSkillData.VfxSpawnMode.LocalPlayer)
+                    {
+                        vfx.transform.SetParent(_player.GameObject.transform, false);
+                        vfx.transform.localPosition = Vector3.zero;
+                    }
+
+                    // Neu prefab CastVfx la dang vu no (co ExplosionEffectController), go Trigger de no chay sequence
+                    // (scale theo ban kinh -> fade -> tu dong tra ve pool sau khi animation ket thuc).
+                    // Bat buoc phai go Trigger, neu khong VFX se dung o initialScale (rat nho), khong chay sequence
+                    // va khong bao gio tu tra ve pool.
+                    ExplosionEffectController explosion = vfx.GetComponentInChildren<ExplosionEffectController>();
+                    if (explosion != null)
+                    {
+                        explosion.Trigger(_equippedSkillData.CastVfxExplosionRadius);
+                    }
+
+                    Debug.Log($"[PlayerSkillController] Da spawn VFX skill: {_equippedSkillData.DisplayName} (mode: {_equippedSkillData.CastVfxSpawnMode}).");
                 }
             }
         }
@@ -235,15 +277,50 @@ namespace Skills
 
         /// <summary>
         /// Kiem tra xem nguoi choi co nhan nut su dung skill hay khong thong qua Keyboard cua InputSystem.
+        /// Key duoc citest tu SettingsManager.UseSkillKey (rebind din Settings UI).
         /// </summary>
         private bool DetectUseSkillInput()
         {
-            if (Keyboard.current != null && Keyboard.current[_useSkillKey].wasPressedThisFrame)
+            if (Keyboard.current != null && Keyboard.current[ResolveUseSkillKey()].wasPressedThisFrame)
             {
                 return true;
             }
             return false;
         }
+
+        /// <summary>
+        /// Resolveaza key duoc dung de kich hoat skill: citest tu SettingsManager.UseSkillKey
+        /// (rebind din Settings UI), cu fallback la _useSkillKey (serialized din Inspector).
+        /// Cacheaza rezultatul de tranh limpia parse o moi frame (parse lai chi cand ten key thay doi).
+        /// </summary>
+        private Key ResolveUseSkillKey()
+        {
+            Core.SettingsManager settings = Core.SettingsManager.Instance;
+            string configuredName = settings != null ? settings.UseSkillKey : _useSkillKey.ToString();
+
+            if (_lastUseSkillKeyName != configuredName)
+            {
+                _lastUseSkillKeyName = configuredName;
+                _cachedUseSkillKey = ParseUseSkillKey(configuredName);
+            }
+
+            return _cachedUseSkillKey;
+        }
+
+        /// <summary>
+        /// Conversie sam nume Key (care luu de SettingsManager) din enum Key din InputSystem.
+        /// Neu nu tim thay sam, tra ve fallback serialized (_useSkillKey).
+        /// </summary>
+        /// <param name="keyName">Sam nume Key (vi du "E", "Space").</param>
+        private Key ParseUseSkillKey(string keyName)
+{
+        if (Enum.TryParse(keyName, true, out Key resultKey))
+        {
+            return resultKey;
+        }
+
+        return _useSkillKey;
+    }
 
         /// <summary>
         /// Cap nhat thoi gian hieu luc cua skill moi frame va goi UpdateBehavior.
@@ -276,6 +353,12 @@ namespace Skills
             if (_equippedSkillData != null && _equippedSkillData.Behavior != null)
             {
                 _equippedSkillData.Behavior.Deactivate(_player);
+            }
+
+            // Phat SFX + VFX sau khi het duration (neu skill duoc cau hinh PlayCastOnDeactivate).
+            if (_equippedSkillData != null && _equippedSkillData.PlayCastOnDeactivate)
+            {
+                PlayCastEffects();
             }
         }
 

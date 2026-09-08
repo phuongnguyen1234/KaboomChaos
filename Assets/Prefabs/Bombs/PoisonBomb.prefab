@@ -175,7 +175,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0.5
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -327,6 +327,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0.17252399, g: 0.7433963, b: 0.18151021, a: 1}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!4 &4679205124310044324 stripped
 Transform:
@@ -427,6 +429,8 @@ MonoBehaviour:
   _customDecalColor: {r: 1, g: 1, b: 1, a: 1}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!4 &5963425772724708281 stripped
 Transform:
@@ -527,6 +531,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!4 &7770262446909035237 stripped
 Transform:

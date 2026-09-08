@@ -156,6 +156,7 @@ namespace Managers
             // Đăng ký lắng nghe sự kiện người chơi chết để điều chỉnh độ khó
             GameEvents.OnPlayerDied += HandlePlayerDeath;
             GameEvents.OnStartGameRequest += StartGame;
+            GameEvents.OnSpawnInitialPlayerRequest += HandleSpawnInitialPlayer;
             // Stop the running game loop when the player returns to the Home screen.
             GameEvents.OnReturnToHomeRequest += HandleReturnToHome;
         }
@@ -164,6 +165,7 @@ namespace Managers
         {
             GameEvents.OnPlayerDied -= HandlePlayerDeath;
             GameEvents.OnStartGameRequest -= StartGame;
+            GameEvents.OnSpawnInitialPlayerRequest -= HandleSpawnInitialPlayer;
             GameEvents.OnReturnToHomeRequest -= HandleReturnToHome;
         }
 
@@ -200,11 +202,13 @@ namespace Managers
 
             _gameLoopActive = true;
 
-            // Spawn người chơi lần đầu tiên khi game bắt đầu.
-            _playerManager?.SpawnInitialPlayer();
-
             // Bắt đầu vòng lặp game chính
             _gameLoopCoroutine = StartCoroutine(GameLoopCoroutine());
+        }
+
+        private void HandleSpawnInitialPlayer()
+        {
+            _playerManager?.SpawnInitialPlayer();
         }
 
         /// <summary>
@@ -676,9 +680,11 @@ namespace Managers
         }
 
         /// <summary>
-        /// Dịch chuyển tất cả người chơi hiện đang hoạt động đến một vị trí ngẫu nhiên trong khu vực arena.
+        /// Dịch chuyển tất cả người chơi tham gia round (khong bao gom AFK) đến một vị trí ngẫu nhiên trong khu vực arena.
         /// Lưu ý: vị trí của Arena/BombSpawner/TopBorder đã được định vị ở <see cref="UpdateArenaEnvironmentPosition"/>
         /// (gọi trong BuildingStage ngay sau khi build xong map, trước bước teleport này).
+        /// CHI teleport nhung nguoi choi trong _playersInRound (nhuoc gap StartRound da loc AFK),
+        /// de player AFK (khong tham gia round) van o lobby va khong bi dua vao arena.
         /// </summary>
         private void TeleportPlayersToArena()
         {
@@ -687,7 +693,7 @@ namespace Managers
                 Debug.LogError("[GameloopManager] Arena Spawn Area is not assigned!", this);
                 return;
             }
-            var players = _playerManager?.GetAllPlayers();
+            var players = _playerManager?.GetPlayersInRound();
             if (players == null) return;
 
             // Sau khi môi trường đã được định vị ở bước riêng (sau khi build map), tiến hành dịch chuyển người chơi.

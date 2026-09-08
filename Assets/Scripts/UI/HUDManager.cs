@@ -5,6 +5,7 @@ using Core;
 using Core.Enums;
 using Core.Interfaces;
 using System.Collections;
+using DG.Tweening;
 
 namespace UI
 {
@@ -29,6 +30,25 @@ namespace UI
         [Tooltip("Sprite fill dung khi energy dang trong qua trinh tu sac (gray). NULL thi giu nguyen fill hien tai.")]
         [SerializeField] private Sprite _energyRechargeFillSprite;
 
+        [Header("Energy Notification")]
+        [Tooltip("Text hien thi thong bao 'Charge Full' tren UI khi nhap Battery luc energy dang day. Tu dong an sau 2 giay.")]
+        [SerializeField] private TextMeshProUGUI _chargeFullText;
+
+        [Tooltip("Thoi gian (giay) hien thi thong bao 'Charge Full' tren UI truoc khi tu dong an.")]
+        [SerializeField] private float _chargeFullTextDuration = 2f;
+
+        [Tooltip("Am thanh (SFX) phat khi energy dong sac day tu dong (bao hieu da du 100% energy).")]
+        [SerializeField] private AudioClip _energyFullChargedSfx;
+
+        [Tooltip("Icon Energy tren UI se pulse scale khi energy day (de nguoi choi nhan biet). Neu bo trong, dung fillRect cua energy slider.")]
+        [SerializeField] private RectTransform _energyIconTransform;
+
+        [Tooltip("Thoi gian (giay) pulse scale icon Energy.")]
+        [SerializeField] private float _energyPulseDuration = 0.3f;
+
+        [Tooltip("Muc do phong to (ti le) khi pulse icon Energy.")]
+        [SerializeField] private float _energyPulseScaleMultiplier = 1.15f;
+
         [Header("Equipped Skill & Perk Icons")]
         [Tooltip("Container chứa icon skill đang trang bi. Tu dong an khi khong co skill.")]
         [SerializeField] private GameObject _equippedSkillContainer;
@@ -50,6 +70,12 @@ namespace UI
         private bool _energyFillCached;
         private bool _energyFillGrayActive;
 
+        // AudioSource de phat SFX thong bao (tu tim tren GameObject HUD).
+        private AudioSource _audioSource;
+        // Coroutine an thong bao 'Charge Full' sau thoi gian.
+        private Coroutine _chargeFullTextRoutine;
+        private RectTransform _energyPulseTarget;
+
         [Header("Health Bar")]
         [Tooltip("Image fill phu (secondary bar) cua thanh mau; se keo fillAmount sau 0.5s khi nhan sat thuong.")]
         [SerializeField] private Image _healthSecondaryFill;
@@ -66,10 +92,22 @@ namespace UI
         // Tranh setActive lap lai moi frame khi trang thai khong doi.
         private bool _attributePanelVisible;
 
+        [Header("Extreme Mode")]
+        [Tooltip("Text hien thi trang thai Extreme Mode tren HUD (vi du: 'EXTREME').")]
+        [SerializeField] private TextMeshProUGUI _extremeModeText;
+        [Tooltip("Icon hien thi trang thai Extreme Mode tren HUD.")]
+        [SerializeField] private Image _extremeModeIcon;
+
         #region Unity Lifecycle
 
         private void Awake()
         {
+            _audioSource = GetComponent<AudioSource>();
+            if (_audioSource == null)
+            {
+                _audioSource = gameObject.AddComponent<AudioSource>();
+            }
+            _energyPulseTarget = _energyIconTransform != null ? _energyIconTransform : (_energySlider != null ? _energySlider.fillRect : null);
         }
 
         private void OnEnable()
@@ -77,9 +115,15 @@ namespace UI
             GameEvents.OnPlayerHealthChanged += HandlePlayerHealthChanged;
             GameEvents.OnPlayerEnergyChanged += HandlePlayerEnergyChanged;
             GameEvents.OnPlayerEquipmentChanged += HandleEquipmentChanged;
+            GameEvents.OnBatteryCollectibleRefused += HandleBatteryCollectibleRefused;
+            GameEvents.OnPlayerEnergyFullyCharged += HandlePlayerEnergyFullyCharged;
+            GameEvents.OnExtremeModeStateChanged += HandleExtremeModeChanged;
 
             // Dong bo icon trang bi luc HUD bat (vi du: quay lai sau pause).
             RefreshEquippedIcons();
+
+            // Khoi phuc trang thai Extreme Mode khi HUD bat (da luu tru).
+            RefreshExtremeModeIndicator();
 
             // Dong bo thanh nang luong + trang thai sac neu HUD duoc bat lai giua chung.
             SyncEnergyDisplay();
@@ -90,6 +134,9 @@ namespace UI
             GameEvents.OnPlayerHealthChanged -= HandlePlayerHealthChanged;
             GameEvents.OnPlayerEnergyChanged -= HandlePlayerEnergyChanged;
             GameEvents.OnPlayerEquipmentChanged -= HandleEquipmentChanged;
+            GameEvents.OnBatteryCollectibleRefused -= HandleBatteryCollectibleRefused;
+            GameEvents.OnPlayerEnergyFullyCharged -= HandlePlayerEnergyFullyCharged;
+            GameEvents.OnExtremeModeStateChanged -= HandleExtremeModeChanged;
         }
 
         private void Update()
@@ -172,6 +219,38 @@ namespace UI
 
         #endregion
 
+        #region Extreme Mode
+
+        /// <summary>
+        /// Phan hoi khi trang thai Extreme Mode thay doi: dong bo indicator (text + icon) tren HUD.
+        /// </summary>
+        /// <param name="enabled">True neu Extreme Mode dang bat.</param>
+        private void HandleExtremeModeChanged(bool enabled)
+        {
+            RefreshExtremeModeIndicator();
+        }
+
+        /// <summary>
+        /// Cap nhat indicator Extreme Mode tren HUD: hien/an text + icon theo trang thai hien tai (da luu tru).
+        /// </summary>
+        private void RefreshExtremeModeIndicator()
+        {
+            bool enabled = GameEvents.TriggerRequestExtremeModeEnabled();
+
+            if (_extremeModeText != null)
+            {
+                _extremeModeText.gameObject.SetActive(enabled);
+                _extremeModeText.text = enabled ? "EXTREME" : string.Empty;
+            }
+
+            if (_extremeModeIcon != null)
+            {
+                _extremeModeIcon.gameObject.SetActive(enabled);
+            }
+        }
+
+        #endregion
+
         #region Event Handlers
 
         private void HandlePlayerHealthChanged(IPlayer player, float currentHealth, float maxHealth)
@@ -230,6 +309,87 @@ namespace UI
 
             UpdateEnergy(energy.CurrentEnergy, energy.MaxEnergy);
             RefreshRechargeState(player);
+        }
+
+        /// <summary>
+        /// Xu ly khi nguoi choi co gang nhap Battery nhung energy dang day (khong the nhap).
+        /// Hien thi thong bao 'Charge Full' tren UI (tu dong an sau 2 giay) + phat SFX (lay tu Battery).
+        /// </summary>
+        private void HandleBatteryCollectibleRefused(IPlayer player, AudioClip chargeFullSfx)
+        {
+            ShowChargeFullNotification(chargeFullSfx);
+        }
+
+        /// <summary>
+        /// Xu ly khi energy da sac day tu dong 100% (hoan tat qua trinh sac).
+        /// Phat audio bao hieu sac day va pulse icon Energy tren UI.
+        /// </summary>
+        private void HandlePlayerEnergyFullyCharged(IPlayer player)
+        {
+            if (_audioSource != null && _energyFullChargedSfx != null)
+            {
+                _audioSource.PlayOneShot(_energyFullChargedSfx);
+            }
+            PulseEnergyIcon();
+        }
+
+        /// <summary>
+        /// Hien thi thong bao 'Charge Full' tren UI (neu co text) show trong _chargeFullTextDuration giay,
+        /// phat SFX (neu co), va pulse icon Energy.
+        /// </summary>
+        private void ShowChargeFullNotification(AudioClip chargeFullSfx)
+        {
+            if (_chargeFullText != null)
+            {
+                _chargeFullText.gameObject.SetActive(true);
+
+                if (_chargeFullTextRoutine != null) StopCoroutine(_chargeFullTextRoutine);
+                _chargeFullTextRoutine = StartCoroutine(HideChargeFullTextRoutine());
+            }
+
+            if (_audioSource != null && chargeFullSfx != null)
+            {
+                _audioSource.PlayOneShot(chargeFullSfx);
+            }
+
+            PulseEnergyIcon();
+        }
+
+        /// <summary>
+        /// Coroutine tam dung de tu dong an thong bao 'Charge Full' sau _chargeFullTextDuration giay.
+        /// </summary>
+        private IEnumerator HideChargeFullTextRoutine()
+        {
+            yield return new WaitForSeconds(_chargeFullTextDuration);
+            if (_chargeFullText != null)
+            {
+                _chargeFullText.gameObject.SetActive(false);
+            }
+            _chargeFullTextRoutine = null;
+        }
+
+        /// <summary>
+        /// Pulse (phong to roi thu nho lai) scale cua icon Energy de thu hut su chu y khi energy day.
+        /// </summary>
+        private void PulseEnergyIcon()
+        {
+            if (_energyPulseTarget == null) return;
+            if (!gameObject.activeInHierarchy) return;
+
+            Vector3 originalScale = _energyPulseTarget.localScale;
+            Vector3 targetScale = originalScale * _energyPulseScaleMultiplier;
+
+            // Dung cac tween dang chay neu co, reset lai scale goc roi chay chu ky pulse.
+            DOTween.Kill(_energyPulseTarget);
+            _energyPulseTarget.localScale = originalScale;
+            _energyPulseTarget.DOScale(targetScale, _energyPulseDuration * 0.5f)
+                .SetEase(Ease.OutQuad)
+                .OnComplete(() =>
+                {
+                    if (_energyPulseTarget == null) return;
+                    _energyPulseTarget.DOScale(originalScale, _energyPulseDuration * 0.5f)
+                        .SetEase(Ease.InQuad);
+                });
         }
 
         /// <summary>

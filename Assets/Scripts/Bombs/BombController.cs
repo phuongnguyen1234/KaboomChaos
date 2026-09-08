@@ -44,9 +44,33 @@ namespace Bombs // Thay đổi
         [Tooltip("Danh sách các bộ phận sẽ nháy màu khi có hiệu ứng pulse. Kéo các GameObject có component ColorTint vào đây.")]
         [SerializeField] private List<MaterialEffectController> _partsToPulse = new();
 
+        [Header("Naval Mine Tether")]
+        [Tooltip("Điểm 'nút thắt' trên quả bom nơi dây xích của thủy lôi sẽ được buộc vào (một child object trên prefab bom). Nếu để trống, hệ thống sẽ tự tìm child có tên gợi ý hoặc tạo một điểm nút ở đỉnh bom khi hoạt động.")]
+        [SerializeField] private Transform _tetherKnotPoint;
+
         // Cached components
         public Rigidbody BombRigidbody { get; private set; }
         public Collider BombCollider { get; private set; }
+
+        /// <summary>
+        /// Quyen truy cap AudioSource cua bom cho cac strategy hanh vi
+        /// (vi du Laser Drone phat audio khi ngam muc tieu).
+        /// </summary>
+        public AudioSource BombAudioSource => _audioSource;
+
+        /// <summary>
+        /// Cho biết bom này có phải là tên lửa (missile) hay không.
+        /// Dùng bởi Bubble Barrier để giữ tư thế đâm thẳng xuống khi bị đẩy ra.
+
+        /// </summary>
+        public bool IsProjectile => _behavior is MissileBombBehavior;
+
+        /// <summary>
+        /// Điểm 'nút thắt' (knot) trên quả bom dùng để buộc dây xích của thủy lôi.
+        /// Nếu chưa được gán trong Inspector, hệ thống sẽ tự tìm/tạo một điểm nút ở đỉnh bom.
+        /// </summary>
+        public Transform TetherKnotPoint => _tetherKnotPoint;
+
         private AudioSource _audioSource;
         // Manager references (injected)
         private IDestructionManager _destructionManager;
@@ -84,7 +108,9 @@ namespace Bombs // Thay đổi
             { typeof(ClusterBombData), () => new MissileBombBehavior() }, // Bom chùm có hành vi di chuyển như tên lửa
             { typeof(MatryoshkaBombData), () => new FuseBombBehavior() }, // Bom Matryoshka có hành vi như bom hẹn giờ
             { typeof(TrackingRocketData), () => new TrackingRocketBehavior() }, // Tên lửa theo dõi mục tiêu
-            { typeof(NavalMineData), () => new NavalMineBehavior() } // Thủy lôi
+            { typeof(NavalMineData), () => new NavalMineBehavior() }, // Thủy lôi
+            { typeof(ZombombData), () => new ZombombBehavior() }, // Zombomb - bom hẹn giờ lăn đuổi theo player
+            { typeof(LaserDroneData), () => new LaserDroneBehavior() } // Laser Drone - bay, ngắm, bắn chùm vụ nổ
         };
 
         // Explosion Strategy

@@ -46,14 +46,14 @@ MonoBehaviour:
     height: 2
     enableScattering: 1
     scatterPrefab: {fileID: 7768746031248934290, guid: 20e058d1a9dc4e24dbcf34f118fd2c2d, type: 3}
-    scatterPercentage: 20
+    scatterPercentage: 10
     scatterInitialEffect: 4
     initialEffect: 0
   - blockPrefab: {fileID: 7768746031248934290, guid: 20e058d1a9dc4e24dbcf34f118fd2c2d, type: 3}
     height: 2
     enableScattering: 1
     scatterPrefab: {fileID: 7768746031248934290, guid: 20e058d1a9dc4e24dbcf34f118fd2c2d, type: 3}
-    scatterPercentage: 40
+    scatterPercentage: 30
     scatterInitialEffect: 4
     initialEffect: 0
   randomSeed: 0

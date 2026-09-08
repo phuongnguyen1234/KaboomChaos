@@ -38,7 +38,7 @@ namespace Managers
         [SerializeField] private AnimationCurve _maxBombsPerSpawnByDifficulty = AnimationCurve.Linear(1, 1, 5, 5);
 
         [Header("Naval Mine Settings")]
-        [Tooltip("Khoảng cách dọc (theo trục Y) mà thủy lôi được đặt lệch về phía trên so với điểm neo (anchor). Thủy lôi sẽ được đặt tại vị trí anchor + offset này để có thể trôi lên đúng cơ chế.")]
+        [Tooltip("Khoảng cách dọc (theo trục Y) mà thủy lôi được đặt lệch lên phía trên BỀ MẶT TRÊN CÙNG của block điểm neo. Thủy lôi sẽ được đặt tại (bề mặt trên cùng của block) + offset này để có thể trôi nổi nhẹ nhàng mà không chạm vào khối.")]
         [SerializeField] private float _navalMineAnchorSpawnOffset = 0.5f;
         [Tooltip("Khoảng cách NGANG (trên mặt phẳng XZ) tối thiểu giữa điểm neo của thủy lôi và chân người chơi. Giúp tránh việc mìn spawn ngay tại chân player rồi chạm và nổ tức thì (không công bằng). 0 = tắt kiểm tra này.")]
         [SerializeField] private float _navalMineMinPlayerHorizontalDistance = 1.5f;
@@ -117,11 +117,21 @@ namespace Managers
         private void OnEnable()
         {
             GameEvents.OnBombDespawnRequest += HandleBombDespawn;
+            GameEvents.OnRequestActiveBombInstances += HandleRequestActiveBombs;
         }
 
         private void OnDisable()
         {
             GameEvents.OnBombDespawnRequest -= HandleBombDespawn;
+            GameEvents.OnRequestActiveBombInstances -= HandleRequestActiveBombs;
+        }
+
+        /// <summary>
+        /// Cung cap danh sach cac instance bom dang hoat dong cho he thong yeu cau (vi du skill Disarm) qua GameEvents.
+        /// </summary>
+        private IReadOnlyList<GameObject> HandleRequestActiveBombs()
+        {
+            return GetActiveBombInstances();
         }
 
         public void StartSpawning()
@@ -202,7 +212,7 @@ namespace Managers
                             if (anchor == null)
                             {
                                 // Không tìm thấy điểm neo hợp lệ -> không thể spawn thủy lôi. Hủy và trả về pool.
-                                Debug.LogWarning("[BombSpawnerManager] Không tìm thấy điểm neo hợp lệ (DestructibleBlock hoặc DestructiblePart còn Intact) cho thủy lôi. Bỏ qua lần spawn này.", this);
+                                Debug.LogWarning("[BombSpawnerManager] Không tìm thấy điểm neo hợp lệ (DestructibleBlock nằm ở bề mặt trên cùng, thoáng phía trên) cho thủy lôi. Bỏ qua lần spawn này.", this);
                                 waveSpawnCount[bombData] = Mathf.Max(0, waveSpawnCount[bombData] - 1);
                                 GameEvents.TriggerBombDespawnRequest(bombInstance);
                                 continue;
@@ -210,8 +220,8 @@ namespace Managers
 
                             // Gán anchor cho hành vi thủy lôi thông qua BehaviorData.
                             bombController.BehaviorData = anchor;
-                            // Đặt thủy lôi lệch lên phía trên anchor để nó có thể "trôi lên" đúng cơ chế.
-                            bombInstance.transform.position = anchor.transform.position + Vector3.up * _navalMineAnchorSpawnOffset;
+                            // Đặt thủy lôi ngay trên bề mặt trên cùng của block điểm neo (thay vì tại vị trí spawner như các bom khác).
+                            bombInstance.transform.position = GetNavalMineSpawnPosition(anchor);
                         }
 
                         bombController.Activate();
@@ -370,10 +380,10 @@ namespace Managers
                     }
                 }
 
-                // Khong fallback ve vat pham goc: neu vat pham goc co khai bao bien the ma
-                // khong bien the nao tung xuc xac thanh cong thi coi nhu khong spawn duoc
-                // vat pham nay trong luot nay (caller se bo qua slot nay khi nhan null).
-                return null;
+                // Fallback ve vat pham goc: neu vat pham goc co khai bao bien the ma
+                // khong bien the nao tung xuc xac thanh cong thi tra ve chinh vat pham goc.
+                // Dieu nay dam bao vat pham goc VAN co the spawn duoc (thong nhat voi logic cua bom).
+                return selectedMapping;
             }
 
             // Vat pham goc khong khai bao bien the nao, tra ve chinh no.
@@ -621,8 +631,8 @@ namespace Managers
 
         /// <summary>
         /// Tìm điểm neo hợp lệ gần nhất cho thủy lôi (Naval Mine): một <see cref="DestructibleBlock"/>
-        /// hoặc một <see cref="DestructiblePart"/> còn nguyên vẹn (<see cref="PartState.Intact"/>) đang active trong scene.
-        /// Ưu tiên anchor gần vị trí tham chiếu (vốn đã được lệch về phía người chơi), nhưng LOẠI TRỪ các anchor
+        /// nằm ở BỀ MẶT TRÊN CÙNG của địa hình (không có khối phá hủy được nào trực tiếp phía trên) đang active trong scene.
+        /// Ưu tiên block gần vị trí tham chiếu nhất, nhưng LOẠI TRỪ các block
         /// nằm trong bán kính ngang quanh chân người chơi để tránh mìn nổ ngay tại chân player.
         /// </summary>
         /// <param name="fromPosition">Vị trí tham chiếu để chọn anchor gần nhất.</param>
@@ -630,23 +640,16 @@ namespace Managers
         /// <returns>GameObject của anchor hợp lệ, hoặc null nếu không tìm thấy.</returns>
         private GameObject FindNearestValidAnchor(Vector3 fromPosition, float minPlayerHorizontalDist)
         {
-            // Gom tất cả anchor hợp lệ kèm khoảng cách đến vị trí tham chiếu.
-            var candidates = new List<(DestructibleBlock block, DestructiblePart part, float dist)>();
+            // Chỉ chọn DestructibleBlock nằm ở bề mặt trên cùng (không còn dùng DestructiblePart).
+            var candidates = new List<(DestructibleBlock block, float dist)>();
             float sqrMinPlayerDist = minPlayerHorizontalDist * minPlayerHorizontalDist;
 
             foreach (var block in FindObjectsByType<DestructibleBlock>(FindObjectsInactive.Exclude))
             {
                 if (block == null || block.gameObject == null || !block.gameObject.activeInHierarchy) continue;
+                if (!IsTopSurfaceBlock(block)) continue; // Chỉ giữ khối nằm ở bề mặt trên cùng
                 float dist = Vector3.Distance(block.transform.position, fromPosition);
-                candidates.Add((block, null, dist));
-            }
-
-            foreach (var part in FindObjectsByType<DestructiblePart>(FindObjectsInactive.Exclude))
-            {
-                if (part == null || part.gameObject == null || !part.gameObject.activeInHierarchy) continue;
-                if (part.CurrentState != PartState.Intact) continue; // Chỉ neo vào các mảnh còn nguyên vẹn
-                float dist = Vector3.Distance(part.transform.position, fromPosition);
-                candidates.Add((null, part, dist));
+                candidates.Add((block, dist));
             }
 
             if (candidates.Count == 0) return null;
@@ -679,22 +682,21 @@ namespace Managers
                 return false;
             }
 
-            // Sắp xếp theo khoảng cách tăng dần để ưu tiên anchor gần fromPosition (vốn gần player) nhất.
+            // Sắp xếp theo khoảng cách tăng dần để ưu tiên block gần fromPosition nhất.
             candidates.Sort((a, b) => a.dist.CompareTo(b.dist));
 
-            // Chọn anchor đầu tiên thỏa mãn CẢ HAI điều kiện:
+            // Chọn block đầu tiên thỏa mãn:
             // 1. Không nằm trong vùng chân của bất kỳ người chơi nào.
-            // 2. Khoảng trống PHÍA TRÊN anchor đủ rộng và thoáng để mìn có thể trôi lên và kích hoạt (arm).
+            // 2. Có khoảng trống phía trên đủ rộng để thủy lôi có thể trôi nổi.
             foreach (var c in candidates)
             {
-                Vector3 candidatePos = c.block != null ? c.block.transform.position : c.part.transform.position;
+                Vector3 candidatePos = GetNavalMineSpawnPosition(c.block.gameObject);
                 if (IsNearAnyPlayerFeet(candidatePos)) continue;
                 if (!HasClearSpaceAbove(candidatePos)) continue;
-                return c.block != null ? c.block.gameObject : c.part.gameObject;
+                return c.block.gameObject;
             }
 
-            // Không có anchor nào vừa thoáng phía trên vừa cách chân player -> bỏ qua spawn.
-            // Nếu ép chọn anchor bị bao quanh, mìn sẽ kẹt trong đất, không bao giờ arm được (vô hình).
+            // Không có block nào vừa thoáng phía trên vừa cách chân player -> bỏ qua spawn.
             return null;
         }
 
@@ -704,6 +706,63 @@ namespace Managers
         /// </summary>
         /// <param name="anchorPosition">Vị trí điểm neo (world) cần kiểm tra phía trên.</param>
         /// <returns>True nếu phía trên thoáng, False nếu bị khối chặn.</returns>
+        /// <summary>
+        /// Kiểm tra xem một khối có nằm ở bề mặt trên cùng hay không (không có khối phá hủy được nào khác trực tiếp phía trên).
+        /// </summary>
+        /// <param name="block">Khối cần kiểm tra.</param>
+        /// <returns>True nếu khối là khối trên cùng của cột địa hình.</returns>
+        private bool IsTopSurfaceBlock(DestructibleBlock block)
+        {
+            if (block == null || block.gameObject == null) return false;
+
+            float blockTop = GetBlockTopWorldY(block.gameObject);
+            float halfWidth = Mathf.Max(_navalMineClearanceHalfWidth, 0.05f);
+            Vector3 center = new Vector3(block.transform.position.x, blockTop + 0.5f, block.transform.position.z);
+            Vector3 halfExtents = new(halfWidth, 0.5f, halfWidth);
+
+            // Nếu phía trên có một khối phá hủy được khác, thì khối này không phải bề mặt trên cùng.
+            int hitCount = Physics.OverlapBoxNonAlloc(center, halfExtents, _navalMineClearanceHits, Quaternion.identity, ~0, QueryTriggerInteraction.Ignore);
+            for (int i = 0; i < hitCount; i++)
+            {
+                var hit = _navalMineClearanceHits[i];
+                if (hit == null || hit.gameObject == null) continue;
+                if (hit.gameObject == block.gameObject) continue;
+                if (hit.GetComponent<DestructibleBlock>() != null) return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Lấy tọa độ Y của bề mặt trên cùng (top) của một khối, dựa trên collider hoặc renderer.
+        /// </summary>
+        /// <param name="blockGO">GameObject của khối.</param>
+        /// <returns>Tọa độ Y world của bề mặt trên cùng (fallback về vị trí hiện tại nếu không có collider/renderer).</returns>
+        private float GetBlockTopWorldY(GameObject blockGO)
+        {
+            if (blockGO == null) return 0f;
+
+            Collider col = blockGO.GetComponentInChildren<Collider>(true);
+            if (col != null) return col.bounds.max.y;
+
+            Renderer ren = blockGO.GetComponentInChildren<Renderer>(true);
+            if (ren != null) return ren.bounds.max.y;
+
+            return blockGO.transform.position.y;
+        }
+
+        /// <summary>
+        /// Lấy vị trí thả thủy lôi: ngay trên bề mặt trên cùng của điểm neo (block) cộng với một khoảng lệch nhỏ.
+        /// </summary>
+        /// <param name="anchor">GameObject điểm neo (DestructibleBlock).</param>
+        /// <returns>Vị trí world để spawn thủy lôi.</returns>
+        private Vector3 GetNavalMineSpawnPosition(GameObject anchor)
+        {
+            if (anchor == null) return Vector3.zero;
+            Vector3 position = anchor.transform.position;
+            position.y = GetBlockTopWorldY(anchor) + _navalMineAnchorSpawnOffset;
+            return position;
+        }
+
         private bool HasClearSpaceAbove(Vector3 anchorPosition)
         {
             if (_navalMineClearanceHeight <= 0f) return true; // Tắt kiểm tra này nếu chiều cao = 0
@@ -711,8 +770,8 @@ namespace Managers
             float halfHeight = _navalMineClearanceHeight * 0.5f;
             float halfWidth = Mathf.Max(_navalMineClearanceHalfWidth, 0.01f);
 
-            // Tâm box kiểm tra nằm phía trên anchor (từ ngay trên anchor đến đỉnh hành lang).
-            Vector3 center = anchorPosition + Vector3.up * (halfHeight + _navalMineAnchorSpawnOffset);
+            // Tâm box kiểm tra nằm phía trên anchor (từ ngay trên bề mặt anchor đến đỉnh hành lang).
+            Vector3 center = anchorPosition + Vector3.up * (halfHeight + 0.2f);
             Vector3 halfExtents = new Vector3(halfWidth, halfHeight, halfWidth);
 
             int hitCount = Physics.OverlapBoxNonAlloc(center, halfExtents, _navalMineClearanceHits, Quaternion.identity, ~0, QueryTriggerInteraction.Ignore);
@@ -769,6 +828,31 @@ namespace Managers
             if (instance == null) return null;
             _instanceToPrefabMap.TryGetValue(instance, out var prefab);
             return prefab;
+        }
+
+        /// <summary>
+        /// Lay danh sach cac instance bom dang hoat dong (da duoc sinh tu pool). Duoc dung boi skill Disarm de go bo bom trong 1 khu vuc.
+
+        /// </summary>
+        public IReadOnlyList<GameObject> GetActiveBombInstances()
+        {
+            var active = new List<GameObject>();
+            foreach (var instance in _instanceToPrefabMap.Keys)
+            {
+                if (instance != null && instance.activeInHierarchy)
+                {
+                    active.Add(instance);
+                }
+            }
+            return active;
+        }
+
+        public void DespawnBomb(GameObject instance)
+        {
+            if (instance == null) return;
+            // Tra ve pool (disable); neu instance khong duoc pool theo doi se tu huy de tranh that ro ri..;
+
+            ReturnToPool(instance);
         }
     }
 }

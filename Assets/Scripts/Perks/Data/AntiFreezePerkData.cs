@@ -6,15 +6,20 @@ namespace Perks.Data
 {
     /// <summary>
     /// Du lieu cau hinh cua Perk Anti-Freeze.
-    /// Mien nhiem dong bang. Neu nhan sat thuong bang thi +Max HP (chi co han trong round).
+    /// Player khong the bi dong bang. Moi lan tiep xuc voi vu no bang se tang Max HP va hoi 10 HP.
+    /// Toan bo bien doi chi co hieu luc trong round; khi quay ve lobby Max HP tu reset ve gia tri ban dau (100).
     /// </summary>
     [CreateAssetMenu(fileName = "AntiFreezePerkData", menuName = "Kaboom Chaos/Perks/Anti Freeze")]
     public class AntiFreezePerkData : BasePerkData
     {
         [Header("Thong So Anti Freeze")]
-        [Tooltip("Luong Max HP tang them khi nhan sat thuong bang (chi co han trong round).")]
+        [Tooltip("Luong Max HP tang them moi lan player tiep xuc voi mot vu no bang.")]
         [SerializeField] private float _maxHealthBonus = 10f;
         public float MaxHealthBonus => _maxHealthBonus;
+
+        [Tooltip("Luong HP duoc hoi (heal) moi lan player tiep xuc voi mot vu no bang.")]
+        [SerializeField] private float _healBonus = 10f;
+        public float HealBonus => _healBonus;
 
         private AntiFreezeBehavior _behavior;
 
@@ -23,14 +28,12 @@ namespace Perks.Data
 
     /// <summary>
     /// Hanh vi thuc thi cua Perk Anti-Freeze.
-    /// Chan hieu ung dong bang huong vao player va tang Max HP khi nhan sat thuong bang.
+    /// Chan hieu ung dong bang huong vao player. Moi lan player trung dan vao vu no bang
+    /// (khong phu thuoc khien hay trang thai bat tu) thi tang Max HP va hoi mau theo cau hinh.
     /// </summary>
     public class AntiFreezeBehavior : IPerkBehavior
     {
         private readonly AntiFreezePerkData _data;
-
-        // Chi tang Max HP mot lan moi round; reset khi round ket thuc.
-        private bool _grantedThisRound;
 
         public AntiFreezeBehavior(AntiFreezePerkData data)
         {
@@ -39,14 +42,10 @@ namespace Perks.Data
 
         public void Apply(IPlayer player)
         {
-            _grantedThisRound = false;
-
-            // Chan hieu ung dong bang (thay doi rule cua game).
+            // Chan hieu ung dong bang (thay doi rule cua game): player khong the bi frozen.
             GameEvents.OnQueryPlayerStatusEffectBlocked += HandleStatusEffectBlockQuery;
-            // Phat hien sat thuong bang de tang Max HP.
-            GameEvents.OnPlayerDamageTaken += HandleDamageTaken;
-            // Reset trang thai bonus theo round.
-            GameEvents.OnRoundEndPlayerReset += HandleRoundEnd;
+            // Phat hien moi lan trung vu no bang (bat ke co khien hay bat tu) de tang Max HP va heal.
+            GameEvents.OnPlayerExplosionHit += HandleExplosionHit;
         }
 
         public void UpdateBehavior(IPlayer player, float deltaTime)
@@ -57,16 +56,7 @@ namespace Perks.Data
         public void Remove(IPlayer player)
         {
             GameEvents.OnQueryPlayerStatusEffectBlocked -= HandleStatusEffectBlockQuery;
-            GameEvents.OnPlayerDamageTaken -= HandleDamageTaken;
-            GameEvents.OnRoundEndPlayerReset -= HandleRoundEnd;
-        }
-
-        /// <summary>
-        /// Reset lai co tang Max HP moi khi bat dau round moi.
-        /// </summary>
-        private void HandleRoundEnd()
-        {
-            _grantedThisRound = false;
+            GameEvents.OnPlayerExplosionHit -= HandleExplosionHit;
         }
 
         /// <summary>
@@ -78,11 +68,12 @@ namespace Perks.Data
         }
 
         /// <summary>
-        /// Neu player nhan sat thuong bang (Frozen context) thi tang 10 Max HP, moi round moi lan.
+        /// Moi lan player trung dan vao vu no bang (khong phu thuoc khien/bat tu) thi tang Max HP va heal.
+        /// Max HP chi co hieu luc trong round; PlayerHealth.ResetState se dua Max HP ve ban dau
+        /// (100) khi ket thuc round/quay ve lobby.
         /// </summary>
-        private void HandleDamageTaken(IPlayer player, float amount, DamageSourceType sourceType, StatusEffectType effectContext)
+        private void HandleExplosionHit(IPlayer player, StatusEffectType effectContext)
         {
-            if (_grantedThisRound) return;
             if (effectContext != StatusEffectType.Frozen) return;
             if (player == null || player.GameObject == null) return;
 
@@ -93,9 +84,10 @@ namespace Perks.Data
                 return;
             }
 
+            // Tang Max HP va heal 10 HP moi lan trung vu no bang, bat ke khien hay bat tu.
             healable.IncreaseMaxHealth(_data.MaxHealthBonus);
-            _grantedThisRound = true;
-            Debug.Log($"[AntiFreezeBehavior] Mien nhiem dong bang. Tang +{_data.MaxHealthBonus} Max HP (chi trong round).");
+            healable.Heal(_data.HealBonus);
+            Debug.Log($"[AntiFreezeBehavior] Trung vu no bang: +{_data.MaxHealthBonus} Max HP va hoi {_data.HealBonus} HP.");
         }
     }
 }

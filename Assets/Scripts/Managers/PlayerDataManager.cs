@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using Core;
+using Core.Utilities;
 
 namespace Managers
 {
@@ -27,6 +28,15 @@ namespace Managers
         // ID perk dang duoc trang bi (null/rong = chua trang bi).
         private string _equippedPerkId;
 
+        // Trang thai Extreme Mode cua nguoi choi (bat/tat). Luu tru de khoi phuc khi vao game.
+        private bool _extremeModeEnabled;
+
+        // Gia tri Extreme Mode dang CHO ap dung khi dang trong round (chi valid neu _hasPendingExtremeModeEnabled = true).
+        // Dung de tri hoan thay doi Extreme Mode neu nguoi choi bat/tat luc dang trong round,
+        // ap dung sau khi round ket thuc (khong ap dung giua round dang dien ra).
+        private bool _pendingExtremeModeEnabled;
+        private bool _hasPendingExtremeModeEnabled;
+
         /// <summary>
         /// Đường dẫn đầy đủ tới file lưu dữ liệu.
         /// </summary>
@@ -38,6 +48,19 @@ namespace Managers
             // nhưng chúng ta vẫn cần đảm bảo nó tồn tại giữa các scene.
             DontDestroyOnLoad(gameObject);
             LoadData();
+        }
+
+        private void Update()
+        {
+            // Ap dung thay doi Extreme Mode (neu dang CHO) khi khong con trong round
+            // (luc dang o lobby / giua cac round). Dieu nay dam bao ta cau
+            // bat/tat Extreme Mode trong round khong ap dung giua chung.
+            if (_hasPendingExtremeModeEnabled && !RoundStateHelper.IsInRound())
+            {
+                bool pendingValue = _pendingExtremeModeEnabled;
+                _hasPendingExtremeModeEnabled = false;
+                ApplyExtremeModeEnabled(pendingValue);
+            }
         }
 
         private void OnEnable()
@@ -56,6 +79,8 @@ namespace Managers
             GameEvents.OnRequestEquippedSkillId += GetEquippedSkillId;
             GameEvents.OnEquippedPerkIdChanged += SetEquippedPerkId;
             GameEvents.OnRequestEquippedPerkId += GetEquippedPerkId;
+            GameEvents.OnExtremeModeChanged += SetExtremeModeEnabled;
+            GameEvents.OnRequestExtremeModeEnabled += GetExtremeModeEnabled;
         }
 
         private void OnDisable()
@@ -74,6 +99,8 @@ namespace Managers
             GameEvents.OnRequestEquippedSkillId -= GetEquippedSkillId;
             GameEvents.OnEquippedPerkIdChanged -= SetEquippedPerkId;
             GameEvents.OnRequestEquippedPerkId -= GetEquippedPerkId;
+            GameEvents.OnExtremeModeChanged -= SetExtremeModeEnabled;
+            GameEvents.OnRequestExtremeModeEnabled -= GetExtremeModeEnabled;
         }
 
         /// <summary>
@@ -106,13 +133,18 @@ namespace Managers
             CopyIds(data.OwnedPerkIds, _ownedPerkIds);
             _equippedSkillId = data.EquippedSkillId;
             _equippedPerkId = data.EquippedPerkId;
+            _extremeModeEnabled = data.ExtremeModeEnabled;
 
-            Debug.Log($"[PlayerDataManager] Du lieu da duoc tai. Credits: {_currentCredits}, Skills: {_ownedSkillIds.Count}, Perks: {_ownedPerkIds.Count}, Spins: {_skillSpinCount}, EquippedSkill: {_equippedSkillId}, EquippedPerk: {_equippedPerkId}");
+            Debug.Log($"[PlayerDataManager] Du lieu da duoc tai. Credits: {_currentCredits}, Skills: {_ownedSkillIds.Count}, Perks: {_ownedPerkIds.Count}, Spins: {_skillSpinCount}, EquippedSkill: {_equippedSkillId}, EquippedPerk: {_equippedPerkId}, ExtremeMode: {_extremeModeEnabled}");
 
             // Thông báo cho các hệ thống khác về dữ liệu đã tải.
             GameEvents.TriggerCreditsChanged(_currentCredits);
             GameEvents.TriggerOwnedSkillsChanged(_ownedSkillIds);
             GameEvents.TriggerOwnedPerksChanged(_ownedPerkIds);
+
+            // Phat lai trang thai Extreme Mode da luu de cac he thong (PlayerHealth, PlayerPerkController, HUD, UIManager)
+            // khoi phuc lai logic va UI tuong ung khi vao game.
+            GameEvents.TriggerExtremeModeStateChanged(_extremeModeEnabled);
         }
 
         /// <summary>
@@ -130,7 +162,8 @@ namespace Managers
                     OwnedPerkIds = _ownedPerkIds,
                     SkillSpinCount = _skillSpinCount,
                     EquippedSkillId = _equippedSkillId,
-                    EquippedPerkId = _equippedPerkId
+                    EquippedPerkId = _equippedPerkId,
+                    ExtremeModeEnabled = _extremeModeEnabled
                 };
 
                 // PrettyPrint để dễ kiểm tra/debug file lưu.
@@ -280,6 +313,59 @@ namespace Managers
         private string GetEquippedPerkId()
         {
             return _equippedPerkId;
+        }
+
+        /// <summary>
+        /// Xu ly khi nguoi choi bat/tat Extreme Mode tu Option Menu:
+        /// - Neu dang TRONG round: tri hoan ap dung cho toi khi round ket thuc (khong ap dung giua round).
+        /// - Neu khong trong round: ap dung lap tuc (luu tru + cap nhat logic/UI).
+        /// </summary>
+        /// <param name="enabled">True neu bat Extreme Mode, false neu tat.</param>
+        private void SetExtremeModeEnabled(bool enabled)
+        {
+            // Neu trung voi trang thai dang ap dung -> khong lam gi (va xoa pending neu co).
+            if (_extremeModeEnabled == enabled)
+            {
+                _hasPendingExtremeModeEnabled = false;
+                return;
+            }
+
+            // Dang trong round: luu tam, ap dung sau khi round ket thuc
+            // (de max HP/perk/score khong thay doi giua round dang dien ra).
+            if (RoundStateHelper.IsInRound())
+            {
+                _pendingExtremeModeEnabled = enabled;
+                _hasPendingExtremeModeEnabled = true;
+                Debug.Log($"[PlayerDataManager] Dang trong round - luu trang thai Extreme Mode = {enabled} tam, se ap dung sau khi round ket thuc.");
+                return;
+            }
+
+            ApplyExtremeModeEnabled(enabled);
+        }
+
+        /// <summary>
+        /// Ap dung gia tri Extreme Mode moi vao trang thai (luu tru) va phat su kien global
+        /// OnExtremeModeStateChanged de cac thanh phan (PlayerHealth, PlayerPerkController, HUD, UIManager)
+        /// cap nhat logic va UI theo trang thai moi.
+        /// </summary>
+        /// <param name="enabled">True neu bat Extreme Mode, false neu tat.</param>
+        private void ApplyExtremeModeEnabled(bool enabled)
+        {
+            _extremeModeEnabled = enabled;
+            Debug.Log($"[PlayerDataManager] Extreme Mode da thay doi: {(_extremeModeEnabled ? "BAT" : "TAT")}");
+
+            SaveData();
+
+            // Thong bao cho cac thanh phan khac de ap dung logic (max HP, vô hiệu perk) va UI.
+            GameEvents.TriggerExtremeModeStateChanged(_extremeModeEnabled);
+        }
+
+        /// <summary>
+        /// Tra ve trang thai Extreme Mode hien tai (da luu).
+        /// </summary>
+        private bool GetExtremeModeEnabled()
+        {
+            return _extremeModeEnabled;
         }
 
         /// <summary>

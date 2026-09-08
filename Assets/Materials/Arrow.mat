@@ -73,6 +73,8 @@ Material:
     m_Ints: []
     m_Floats:
     - _Alpha: 1
+    - _BUILTIN_QueueControl: -1
+    - _BUILTIN_QueueOffset: 0
     - _EmissionIntensity: 0
     - _QueueControl: 0
     - _QueueOffset: 0

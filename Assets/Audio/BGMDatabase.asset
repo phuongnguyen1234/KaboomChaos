@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a5c78ae70a40fb46becab2669810091, type: 3}
   m_Name: BGMDatabase
   m_EditorClassIdentifier: Core::Core.Database.BGMDatabase
-  HomeMusic: {fileID: 8300000, guid: 1b1fe9ea19f99e04b8b2e0776830213c, type: 3}
+  HomeMusic: {fileID: 8300000, guid: af0256c3db5790b4caedde04e06cc7f5, type: 3}
   LobbyMusic: {fileID: 8300000, guid: 0e844b94332e6144fb1b76de5761236a, type: 3}
   NormalGameplayMusic:
   - {fileID: 8300000, guid: ea0a31997148570459c7d3f27c4e3cb4, type: 3}

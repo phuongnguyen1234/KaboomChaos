@@ -111,7 +111,7 @@ MonoBehaviour:
   minNumberOfExplosions: 10
   maxNumberOfExplosions: 13
   spawnSound: {fileID: 0}
-  delayBetweenExplosions: 0.4
+  delayBetweenExplosions: 0.5
   explosionSpreadRadius: 6
   subExplosionDamage: 80
   subExplosionDamageFalloff:
@@ -190,7 +190,7 @@ MonoBehaviour:
     visualEffect: {fileID: 622474822864226661, guid: 16bbf8cf4bf32754ba44220b8bfbd7e0, type: 3}
     stageSoundPitch: 0.6
     stageSound: {fileID: 8300000, guid: d1f17199c3c86e049bba1a3dfcfb0b0a, type: 3}
-    vfxRadius: 2.5
+    vfxRadius: 5
     enableBaseColorPulse: 1
     basePulseColor: {r: 0.90943396, g: 0.23851186, b: 0.23851186, a: 0}
     basePulseDuration: 0.2
@@ -204,7 +204,7 @@ MonoBehaviour:
     visualEffect: {fileID: 622474822864226661, guid: 16bbf8cf4bf32754ba44220b8bfbd7e0, type: 3}
     stageSoundPitch: 0.6
     stageSound: {fileID: 8300000, guid: d1f17199c3c86e049bba1a3dfcfb0b0a, type: 3}
-    vfxRadius: 2.5
+    vfxRadius: 5
     enableBaseColorPulse: 1
     basePulseColor: {r: 0.90943396, g: 0.23851186, b: 0.23851186, a: 0}
     basePulseDuration: 0.2
@@ -218,7 +218,7 @@ MonoBehaviour:
     visualEffect: {fileID: 622474822864226661, guid: 16bbf8cf4bf32754ba44220b8bfbd7e0, type: 3}
     stageSoundPitch: 0.6
     stageSound: {fileID: 8300000, guid: d1f17199c3c86e049bba1a3dfcfb0b0a, type: 3}
-    vfxRadius: 2.5
+    vfxRadius: 5
     enableBaseColorPulse: 1
     basePulseColor: {r: 0.90943396, g: 0.23851186, b: 0.23851186, a: 0}
     basePulseDuration: 0.2
@@ -232,7 +232,7 @@ MonoBehaviour:
     visualEffect: {fileID: 622474822864226661, guid: 16bbf8cf4bf32754ba44220b8bfbd7e0, type: 3}
     stageSoundPitch: 0.6
     stageSound: {fileID: 8300000, guid: d1f17199c3c86e049bba1a3dfcfb0b0a, type: 3}
-    vfxRadius: 2.5
+    vfxRadius: 5
     enableBaseColorPulse: 1
     basePulseColor: {r: 0.90943396, g: 0.23851186, b: 0.23851186, a: 0}
     basePulseDuration: 0.2
@@ -246,7 +246,7 @@ MonoBehaviour:
     visualEffect: {fileID: 622474822864226661, guid: 16bbf8cf4bf32754ba44220b8bfbd7e0, type: 3}
     stageSoundPitch: 0.6
     stageSound: {fileID: 8300000, guid: d1f17199c3c86e049bba1a3dfcfb0b0a, type: 3}
-    vfxRadius: 2.5
+    vfxRadius: 5
     enableBaseColorPulse: 1
     basePulseColor: {r: 0.90943396, g: 0.23851186, b: 0.23851186, a: 0}
     basePulseDuration: 0.2
@@ -260,7 +260,7 @@ MonoBehaviour:
     visualEffect: {fileID: 622474822864226661, guid: 16bbf8cf4bf32754ba44220b8bfbd7e0, type: 3}
     stageSoundPitch: 0.6
     stageSound: {fileID: 8300000, guid: d1f17199c3c86e049bba1a3dfcfb0b0a, type: 3}
-    vfxRadius: 2.5
+    vfxRadius: 5
     enableBaseColorPulse: 1
     basePulseColor: {r: 0.90943396, g: 0.23851186, b: 0.23851186, a: 0}
     basePulseDuration: 0.2
@@ -274,7 +274,7 @@ MonoBehaviour:
     visualEffect: {fileID: 622474822864226661, guid: 16bbf8cf4bf32754ba44220b8bfbd7e0, type: 3}
     stageSoundPitch: 1
     stageSound: {fileID: 8300000, guid: d1f17199c3c86e049bba1a3dfcfb0b0a, type: 3}
-    vfxRadius: 2.5
+    vfxRadius: 5
     enableBaseColorPulse: 1
     basePulseColor: {r: 0.90943396, g: 0.23851186, b: 0.23851186, a: 0}
     basePulseDuration: 0.2
@@ -288,7 +288,7 @@ MonoBehaviour:
     visualEffect: {fileID: 622474822864226661, guid: 16bbf8cf4bf32754ba44220b8bfbd7e0, type: 3}
     stageSoundPitch: 1
     stageSound: {fileID: 8300000, guid: d1f17199c3c86e049bba1a3dfcfb0b0a, type: 3}
-    vfxRadius: 2.5
+    vfxRadius: 5
     enableBaseColorPulse: 1
     basePulseColor: {r: 0.90943396, g: 0.23851186, b: 0.23851186, a: 0}
     basePulseDuration: 0.2
@@ -302,7 +302,7 @@ MonoBehaviour:
     visualEffect: {fileID: 622474822864226661, guid: 16bbf8cf4bf32754ba44220b8bfbd7e0, type: 3}
     stageSoundPitch: 1
     stageSound: {fileID: 8300000, guid: d1f17199c3c86e049bba1a3dfcfb0b0a, type: 3}
-    vfxRadius: 2
+    vfxRadius: 5
     enableBaseColorPulse: 1
     basePulseColor: {r: 0.90943396, g: 0.23851186, b: 0.23851186, a: 0}
     basePulseDuration: 0.2
@@ -316,7 +316,7 @@ MonoBehaviour:
     visualEffect: {fileID: 622474822864226661, guid: 16bbf8cf4bf32754ba44220b8bfbd7e0, type: 3}
     stageSoundPitch: 1
     stageSound: {fileID: 8300000, guid: d1f17199c3c86e049bba1a3dfcfb0b0a, type: 3}
-    vfxRadius: 2
+    vfxRadius: 5
     enableBaseColorPulse: 1
     basePulseColor: {r: 0.90943396, g: 0.23851186, b: 0.23851186, a: 0}
     basePulseDuration: 0.2

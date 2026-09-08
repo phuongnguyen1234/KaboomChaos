@@ -18,6 +18,17 @@ namespace Core.Interfaces
         /// Co the null neu skill khong co VFX.
         /// </summary>
         GameObject CastVfx { get; }
+
+        /// <summary>
+        /// Co phat SFX va VFX ngay tai thoi diem kich hoat skill hay khong (mac dinh bat).
+        /// </summary>
+        bool PlayCastOnActivate { get; }
+
+        /// <summary>
+        /// Co phat SFX va VFX sau khi het duration (ket thuc hieu luc skill) hay khong (mac dinh tat).
+        /// </summary>
+        bool PlayCastOnDeactivate { get; }
+
         /// <summary>
         /// ID duy nhat cua skill.
         /// </summary>

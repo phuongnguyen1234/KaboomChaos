@@ -39,6 +39,17 @@ namespace Managers
         // Dữ liệu theo dõi từng người chơi xuyên suốt các round: win streak, thời điểm bắt đầu round, Extreme Mode.
         // Key là IPlayer của người chơi ĐANG TỒN TẠI (chưa bị hồi sinh/phá hủy). Khi người chơi chết, entry sẽ được xóa.
         private readonly Dictionary<IPlayer, PlayerRoundData> _playerData = new();
+
+        // Trang thai AFK (runtime - KHONG luu tren player data).
+        // Mac dinh TAT (false) khi nguoi choi vao game tu Home (player khong AFK, tham gia arena).
+        // Nguoi choi bat/tat qua Option Menu. Khi BAT (true): player khong duoc dua vao round / khong bi teleport vao arena.
+        private bool _afkEnabled = false;
+
+        // Gia tri AFK dang CHO ap dung khi dang trong round (chi valid neu _hasPendingAfkEnabled = true).
+        // Dung de tri hoan thay doi AFK neu nguoi choi bat/tat luc dang trong round,
+        // ap dung sau khi round ket thuc (xem RoundStateHelper).
+        private bool _pendingAfkEnabled;
+        private bool _hasPendingAfkEnabled;
         #endregion
 
         #region Unity Lifecycle
@@ -65,6 +76,19 @@ namespace Managers
             _spawnManager = SpawnManager.Instance;
         }
 
+        private void Update()
+        {
+            // Ap dung thay đoi AFK (neu dang CHO) khi khong con trong round
+            // (luc dang o lobby / giua cac round). Dieu nay dam bao ta cau
+            // bat/tat AFK trong round khong ap dung giua chung.
+            if (_hasPendingAfkEnabled && !RoundStateHelper.IsInRound())
+            {
+                bool pendingValue = _pendingAfkEnabled;
+                _hasPendingAfkEnabled = false;
+                ApplyAfkEnabled(pendingValue);
+            }
+        }
+
         private void OnEnable()
         {
             // Đăng ký lắng nghe sự kiện người chơi chết từ GameEvents
@@ -73,6 +97,10 @@ namespace Managers
             GameEvents.OnReturnToHomeRequest += HandleReturnToHome;
             // Handles the Roblox-style reset request (no player argument).
             GameEvents.OnResetPlayerRequested += HandleResetPlayerRequested;
+            // Xu ly thay doi trang thai AFK tu Option Menu.
+            GameEvents.OnAfkEnabledChanged += HandleAfkEnabledChanged;
+            // Cung cap trang thai AFK runtime cho cac he thong khac (PlayerAfkIndicator...).
+            GameEvents.OnRequestAfkEnabled += GetAfkEnabled;
         }
 
         private void OnDisable()
@@ -81,16 +109,22 @@ namespace Managers
             GameEvents.OnPlayerDied -= HandlePlayerDeath;
             GameEvents.OnReturnToHomeRequest -= HandleReturnToHome;
             GameEvents.OnResetPlayerRequested -= HandleResetPlayerRequested;
+            GameEvents.OnAfkEnabledChanged -= HandleAfkEnabledChanged;
+            GameEvents.OnRequestAfkEnabled -= GetAfkEnabled;
         }
         #endregion
 
         #region Public Methods (IPlayerManager Implementation)
 
         /// <summary>
-        /// Bắt đầu quá trình sinh người chơi lần đầu tiên khi game bắt đầu.
+        /// Bắt đầu quá trình sinh người chơi lần đầu tiên khi game bắt đầu (vào game từ Home).
         /// </summary>
         public void SpawnInitialPlayer()
         {
+            // AFK mac dinh TAT (false) khi nguoi choi vao game tu Home: ban dau player KHONG AFK
+            // (tham gia arena binh thuong), va phai tu bat AFK trong Option Menu neu muon nghi khong vaoc arena.
+            ResetAfkToDefault();
+
             SpawnPlayer();
         }
 
@@ -115,20 +149,25 @@ namespace Managers
         public void StartRound()
         {
             _playersInRound.Clear();
+
+            // Lay trang thai AFK (runtime) de loai toan bo player AFK ra khoi round.
+            bool anyPlayerAfk = _afkEnabled;
+
             foreach (var player in _activePlayers)
             {
                 if (player != null && player.GameObject != null)
                 {
-                    // TODO(AFK): Khi triển khai hệ thống AFK, hãy BỎ QUA những người chơi đang AFK
-                    // tại thời điểm này (không đưa vào _playersInRound), để:
-                    // 1. Họ không bị dịch chuyển vào arena.
-                    // 2. Độ khó (initialPlayerCountForRound trong GameloopManager) chỉ tính trên
-                    //    danh sách non-AFK tham gia ban đầu.
+                    // BỎ QUA player AFK: khong dua vao _playersInRound de ho:
+                    // 1. Khong bi dich chuyen (teleport) vao arena.
+                    // 2. Do khoi (initialPlayerCountForRound) chi tinh tren danh sach non-AFK ban dau.
+                    //    (Xem TODO(AFK) trong GameloopManager.PreRoundStage va TeleportPlayersToArena.)
+                    if (anyPlayerAfk) continue;
+
                     player.GameObject.SetActive(true); // Đảm bảo người chơi được kích hoạt
                     _playersInRound.Add(player);
                 }
             }
-            Debug.Log($"[PlayerManager] Started round with {_playersInRound.Count} players.");            
+            Debug.Log($"[PlayerManager] Started round with {_playersInRound.Count} players.");
         }
 
         /// <inheritdoc/>
@@ -182,7 +221,11 @@ namespace Managers
             }
 
             // Tạo dữ liệu mới nếu chưa tồn tại (ví dụ: người chơi vừa được hồi sinh sau khi chết).
-            var newData = new PlayerRoundData();
+            var newData = new PlayerRoundData
+            {
+                // Ghi nhận trạng thái Extreme Mode hiện tại (đã lưu) để tính điểm x1.25 cho round.
+                IsExtremeModeEnabled = GameEvents.TriggerRequestExtremeModeEnabled()
+            };
             _playerData[player] = newData;
             return newData;
         }
@@ -550,6 +593,79 @@ namespace Managers
         {
             Debug.Log("[PlayerManager] Return to Home requested. Clearing all active players.");
             ClearAllPlayers();
+        }
+
+        /// <summary>
+        /// Xu ly khi nguoi choi bat/tat AFK tu Option Menu:
+        /// - Neu dang TRONG round: tri hoan ap dung cho toi khi round ket thuc (khong ap dung giua round).
+        /// - Neu khong trong round: ap dung lap tuc (cap nhat runtime + thong bao cac he thong khac).
+        /// </summary>
+        /// <param name="enabled">True neu bat AFK, false neu tat.</param>
+        private void HandleAfkEnabledChanged(bool enabled)
+        {
+            // Neu trung voi trang thai dang ap dung -> khong lam gi (va xoa pending neu co).
+            if (enabled == _afkEnabled)
+            {
+                _hasPendingAfkEnabled = false;
+                return;
+            }
+
+            // Dang trong round: luu tam, ap dung sau khi round ket thuc.
+            if (RoundStateHelper.IsInRound())
+            {
+                _pendingAfkEnabled = enabled;
+                _hasPendingAfkEnabled = true;
+                Debug.Log($"[PlayerManager] Dang trong round - luu trang thai AFK = {enabled} tam, se ap dung sau khi round ket thuc.");
+                return;
+            }
+
+            ApplyAfkEnabled(enabled);
+        }
+
+        /// <summary>
+        /// Ap dung gia tri AFK moi vao trang thai runtime va bao cac he thong khac (PlayerAfkIndicator...).
+        /// Khi TAT AFK (enabled = false): viet lai rang buoc reset HP va max HP ve mac dinh
+        /// cho player dang hoat dong, de player vua thoat khoi trang thai AFK
+        /// (khong tham gia round truoc do) co day du mau khi quay lai arena.
+        /// </summary>
+        /// <param name="enabled">True neu bat AFK, false neu tat.</param>
+        private void ApplyAfkEnabled(bool enabled)
+        {
+            _afkEnabled = enabled;
+            Debug.Log($"[PlayerManager] AFK da thay doi: {(_afkEnabled ? "BAT" : "TAT")}");
+
+            GameEvents.TriggerAfkStateChanged(_afkEnabled);
+
+            // Khi tat AFK (player bat dau tham gia arena): reset HP va max HP ve mac dinh.
+            if (!_afkEnabled)
+            {
+                GameEvents.TriggerRoundEndPlayerReset();
+            }
+        }
+
+        /// <summary>
+        /// Cap trang thai AFK runtime hien tai cho cac he thong khac (PlayerAfkIndicator...).
+        /// </summary>
+        /// <returns>True neu AFK dang bat.</returns>
+        private bool GetAfkEnabled()
+        {
+            return _afkEnabled;
+        }
+
+        /// <summary>
+        /// Reset rang thai AFK ve mac dinh TAT (false) khi nguoi choi vao game tu Home.
+        /// Dieu nay dam bao: ban dau, player khong AFK (tham gia arena) va phai tu bat
+        /// AFK trong Option Menu neu muon nghi khong vaoc arena.
+        /// </summary>
+        private void ResetAfkToDefault()
+        {
+            _hasPendingAfkEnabled = false;
+
+            if (!_afkEnabled) return;
+
+            _afkEnabled = false;
+            Debug.Log("[PlayerManager] AFK reset mac dinh TAT (vao game tu Home).");
+            GameEvents.TriggerAfkStateChanged(_afkEnabled);
         }
         #endregion
     }

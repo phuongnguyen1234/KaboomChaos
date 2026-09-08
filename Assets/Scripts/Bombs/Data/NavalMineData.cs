@@ -24,6 +24,12 @@ namespace Bombs.Data
         [Tooltip("Prefab của dây xích (nên có component ChainController).")]
         public GameObject chainPrefab;
 
+        [Tooltip("Prefab hiệu ứng (VFX) xuất hiện ngay tại khối điểm neo khi thủy lôi được sinh ra, trước khi nó trôi lên. Nên có component ExplosionEffectController để phát animation và tự trả về pool.")]
+        public GameObject spawnVFXPrefab;
+
+        [Tooltip("Bán kính (world space) của hiệu ứng spawn khi được kích hoạt qua ExplosionEffectController.Trigger().")]
+        public float spawnVFXRadius = 1.5f;
+
         [Tooltip("Lực nổi đẩy mìn lên khi nó đang trôi nổi.")]
         public float buoyancyForce = 10.0f;
 

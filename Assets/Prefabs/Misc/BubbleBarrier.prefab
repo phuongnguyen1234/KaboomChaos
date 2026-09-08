@@ -12,7 +12,9 @@ GameObject:
   - component: {fileID: 2925717187741556370}
   - component: {fileID: 1145423622768406404}
   - component: {fileID: 2446255909204206059}
-  m_Layer: 0
+  - component: {fileID: 2508972384543224393}
+  - component: {fileID: 1112192478277733689}
+  m_Layer: 17
   m_Name: BubbleBarrier
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -28,9 +30,9 @@ Transform:
   m_GameObject: {fileID: 7267022090112080444}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 53.125, y: 20.38202, z: -20.43337}
-  m_LocalScale: {x: 12, y: 12, z: 12}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -111,3 +113,39 @@ MonoBehaviour:
   _customFresnelPower: 2
   _customThickness: 0.3
   _statusEffectProfiles: []
+--- !u!114 &2508972384543224393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7267022090112080444}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aabbb45fc2124d7419ed7dd46bc7c2a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Core::Core.BubbleBarrierController
+  _expandDuration: 1
+  _radiusBase: 9
+  _pushDelay: 0.5
+  _pushForce: 5
+  _missileDeflectUpwardSpeed: 18
+  _missileDeflectHorizontalForce: 10
+  _overlapBufferSize: 256
+--- !u!114 &1112192478277733689
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7267022090112080444}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b49a10427c9e954c988924557b14e31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Core::Core.LifetimeController
+  _lifetime: 15
+  _despawnAction: 1
+  _fadeOutBeforeDespawn: 1
+  _fadeOutDuration: 0.5
+  _meshRenderer: {fileID: 1145423622768406404}

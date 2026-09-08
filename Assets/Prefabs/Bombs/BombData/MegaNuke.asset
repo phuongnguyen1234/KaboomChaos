@@ -109,7 +109,7 @@ MonoBehaviour:
   minNumberOfExplosions: 6
   maxNumberOfExplosions: 9
   spawnSound: {fileID: 8300000, guid: 8b514b8162f3b754f842b9176e4d078b, type: 3}
-  delayBetweenExplosions: 0.4
+  delayBetweenExplosions: 0.5
   explosionSpreadRadius: 6
   subExplosionDamage: 50
   subExplosionDamageFalloff:
@@ -187,6 +187,6 @@ MonoBehaviour:
     m_RotationOrder: 4
   maxPerSpawnWave: 1
   maxActiveInstances: 3
-  fallSpeed: 6.5
+  fallSpeed: 5.75
   landingLightVFX: {fileID: 1805167288089911798, guid: 41a1b5e54e513e84e9defb3a091a203a, type: 3}
   landingLightColor: {r: 1, g: 0, b: 0, a: 1}

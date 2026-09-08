@@ -116,6 +116,9 @@ namespace Managers
             // Cấu hình AudioSource cho nhạc nền 2D, không bị ảnh hưởng bởi vị trí.
             _audioSource.spatialBlend = 0f;
             _audioSource.playOnAwake = false;
+
+            // Ap dung music volume din Settings (0-100) cu AudioSource (0-1) backend la boot.
+            ApplyMusicVolume(Core.SettingsManager.Instance != null ? Core.SettingsManager.Instance.MusicVolume : 100f);
         }
 
         private void OnEnable()
@@ -124,6 +127,7 @@ namespace Managers
             GameEvents.OnReturnToHomeRequest += HandleReturnToHomeRequest;
             GameEvents.OnMusicPauseRequested += PauseMusic;
             GameEvents.OnMusicResumeRequested += ResumeMusic;
+            GameEvents.OnSettingsMusicVolumeChanged += ApplyMusicVolume;
         }
 
         private void OnDisable()
@@ -132,6 +136,7 @@ namespace Managers
             GameEvents.OnReturnToHomeRequest -= HandleReturnToHomeRequest;
             GameEvents.OnMusicPauseRequested -= PauseMusic;
             GameEvents.OnMusicResumeRequested -= ResumeMusic;
+            GameEvents.OnSettingsMusicVolumeChanged -= ApplyMusicVolume;
         }
 
                 private void ResolveDatabaseIfMissing()
@@ -156,6 +161,21 @@ namespace Managers
 
         #endregion
 #region Public Methods
+
+        /// <summary>
+        /// Ap dung gia tri music volume (0-100 din Settings) cu AudioSource BGM (0-1).
+        /// Asculta la GameEvents.OnSettingsMusicVolumeChanged de schimba live din Settings UI.
+        /// </summary>
+        /// <param name="value">Music volume in [0, 100].</param>
+        public void ApplyMusicVolume(float value)
+        {
+            if (_audioSource == null)
+            {
+                return;
+            }
+
+            _audioSource.volume = Mathf.Clamp01(value / 100f);
+        }
 
         /// <summary>
         /// Phát nhạc nền màn hình chính.

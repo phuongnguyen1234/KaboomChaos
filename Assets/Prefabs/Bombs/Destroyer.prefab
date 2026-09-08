@@ -120,7 +120,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0.5
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -172,7 +172,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fdcc6663c22f0ad4892f61ffaa935049, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bombs.BombController
-  _bombData: {fileID: 11400000, guid: a0e32fcba76dc984593928cc92942cce, type: 2}
   _obsidianBlockPrefab: {fileID: 0}
   _lavaInteractionRadius: 3
   _lavaLayer:
@@ -332,4 +331,6 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []

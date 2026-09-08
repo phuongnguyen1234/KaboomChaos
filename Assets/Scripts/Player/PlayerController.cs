@@ -554,8 +554,16 @@ namespace Player
                 // Tạo vận tốc leo trên mặt phẳng tường
                 Vector3 climbVelocity = Vector3.ProjectOnPlane(tr.up, _climbableSurfaceNormal).normalized * _climbingDirection;
 
-                // Áp dụng vận tốc leo
-                momentum = climbVelocity * _climbSpeed;
+                // --- TỐC ĐỘ LEO TỶ LỆ VỚI TỐC ĐỘ DI CHUYỂN ---
+                // Tính hệ số tốc độ hiện tại so với tốc độ cơ bản. Các skill/perk (SpeedRunner, SuperDash...)
+                // tăng _movementSpeed thông qua _speedBonus, nen chi so nay phan anh dung he so hien tai.
+                // Vi du: _speedBonus = +50% => base = _movementSpeed - _speedBonus, ratio = 1.5.
+                float baseMovementSpeed = _movementSpeed - _speedBonus;
+                float speedRatio = baseMovementSpeed > 0f ? Mathf.Max(0f, _movementSpeed / baseMovementSpeed) : 1f;
+
+                // Tai thoi diem sap ap dung toc do leo, tu dong tai tinh _movementSpeed (vi no co the da duoc boi).
+                // Ap dung toc do leo co ti le voi toc do di chuyen hien tai.
+                momentum = climbVelocity * _climbSpeed * speedRatio;
             }
             else
             {

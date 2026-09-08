@@ -108,7 +108,7 @@ MonoBehaviour:
   explodeMultipleTimes: 0
   minNumberOfExplosions: 1
   maxNumberOfExplosions: 3
-  spawnSound: {fileID: 0}
+  spawnSound: {fileID: 8300000, guid: 117ec1f05cbd321408de8a4a4e9b6ec7, type: 3}
   delayBetweenExplosions: 0.5
   explosionSpreadRadius: 2
   subExplosionDamage: 25
@@ -285,10 +285,12 @@ MonoBehaviour:
   tickingSoundPitch: 1
   tickingSound: {fileID: 0}
   ascendSpeed: 2
-  chainMinLength: 5
-  chainMaxLength: 10
+  chainMinLength: 10
+  chainMaxLength: 18
   safeRadius: 3
   chainPrefab: {fileID: 8437196208069075511, guid: 6ad01e9d0f3e7044388f2b3c03dec187, type: 3}
+  spawnVFXPrefab: {fileID: 5432491707936817209, guid: d7242b76d53eb67439a68fdc6d9b9440, type: 3}
+  spawnVFXRadius: 3
   buoyancyForce: 10
   chainTensionForce: 50
   armClearanceBuffer: 0.3

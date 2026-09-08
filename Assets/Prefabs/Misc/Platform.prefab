@@ -102,6 +102,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Core::Core.LifetimeController
   _lifetime: 10
   _despawnAction: 1
+  _fadeOutBeforeDespawn: 1
+  _fadeOutDuration: 3
+  _meshRenderer: {fileID: 3488392514438782380}
 --- !u!1001 &2765591362201982657
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -150,6 +153,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7635826562936255635, guid: a42bebfb2d254ea4db05f762cb996722, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 1ac876f3fcee1f440bb2c600bff27306, type: 2}
     - target: {fileID: 919132149155446097, guid: a42bebfb2d254ea4db05f762cb996722, type: 3}
       propertyPath: m_Name
       value: Platform
@@ -165,10 +172,43 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8164078558771037576, guid: a42bebfb2d254ea4db05f762cb996722, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4968790976793466759}
   m_SourcePrefab: {fileID: 100100000, guid: a42bebfb2d254ea4db05f762cb996722, type: 3}
 --- !u!4 &2444297694790644010 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: a42bebfb2d254ea4db05f762cb996722, type: 3}
   m_PrefabInstance: {fileID: 2765591362201982657}
   m_PrefabAsset: {fileID: 0}
+--- !u!23 &3488392514438782380 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7635826562936255635, guid: a42bebfb2d254ea4db05f762cb996722, type: 3}
+  m_PrefabInstance: {fileID: 2765591362201982657}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6281950289731670857 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8164078558771037576, guid: a42bebfb2d254ea4db05f762cb996722, type: 3}
+  m_PrefabInstance: {fileID: 2765591362201982657}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4968790976793466759
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6281950289731670857}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d32f934f0591ee540bdaf682b8cb2d48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Core::MaterialEffectController
+  _applyMaterialOverrides: 1
+  _customBaseColor: {r: 1, g: 0.6245283, b: 0.6245283, a: 1}
+  _customDecalColor: {r: 1, g: 0.088679194, b: 0.088679194, a: 0}
+  _customAlpha: 1
+  _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
+  _statusEffectProfiles: []

@@ -108,6 +108,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 0.6
   _customEmissionIntensity: 1
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &1893431941769838756
 GameObject:
@@ -169,7 +171,7 @@ LineRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 1fd928f841bfa6247897d315568b6c14, type: 2}
+  - {fileID: 2100000, guid: 8dbd6fdbab3451b44a9c4c0c3b4e75a9, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -203,7 +205,7 @@ LineRenderer:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 0.1
+        value: 0.5
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -267,9 +269,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Core::MaterialEffectController
   _applyMaterialOverrides: 1
   _customBaseColor: {r: 1, g: 0, b: 0, a: 1}
-  _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
+  _customDecalColor: {r: 1, g: 0, b: 0, a: 1}
   _customAlpha: 1
   _customEmissionIntensity: 1
+  _customFresnelPower: 0.1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &5712356794409419925
 GameObject:
@@ -415,7 +419,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0.5
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -475,6 +479,7 @@ MonoBehaviour:
   _poisonGasPrefab: {fileID: 0}
   _poisonGasScale: 5
   _partsToPulse: []
+  _tetherKnotPoint: {fileID: 0}
 --- !u!1001 &5482171422168652840
 PrefabInstance:
   m_ObjectHideFlags: 0

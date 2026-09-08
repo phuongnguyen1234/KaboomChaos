@@ -142,7 +142,41 @@ MonoBehaviour:
   minPlayerSpawnChance: 30
   maxPlayerSpawnChance: 60
   playerSpawnRadius: 3
-  possibleVariants: []
+  possibleVariants:
+  - variantBombData: {fileID: 11400000, guid: dab5587a2deb3424db094704bd841dea, type: 2}
+    spawnChanceByDifficulty:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 3.99
+        value: 0
+        inSlope: -0
+        outSlope: 29.850746
+        tangentMode: 69
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 6
+        value: 60
+        inSlope: 29.850746
+        outSlope: 29.850746
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
   spawnWeightByDifficulty:
     serializedVersion: 2
     m_Curve:

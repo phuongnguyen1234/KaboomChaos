@@ -1,5 +1,6 @@
 using UnityEngine;
 using Core.Interfaces;
+using Skills.Behaviors;
 
 namespace Skills.Data
 {
@@ -22,45 +23,19 @@ namespace Skills.Data
         {
             _type = SkillType.Defensive;
         }
-    }
 
-    /// <summary>
-    /// Hanh vi thuc thi cua Skill Heal.
-    /// </summary>
-    public class HealBehavior : ISkillBehavior
-    {
-        private readonly HealSkillData _data;
-
-        public HealBehavior(HealSkillData data)
+        /// <summary>
+        /// Khong cho phep su dung skill Heal khi player dang day mau
+        /// (tranh tieu thu energy vo ich khi khong the hoi them HP).
+        /// </summary>
+        public override bool CanActivate(IPlayer player)
         {
-            _data = data;
-        }
+            if (player == null || player.GameObject == null) return true;
 
-        public void Activate(IPlayer player)
-        {
-            if (player != null)
-            {
-                var healable = player.GameObject.GetComponent<IHealable>();
-                if (healable != null)
-                {
-                    float healed = healable.Heal(_data.HealAmount);
-                    Debug.Log($"[HealBehavior] Player {_data.DisplayName} da hoi phuc {healed} HP (Muc tieu: {_data.HealAmount} HP)");
-                }
-                else
-                {
-                    Debug.LogWarning("[HealBehavior] Player GameObject khong co component IHealable!");
-                }
-            }
-        }
+            var healable = player.GameObject.GetComponent<IHealable>();
+            if (healable == null) return true;
 
-        public void UpdateBehavior(IPlayer player, float deltaTime)
-        {
-            // Hanh vi tuc thoi
-        }
-
-        public void Deactivate(IPlayer player)
-        {
-            Debug.Log("[HealBehavior] Skill Heal ket thuc.");
+            return !healable.IsHealthFull;
         }
     }
 }

@@ -22,4 +22,8 @@ MonoBehaviour:
   _price: 0
   _castSfx: {fileID: 0}
   _castVfx: {fileID: 1489550388378782852, guid: 81e4a6235e2c32c4eb59cda1ed309b0d, type: 3}
-  _jumpForce: 65
+  _playCastOnActivate: 1
+  _playCastOnDeactivate: 0
+  _castVfxSpawnMode: 0
+  _castVfxExplosionRadius: 2
+  _jumpForce: 70

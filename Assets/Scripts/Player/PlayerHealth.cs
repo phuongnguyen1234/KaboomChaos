@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using Core.Interfaces;
 using System;
 using Core;
@@ -14,14 +14,23 @@ namespace Player
     [RequireComponent(typeof(PlayerAnimator))]
     [RequireComponent(typeof(RagdollController))] // Phụ thuộc vào RagdollController để kích hoạt hiệu ứng
     [RequireComponent(typeof(AudioSource))]
-    public class PlayerHealth : MonoBehaviour, IExplosionDamageable, IStatusEffectable, IHealable
+    public class PlayerHealth : MonoBehaviour, IExplosionDamageable, IStatusEffectable, IHealable, IInvincible
     {
         #region Fields
+
+        /// <summary>
+        /// Max HP cua player khi bat Extreme Mode (Player chi co 35 HP).
+        /// </summary>
+        private const float ExtremeModeMaxHealth = 35f;
 
         [Header("Health Settings")]
         [SerializeField] private float _baseMaxHealth = 100f;
         private float _currentHealth;
         private float _maxHealth;
+        private bool _isInvincible;
+
+        // Trang thai Extreme Mode cua player (neu bat: max HP = 35).
+        private bool _extremeModeEnabled;
 
         [Header("Status Effect Settings")]
         [Tooltip("Sát thương mỗi tick từ hiệu ứng Burning/Electrified.")]
@@ -70,6 +79,17 @@ namespace Player
         /// </summary>
         public float CurrentHealth => _currentHealth;
 
+        /// <summary>
+        /// Cho biet player co dang bat tu hay khong. (Duoc dung boi skill Forcefield.)
+        /// </summary>
+        public bool IsInvincible { get => _isInvincible; set => _isInvincible = value; }
+
+        /// <summary>
+        /// Cho biet player co dang day mau (mau hien tai dat toi da) hay khong.
+        /// Dung de chan skill Heal khi khong can thiet.
+        /// </summary>
+        public bool IsHealthFull => _currentHealth >= _maxHealth;
+
 
         #region Unity Lifecycle
 
@@ -85,6 +105,14 @@ namespace Player
             _currentHealth = _maxHealth;
             IsAlive = true;
 
+            // Khoi phuc trang thai Extreme Mode: neu dang bat thi gioi han max HP xuong 35.
+            _extremeModeEnabled = GameEvents.TriggerRequestExtremeModeEnabled();
+            if (_extremeModeEnabled)
+            {
+                _maxHealth = ExtremeModeMaxHealth;
+                _currentHealth = _maxHealth;
+            }
+
             // Cập nhật UI lần đầu
             GameEvents.TriggerPlayerHealthChanged(_player, _currentHealth, _maxHealth);
         }
@@ -95,6 +123,8 @@ namespace Player
             GameEvents.OnRoundEndPlayerReset += ResetState;
             // Listen for the character reset request (Roblox-style), so the player dies itself.
             GameEvents.OnPlayerResetRequested += HandlePlayerResetRequested;
+            // Lang nghe thay doi Extreme Mode de gioi han max HP khi bat/tat.
+            GameEvents.OnExtremeModeStateChanged += HandleExtremeModeChanged;
         }
 
         private void OnDisable()
@@ -108,6 +138,7 @@ namespace Player
             // Hủy đăng ký để tránh lỗi
             GameEvents.OnRoundEndPlayerReset -= ResetState;
             GameEvents.OnPlayerResetRequested -= HandlePlayerResetRequested;
+            GameEvents.OnExtremeModeStateChanged -= HandleExtremeModeChanged;
         }
 
         #endregion
@@ -120,6 +151,11 @@ namespace Player
         public void TakeExplosionDamage(float amount, Vector3 force, Vector3 point, IBaseBombData bombData)
         {
             if (!IsAlive) return;
+
+            // Thong bao player da trung dan vao vu no (bat ke co khien hay dang bat tu).
+            // Cac rule/perk (vi du Anti-Freeze tang Max HP moi lan trung vu no bang) lang nghe event
+            // nay de phan ung ngay khi trung vu no, khong phu thuoc vao viec co that su nhan sat thuong.
+            GameEvents.TriggerPlayerExplosionHit(_player, bombData.Effect);
 
             bool wasAlive = IsAlive;
             TakeDamage(amount, DamageSourceType.Explosion, bombData.Effect);
@@ -135,6 +171,11 @@ namespace Player
         public void TakeDamage(float amount, DamageSourceType sourceType = DamageSourceType.Generic, StatusEffectType effectContext = StatusEffectType.None)
         {
             if (!IsAlive) return;
+
+            // Bat tu (forcefield): Player khong nhan bat ky sat thuong nao khi dang bat tu.
+
+
+            if (_isInvincible) return;
 
             // --- LOGIC KHIÊN ---
             // Tất cả sát thương đều phải đi qua khiên trước.
@@ -272,11 +313,19 @@ namespace Player
 
             // Phục hồi máu về giá trị tối đa.
             _maxHealth = _baseMaxHealth;
+            // Neu Extreme Mode dang bat, gioi han max HP xuong 35 khi reset round.
+            if (_extremeModeEnabled)
+            {
+                _maxHealth = ExtremeModeMaxHealth;
+            }
             _currentHealth = _maxHealth;
 
             // Xóa lịch sử miễn nhiễm sát thương để không mang sang round mới.
             _statusEffectContactImmunityTimestamps.Clear();
             _lastEnvironmentalContactDamageTime = 0f;
+            // Tat trang thai bat tu khi reset round de khong mang sang round moi.,
+
+            _isInvincible = false;
 
             // Cập nhật lại UI máu cho người chơi.
             GameEvents.TriggerPlayerHealthChanged(_player, _currentHealth, _maxHealth);
@@ -320,6 +369,39 @@ namespace Player
         #endregion
 
         #region Private Methods
+
+        /// <summary>
+        /// Xử lý khi trạng thái Extreme Mode thay đổi: gioi han max HP xuong 35 khi bat,
+        /// khoi phuc ve max HP co ban khi tat. Khi giam max HP (bat extreme), mau hien tai
+        /// duoc clamp lai de khong vuot qua max moi. Khi TAT extreme, reset day mau ve MaxHP moi
+        /// (truoc day chi clamp nen current HP van nam o gia tri cuoi cung cua extreme = 35).
+        /// </summary>
+        /// <param name="enabled">True neu Extreme Mode dang bat, false neu tat.</param>
+        private void HandleExtremeModeChanged(bool enabled)
+        {
+            _extremeModeEnabled = enabled;
+
+            float newMax = enabled ? ExtremeModeMaxHealth : _baseMaxHealth;
+            if (Mathf.Approximately(_maxHealth, newMax)) return;
+
+            _maxHealth = newMax;
+
+            if (enabled)
+            {
+                // Bat extreme: gioi han max HP ve 35 va clamp mau hien tai xuong khong vuot qua 35.
+                _currentHealth = Mathf.Min(_currentHealth, _maxHealth);
+            }
+            else
+            {
+                // Tat extreme: max HP ve 100 va reset day mau ve MaxHP moi (sua loi "current HP van = 35").
+                _currentHealth = _maxHealth;
+            }
+
+            if (IsAlive)
+            {
+                GameEvents.TriggerPlayerHealthChanged(_player, _currentHealth, _maxHealth);
+            }
+        }
 
         /// <summary>
         /// Handle the character reset request (Roblox-style reset): the player dies itself.

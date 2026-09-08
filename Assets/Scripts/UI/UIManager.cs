@@ -40,8 +40,11 @@ namespace UI
         [SerializeField] private Color _timerIconNormalColor = Color.white;
         [Tooltip("Mau do cua icon timer khi con 30 giay cuoi round.")]
         [SerializeField] private Color _timerIconDangerColor = Color.red;
-        [Tooltip("SFX canh bao phat song song khi bat dau 30 giay cuoi round (chi phat 1 lan).")]
+        [Tooltip("SFX dong ho canh bao phat song song khi bat dau 30 giay cuoi round (chi phat 1 lan).")]
         [SerializeField] private AudioClip _timerDangerSfx;
+        [Tooltip("SFX tieng chuong canh bao phat song song khi bat dau 30 giay cuoi round (chi phat 1 lan).")]
+
+        [SerializeField] private AudioClip _bellDangerSfx;
         [Tooltip("AudioSource dung de phat SFX canh bao timer. Neu de trong se tu tim AudioSource tren GameObject.")]
         [SerializeField] private AudioSource _timerSfxSource;
 
@@ -73,6 +76,10 @@ namespace UI
         [SerializeField] private GameObject _currentIntensityPanel;
         [Tooltip("Text hiển thị giá trị độ khó hiện tại của round.")]
         [SerializeField] private TextMeshProUGUI _currentIntensityText;
+
+        [Header("Extreme Mode")]
+        [Tooltip("Panel hien thi trang thai Extreme Mode. Hien khi bat, an khi tat.")]
+        [SerializeField] private GameObject _extremeModePanel;
 
         [Header("Countdown")]
         [Tooltip("Panel chứa text đếm ngược đầu round.")]
@@ -115,6 +122,8 @@ namespace UI
         [SerializeField] private Button _inventoryButton;
         [Tooltip("Nút Option trên UI chính. Mở popup Option (không tab).")]
         [SerializeField] private Button _optionButton;
+        [Tooltip("Nút Settings trên UI chính. Mở popup Settings (Music/SFX/hotkeys).")]
+        [SerializeField] private Button _settingsButton;
 
         [Tooltip("Popup Shop - là PopupTab, quản lý việc mua bán vật phẩm.")]
         [SerializeField] private ShopPopup _shopPopup;
@@ -122,6 +131,8 @@ namespace UI
         [SerializeField] private InventoryPopup _inventoryPopup;
         [Tooltip("Popup Option - hiển thị các thiết lập của game.")]
         [SerializeField] private OptionPopup _optionPopup;
+        [Tooltip("Popup Settings - contie SettingsUI (slider Music/SFX si rebind UseSkillKey).")]
+        [SerializeField] private SettingsPopup _settingsPopup;
 
         // Coroutine đang chạy để có thể dừng lại nếu cần
         private Coroutine _notificationCoroutine;
@@ -156,6 +167,7 @@ namespace UI
                 {
                     // Subscribe vào event - pattern giống Vue parent-child communication
                     _homeScreen.OnPlayClicked += HandleHomeScreenPlayClicked;
+                    _homeScreen.OnSettingsClicked += HandleHomeScreenSettingsClicked;
                 }
             }
 
@@ -189,6 +201,10 @@ namespace UI
             {
                 _optionButton.onClick.AddListener(OpenOptionPopup);
             }
+            if (_settingsButton != null)
+            {
+                _settingsButton.onClick.AddListener(OpenSettingsPopup);
+            }
 
             // Tu tim AudioSource de phat SFX canh bao timer neu chua gan.
             if (_timerSfxSource == null)
@@ -201,12 +217,17 @@ namespace UI
         {
             _pauseAction.Enable();
             GameEvents.OnReturnToHomeRequest += HandleReturnToHome;
+            GameEvents.OnExtremeModeStateChanged += HandleExtremeModeChanged;
+
+            // Khoi phuc trang thai Extreme Mode khi UIManager bat (da luu tru).
+            RefreshExtremeModeIndicator();
         }
 
         private void OnDisable()
         {
             _pauseAction.Disable();
             GameEvents.OnReturnToHomeRequest -= HandleReturnToHome;
+            GameEvents.OnExtremeModeStateChanged -= HandleExtremeModeChanged;
         }
 
         private void OnDestroy()
@@ -215,6 +236,7 @@ namespace UI
             if (_homeScreen != null)
             {
                 _homeScreen.OnPlayClicked -= HandleHomeScreenPlayClicked;
+                _homeScreen.OnSettingsClicked -= HandleHomeScreenSettingsClicked;
             }
             if (_pauseMenuButton != null)
             {
@@ -231,6 +253,10 @@ namespace UI
             if (_optionButton != null)
             {
                 _optionButton.onClick.RemoveListener(OpenOptionPopup);
+            }
+            if (_settingsButton != null)
+            {
+                _settingsButton.onClick.RemoveListener(OpenSettingsPopup);
             }
         }
 
@@ -386,9 +412,10 @@ namespace UI
         /// </summary>
         private void PlayTimerDangerSfx()
         {
-            if (_timerDangerSfx == null || _timerSfxSource == null) return;
+            if (_timerDangerSfx == null || _bellDangerSfx == null || _timerSfxSource == null) return;
 
             _timerSfxSource.PlayOneShot(_timerDangerSfx);
+            _timerSfxSource.PlayOneShot(_bellDangerSfx);
         }
 
         /// <inheritdoc/>
@@ -567,6 +594,10 @@ namespace UI
             {
                 _optionPopup.Hide();
             }
+            if (_settingsPopup != null)
+            {
+                _settingsPopup.Hide();
+            }
         }
 
         /// <summary>
@@ -622,6 +653,24 @@ namespace UI
                 Debug.LogWarning("[UIManager] _optionPopup chua duoc gan tren Inspector.");
             }
         }
+
+        /// <summary>
+        /// Mo popup Settings khi user nhan nut Settings (tren Home o UI chinh).
+        /// Dong het cac popup khac inan de tranh nhieu popup cung hien thi.
+        /// </summary>
+        private void OpenSettingsPopup()
+        {
+            CloseMainPopups();
+
+            if (_settingsPopup != null)
+            {
+                _settingsPopup.Show();
+            }
+            else
+            {
+                Debug.LogWarning("[UIManager] _settingsPopup chua duoc gan tren Inspector.");
+            }
+        }
         #endregion
 
         #region Event Handlers
@@ -641,6 +690,16 @@ namespace UI
         }
 
         /// <summary>
+        /// Xu ly event Settings da tu HomeScreen: mo popup Settings. HomeScreen khong sa inchide,
+        /// deci popup se hien tren deava Home.
+        /// </summary>
+        private void HandleHomeScreenSettingsClicked()
+        {
+            Debug.Log("[UIManager] HomeScreen SettingsClicked event received. Opening Settings popup.");
+            OpenSettingsPopup();
+        }
+
+        /// <summary>
         /// Xử lý khi người chơi xác nhận "Back To Home" (từ PauseMenu → ConfirmationPopup):
         /// ẩn Main HUD + các panel gameplay, hiện lại HomeScreen (kèm chuỗi loading).
         /// </summary>
@@ -655,6 +714,28 @@ namespace UI
         #endregion
 
         #region Private Methods & Coroutines
+
+        /// <summary>
+        /// Phan hoi khi trang thai Extreme Mode thay doi: dong bo indicator (text + icon) tren UIManager.
+        /// </summary>
+        /// <param name="enabled">True neu Extreme Mode dang bat.</param>
+        private void HandleExtremeModeChanged(bool enabled)
+        {
+            RefreshExtremeModeIndicator();
+        }
+
+        /// <summary>
+        /// Cap nhat panel Extreme Mode tren UIManager: hien/an theo trang thai da luu tru.
+        /// </summary>
+        private void RefreshExtremeModeIndicator()
+        {
+            bool enabled = GameEvents.TriggerRequestExtremeModeEnabled();
+
+            if (_extremeModePanel != null)
+            {
+                _extremeModePanel.SetActive(enabled);
+            }
+        }
 
         private IEnumerator ShowNotificationCoroutine(string message, float duration)
         {

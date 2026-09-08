@@ -1,3 +1,4 @@
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core.Interfaces
@@ -44,5 +45,15 @@ namespace Core.Interfaces
         /// <param name="instance">Instance của bom.</param>
         /// <returns>Prefab gốc, hoặc null nếu không tìm thấy.</returns>
         GameObject GetPrefabForInstance(GameObject instance);
+
+        /// <summary>
+        /// Lay danh sach cac instance bom dang hoat dong (da duoc sinh tu pool).
+        /// </summary>
+        IReadOnlyList<GameObject> GetActiveBombInstances();
+
+        /// <summary>
+        /// Tra mot instance bom ve pool (disable va de de tai su dung ma khong kich no). Dung cho skill Disarm.
+        /// </summary>
+        void DespawnBomb(GameObject instance);
     }
 }

@@ -1,0 +1,183 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &8909955057516432442
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 747627864793514714, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: m_Name
+      value: LaserBlast
+      objectReference: {fileID: 0}
+    - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customAlpha
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customBaseColor.b
+      value: 0.07167935
+      objectReference: {fileID: 0}
+    - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customBaseColor.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customBaseColor.r
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customFresnelPower
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3432503266866048548, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customEmissionIntensity
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _animationStages.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _animationStages.Array.data[0].duration
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _animationStages.Array.data[1].duration
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _animationStages.Array.data[0].targetValue
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _animationStages.Array.data[1].targetValue
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _animationStages.Array.data[0].easeCurve.m_PreInfinity
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _animationStages.Array.data[1].easeCurve.m_PreInfinity
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _animationStages.Array.data[0].easeCurve.m_PostInfinity
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _animationStages.Array.data[1].easeCurve.m_PostInfinity
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _animationStages.Array.data[0].easeCurve.m_RotationOrder
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _animationStages.Array.data[1].easeCurve.m_RotationOrder
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _animationStages.Array.data[0].easeCurve.m_Curve.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _animationStages.Array.data[1].easeCurve.m_Curve.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _animationStages.Array.data[0].easeCurve.m_Curve.Array.data[1].time
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _animationStages.Array.data[1].easeCurve.m_Curve.Array.data[1].time
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _animationStages.Array.data[0].easeCurve.m_Curve.Array.data[1].value
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _animationStages.Array.data[1].easeCurve.m_Curve.Array.data[1].value
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _animationStages.Array.data[0].easeCurve.m_Curve.Array.data[1].inSlope
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _animationStages.Array.data[1].easeCurve.m_Curve.Array.data[1].inSlope
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _animationStages.Array.data[0].easeCurve.m_Curve.Array.data[1].outSlope
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _animationStages.Array.data[1].easeCurve.m_Curve.Array.data[1].outSlope
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5488013012343082406, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5488013012343082406, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5488013012343082406, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5488013012343082406, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5488013012343082406, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5488013012343082406, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5488013012343082406, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5488013012343082406, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5488013012343082406, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5488013012343082406, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customBaseColor.b
+      value: 0.37016737
+      objectReference: {fileID: 0}
+    - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customBaseColor.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customBaseColor.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customEmissionIntensity
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}

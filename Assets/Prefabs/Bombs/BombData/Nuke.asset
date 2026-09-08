@@ -109,7 +109,7 @@ MonoBehaviour:
   minNumberOfExplosions: 5
   maxNumberOfExplosions: 7
   spawnSound: {fileID: 8300000, guid: 8b514b8162f3b754f842b9176e4d078b, type: 3}
-  delayBetweenExplosions: 0.4
+  delayBetweenExplosions: 0.5
   explosionSpreadRadius: 3
   subExplosionDamage: 35
   subExplosionDamageFalloff:

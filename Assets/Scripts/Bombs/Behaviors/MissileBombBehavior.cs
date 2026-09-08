@@ -62,8 +62,21 @@ namespace Bombs.Behaviors
             // Chỉ điều khiển chuyển động nếu bom đang hoạt động.
             if (controller.IsActive && controller.BombData is MissileBombData missileData)
             {
-                // Tên lửa rơi với tốc độ không đổi
-                controller.BombRigidbody.linearVelocity = Vector3.down * missileData.fallSpeed;
+                Rigidbody rb = controller.BombRigidbody;
+                if (rb == null) return;
+
+                // NEU ten lua dang bi day len (van toc Y duong, vi du boi Bubble Barrier) thi
+                // KHONG ghi de van toc xuong moi frame. Cu phap nay de trong luc lam ten lua
+                // bay len roi giam dan toc do (giảm tốc), sau do roi tu do cho den khi dat
+                // toc do roi binh thuong tro lai (tang toc). Khi van toc Y khong con duong
+                // (dang roi xuong) thi moi tiep tuc ghi de ve toc do roi khong doi.
+                if (rb.linearVelocity.y > 0f)
+                {
+                    return;
+                }
+
+                // Ten lua roi voi toc do khong doi
+                rb.linearVelocity = Vector3.down * missileData.fallSpeed;
             }
         }
 

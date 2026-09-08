@@ -54,17 +54,17 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 1
       value: 20
-      inSlope: 4
-      outSlope: 4
+      inSlope: 2
+      outSlope: 2
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 6
-      value: 40
-      inSlope: 4
-      outSlope: 4
+      value: 30
+      inSlope: 2
+      outSlope: 2
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
@@ -126,17 +126,17 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 1
       value: 3
-      inSlope: -0.3
-      outSlope: -0.3
+      inSlope: -0.4
+      outSlope: -0.4
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 6
-      value: 1.5
-      inSlope: -0.3
-      outSlope: -0.3
+      value: 1
+      inSlope: -0.4
+      outSlope: -0.4
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
@@ -150,17 +150,17 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 1
       value: 3.5
-      inSlope: -0.2
-      outSlope: -0.2
+      inSlope: -0.3
+      outSlope: -0.3
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 6
-      value: 2.5
-      inSlope: -0.2
-      outSlope: -0.2
+      value: 2
+      inSlope: -0.3
+      outSlope: -0.3
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
@@ -216,3 +216,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  _navalMineAnchorSpawnOffset: 0.5
+  _navalMineMinPlayerHorizontalDistance: 1.5
+  _navalMineClearanceHeight: 4
+  _navalMineClearanceHalfWidth: 0.8

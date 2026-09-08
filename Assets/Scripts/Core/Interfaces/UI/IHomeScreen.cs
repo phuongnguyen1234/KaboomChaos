@@ -14,6 +14,11 @@ namespace Core.Interfaces.UI
         event Action OnPlayClicked;
 
         /// <summary>
+        /// Event emit cuando user click nút Settings — parent (UIManager) mo popup Settings.
+        /// </summary>
+        event Action OnSettingsClicked;
+
+        /// <summary>
         /// Hiển thị màn hình Home và bắt đầu chuỗi loading.
         /// </summary>
         void Show(bool skipLoading = false);

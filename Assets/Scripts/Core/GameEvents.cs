@@ -82,6 +82,14 @@ namespace Core
         public static event Action<IPlayer, float, DamageSourceType, StatusEffectType> OnPlayerDamageTaken;
 
         /// <summary>
+        /// Duoc goi khi player trung dan vao mot vu no (explosion hit), bat ke co khien hay dang bat tu hay khong.
+        /// Dung cho perk/rule can phan ung voi viec "trung vu no" ma khong phu thuoc vao viec co that su nhan sat thuong
+        /// sau khi qua khien/mien nhiem hay khong (vi du: Anti-Freeze tang Max HP moi lan trung vu no bang).
+        /// Tham so: player, loai hieu ung (context) cua vu no.
+        /// </summary>
+        public static event Action<IPlayer, StatusEffectType> OnPlayerExplosionHit;
+
+        /// <summary>
         /// Duoc goi khi player nhat mot dong coin. Tham so thu hai la luong BonusHP
         /// da cau hinh san trong CoinData (0 neu coin khong co bonus HP).
         /// Dung cho perk Big Saver de hoi HP khi nhat coin.
@@ -89,11 +97,55 @@ namespace Core
         public static event Action<IPlayer, float> OnPlayerCoinCollected;
         #endregion
 
+        #region Extreme Mode Events
+        /// <summary>
+        /// Yeu cau thay doi trang thai Extreme Mode (goi tu Option Menu).
+        /// PlayerDataManager lang nghe de luu tru va phat lai trang thai thuc te qua OnExtremeModeStateChanged.
+        /// </summary>
+        public static event Action<bool> OnExtremeModeChanged;
+
+        /// <summary>
+        /// Bao hieu trang thai Extreme Mode thuc te da thay doi (sau khi da luu tru).
+        /// Cac thanh phan (PlayerHealth, PlayerPerkController, HUD, UIManager...) lang nghe de phan ung.
+        /// </summary>
+        public static event Action<bool> OnExtremeModeStateChanged;
+
+        /// <summary>
+        /// Yeu cau tra ve trang thai Extreme Mode hien tai (da luu tru) de khoi phuc logic/UI khi vao game.
+        /// </summary>
+        public static Func<bool> OnRequestExtremeModeEnabled;
+        #endregion
+
+        #region AFK Mode Events
+        /// <summary>
+        /// Yeu cau thay doi trang thai AFK (goi tu Option Menu).
+        /// PlayerDataManager lang nghe de luu tru va phat lai trang thai thuc te qua OnAfkStateChanged.
+        /// </summary>
+        public static event Action<bool> OnAfkEnabledChanged;
+
+        /// <summary>
+        /// Bao hieu trang thai AFK thuc te da thay doi (sau khi da luu tru).
+        /// Cac thanh phan (PlayerManager, PlayerAfkIndicator...) lang nghe de phan ung.
+        /// </summary>
+        public static event Action<bool> OnAfkStateChanged;
+
+        /// <summary>
+        /// Yeu cau tra ve trang thai AFK hien tai (da luu tru) de khoi phuc logic/UI khi vao game.
+        /// </summary>
+        public static Func<bool> OnRequestAfkEnabled;
+        #endregion
+
         #region Bomb Events
         /// <summary>
         /// Được gọi khi một quả bom muốn được trả về pool.
         /// </summary>
         public static event Action<GameObject> OnBombDespawnRequest;
+
+        /// <summary>
+        /// Yeu cau lay danh sach cac instance bom dang hoat dong (da duoc sinh tu pool).
+        /// Duoc dung boi skill Disarm de go vo cac bom trong khu vuc.
+        /// </summary>
+        public static event Func<IReadOnlyList<GameObject>> OnRequestActiveBombInstances;
         #endregion
 
         #region VFX Events
@@ -106,6 +158,12 @@ namespace Core
         /// Được gọi khi một hiệu ứng hình ảnh (VFX) muốn được trả về pool.
         /// </summary>
         public static event Action<GameObject> OnVFXDespawnRequest;
+
+        /// <summary>
+        /// Duoc goi khi player co gang nhap Battery nhung energy dang day (khong the nhap).
+        /// HUD lang nghe de hien thi thong bao 'Charge Full' tren UI.
+        /// </summary>
+        public static event Action<IPlayer, AudioClip> OnBatteryCollectibleRefused;
         #endregion
 
         #region UI & Floating Text Events
@@ -138,7 +196,12 @@ namespace Core
         /// <summary>
         /// Yêu cầu bắt đầu phiên chơi game (thường từ màn hình chính).
         /// </summary>
-                        public static event Action OnStartGameRequest;
+        public static event Action OnStartGameRequest;
+
+        /// <summary>
+        /// Yêu cầu spawn player trước khi bắt đầu game (trong lúc transition).
+        /// </summary>
+        public static event Action OnSpawnInitialPlayerRequest;
 
         /// <summary>
         /// Yêu cầu trở về màn hình chính (từ trong game).
@@ -294,17 +357,24 @@ namespace Core
         public static void TriggerPlayerDamageTaken(IPlayer player, float amount, DamageSourceType sourceType, StatusEffectType effectContext)
             => OnPlayerDamageTaken?.Invoke(player, amount, sourceType, effectContext);
 
+        public static void TriggerPlayerExplosionHit(IPlayer player, StatusEffectType effectContext)
+            => OnPlayerExplosionHit?.Invoke(player, effectContext);
+
         public static void TriggerPlayerCoinCollected(IPlayer player, float bonusHp)
             => OnPlayerCoinCollected?.Invoke(player, bonusHp);
         #endregion
 
         #region Bomb Triggers
         public static void TriggerBombDespawnRequest(GameObject bombInstance) => OnBombDespawnRequest?.Invoke(bombInstance);
+
+        public static IReadOnlyList<GameObject> TriggerRequestActiveBombInstances() => OnRequestActiveBombInstances?.Invoke() ?? new List<GameObject>();
         #endregion
 
         #region VFX Triggers
         public static GameObject TriggerVFXSpawnRequest(GameObject prefab, Vector3 position, Quaternion rotation) => OnVFXSpawnRequest?.Invoke(prefab, position, rotation);
         public static void TriggerVFXDespawnRequest(GameObject vfxInstance) => OnVFXDespawnRequest?.Invoke(vfxInstance);
+
+        public static void TriggerBatteryCollectibleRefused(IPlayer player, AudioClip chargeFullSfx) => OnBatteryCollectibleRefused?.Invoke(player, chargeFullSfx);
         #endregion
         
         #region UI & Floating Text Triggers
@@ -320,6 +390,7 @@ namespace Core
         #region Game Loop Triggers
         public static void TriggerRoundEndCleanup() => OnRoundEndCleanup?.Invoke();
         public static void TriggerStartGameRequest() => OnStartGameRequest?.Invoke();
+        public static void TriggerSpawnInitialPlayerRequest() => OnSpawnInitialPlayerRequest?.Invoke();
         public static void TriggerReturnToHomeRequest() => OnReturnToHomeRequest?.Invoke();
 
         public static void TriggerMusicPauseRequested() => OnMusicPauseRequested?.Invoke();
@@ -366,6 +437,69 @@ namespace Core
         /// Thông báo rằng trạng thái trang bi (skill/perk) của người chơi đã thay đổi để UI đồng bộ lại.
         /// </summary>
         public static void TriggerPlayerEquipmentChanged() => OnPlayerEquipmentChanged?.Invoke();
+        #endregion
+
+        #region Extreme Mode Triggers
+        /// <summary>
+        /// Yeu cau thay doi trang thai Extreme Mode (tu Option Menu).
+        /// </summary>
+        /// <param name="enabled">True neu bat Extreme Mode, false neu tat.</param>
+        public static void TriggerExtremeModeChanged(bool enabled) => OnExtremeModeChanged?.Invoke(enabled);
+
+        /// <summary>
+        /// Bao hieu trang thai Extreme Mode thuc te da thay doi de cac thanh phan khac phan ung.
+        /// </summary>
+        /// <param name="enabled">True neu Extreme Mode dang bat.</param>
+        public static void TriggerExtremeModeStateChanged(bool enabled) => OnExtremeModeStateChanged?.Invoke(enabled);
+
+        /// <summary>
+        /// Yeu cau tra ve trang thai Extreme Mode hien tai (da luu tru).
+        /// </summary>
+        /// <returns>True neu Extreme Mode dang bat.</returns>
+        public static bool TriggerRequestExtremeModeEnabled() => OnRequestExtremeModeEnabled?.Invoke() ?? false;
+        #endregion
+
+        #region AFK Mode Triggers
+        /// <summary>
+        /// Yeu cau thay doi trang thai AFK (tu Option Menu).
+        /// </summary>
+        /// <param name="enabled">True neu bat AFK, false neu tat.</param>
+        public static void TriggerAfkEnabledChanged(bool enabled) => OnAfkEnabledChanged?.Invoke(enabled);
+
+        /// <summary>
+        /// Bao hieu trang thai AFK thuc te da thay doi de cac thanh phan khac phan ung.
+        /// </summary>
+        /// <param name="enabled">True neu AFK dang bat.</param>
+        public static void TriggerAfkStateChanged(bool enabled) => OnAfkStateChanged?.Invoke(enabled);
+
+        /// <summary>
+        /// Yeu cau tra ve trang thai AFK hien tai (da luu tru).
+        /// </summary>
+        /// <returns>True neu AFK dang bat.</returns>
+        public static bool TriggerRequestAfkEnabled() => OnRequestAfkEnabled?.Invoke() ?? false;
+        #endregion
+
+        #region Settings Triggers
+        /// <summary>
+        /// Bao phio hieu khi gia tri Music volume doi (Settings), de BGMController ap dung live.
+        /// </summary>
+        public static event Action<float> OnSettingsMusicVolumeChanged;
+        /// <summary>
+        /// Bao phio hieu khi gia tri SFX volume doi (Settings), de cac sistem SFX ap dung live.
+        /// </summary>
+        public static event Action<float> OnSettingsSfxVolumeChanged;
+
+        /// <summary>
+        /// Trigger cho OnSettingsMusicVolumeChanged.
+        /// </summary>
+        /// <param name="value">Gia tri music volume moi.</param>
+        public static void TriggerSettingsMusicVolumeChanged(float value) => OnSettingsMusicVolumeChanged?.Invoke(value);
+
+        /// <summary>
+        /// Trigger cho OnSettingsSfxVolumeChanged.
+        /// </summary>
+        /// <param name="value">Gia tri SFX volume moi.</param>
+        public static void TriggerSettingsSfxVolumeChanged(float value) => OnSettingsSfxVolumeChanged?.Invoke(value);
         #endregion
 
         #region Collectible Triggers

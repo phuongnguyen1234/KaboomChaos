@@ -20,6 +20,7 @@ namespace Collectibles
             { typeof(CoinData), () => new CoinBehavior() },
             { typeof(HealingCollectibleData), () => new HealingBehavior() },
             { typeof(ShieldCollectibleData), () => new ShieldBehavior() },
+            { typeof(BatteryCollectibleData), () => new BatteryBehavior() },
         };
         private Coroutine _lifespanCoroutine;
 
@@ -36,12 +37,6 @@ namespace Collectibles
         [Header("Visuals")]
         [Tooltip("Renderer chính của vật phẩm, dùng cho các hiệu ứng hình ảnh như nhấp nháy.")]
         [SerializeField] protected Renderer _mainRenderer;
-
-        [Tooltip("Đối tượng con chứa hình ảnh sẽ xoay. Nếu bỏ trống, sẽ không có gì xoay.")]
-        [SerializeField] private Transform _rotatingVisuals;
-
-        [Tooltip("Tốc độ xoay (độ/giây) quanh trục Y. Đặt là 0 để không xoay.")]
-        [SerializeField] private float _rotationSpeed = 0f;
 
         [Tooltip("Đối tượng mũi tên chỉ báo, sẽ tự động nảy và xoay về phía camera.")]
         [SerializeField] protected GameObject _indicatorArrow;
@@ -154,13 +149,6 @@ namespace Collectibles
 
         protected void LateUpdate()
         {
-            // Xoay phần hình ảnh của vật phẩm nếu được cấu hình
-            if (_rotationSpeed != 0f && _rotatingVisuals != null)
-            {
-                // Sử dụng Space.World để đảm bảo nó luôn xoay quanh trục Y của thế giới
-                _rotatingVisuals.Rotate(Vector3.up, _rotationSpeed * Time.deltaTime, Space.World);
-            }
-
             // Làm cho mũi tên luôn xoay về phía camera (billboarding)
             if (_indicatorArrow != null && _indicatorArrow.activeSelf && _mainCamera != null)
             {

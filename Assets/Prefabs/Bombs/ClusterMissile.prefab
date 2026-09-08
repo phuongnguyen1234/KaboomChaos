@@ -108,6 +108,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 0.6
   _customEmissionIntensity: 5
+  _customFresnelPower: 0.1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &4729048577011763106
 GameObject:
@@ -270,6 +272,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 1
+  _customFresnelPower: 0.1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &6017442970737339222
 GameObject:
@@ -485,6 +489,7 @@ MonoBehaviour:
   _poisonGasPrefab: {fileID: 0}
   _poisonGasScale: 5
   _partsToPulse: []
+  _tetherKnotPoint: {fileID: 0}
 --- !u!136 &1105274069145766865
 CapsuleCollider:
   m_ObjectHideFlags: 0

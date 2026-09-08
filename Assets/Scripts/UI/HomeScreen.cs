@@ -21,16 +21,19 @@ namespace UI
         [SerializeField] private Button _exitButton;
         [SerializeField] private Button _settingsButton;
         [SerializeField] private Button _infoButton;
+        [Header("Animation")]
+        [SerializeField] private Animations.HomeScreenAnimation _animation;
         #endregion
 
         #region Events
         public event Action OnPlayClicked;
+        public event Action OnSettingsClicked;
         #endregion
 
         #region Unity Lifecycle
         private void Awake()
         {
-                        // Gán sự kiện cho nút Play
+            // Gán sự kiện cho nút Play
             if (_playButton != null)
             {
                 _playButton.onClick.AddListener(OnPlayButtonClicked);
@@ -40,6 +43,12 @@ namespace UI
             if (_exitButton != null)
             {
                 _exitButton.onClick.AddListener(OnExitButtonClicked);
+            }
+
+            // Gán sự kiện cho nút Settings — emit event lên parent (UIManager) de mo SettingsPopup.
+            if (_settingsButton != null)
+            {
+                _settingsButton.onClick.AddListener(OnSettingsButtonClicked);
             }
         }
 
@@ -51,7 +60,7 @@ namespace UI
 
         private void OnDestroy()
         {
-                        if (_playButton != null)
+            if (_playButton != null)
             {
                 _playButton.onClick.RemoveListener(OnPlayButtonClicked);
             }
@@ -60,33 +69,59 @@ namespace UI
             {
                 _exitButton.onClick.RemoveListener(OnExitButtonClicked);
             }
+
+            if (_settingsButton != null)
+            {
+                _settingsButton.onClick.RemoveListener(OnSettingsButtonClicked);
+            }
         }
         #endregion
 
         #region Public Methods
-        public async void Show(bool skipLoading = false)
+        public void Show(bool skipLoading = false)
         {
             gameObject.SetActive(true);
 
-            // Quay thẳng para Home (vídeo: Back to Home) - salta la pantalla de loading.
-            if (skipLoading)
+            if (_animation != null)
             {
-                _loadingOverlayGroup.SetActive(false);
-                _homeGroup.SetActive(true);
-                return;
-            }
+                _animation.SetupInitialPositions();
 
-            // 1. Hiển thị loading overlay, ẩn Home group
+                if (skipLoading)
+                {
+                    _loadingOverlayGroup.SetActive(false);
+                    _animation.PlayHomeEnterAnimation();
+                }
+                else
+                {
+                    _animation.StartLoadingAnimation(() => {
+                        _animation.PlayHomeEnterAnimation();
+                    });
+                }
+            }
+            else
+            {
+                // Fallback nếu không có Animation Script
+                if (skipLoading)
+                {
+                    _loadingOverlayGroup.SetActive(false);
+                    _homeGroup.SetActive(true);
+                }
+                else
+                {
+                    ShowLoadingFallback();
+                }
+            }
+        }
+
+        private async void ShowLoadingFallback()
+        {
             _loadingOverlayGroup.SetActive(true);
             _homeGroup.SetActive(false);
 
-            // 2. Delay 1.5s để giả lập quá trình tải tài nguyên
             await Task.Delay(1500);
 
-            // Kiểm tra null trong trường hợp object bị destroy khi đang đợi Task
             if (this == null) return;
 
-            // 3. Tắt loading overlay, bật Home group
             _loadingOverlayGroup.SetActive(false);
             _homeGroup.SetActive(true);
         }
@@ -98,15 +133,43 @@ namespace UI
         #endregion
 
         #region Private Methods
-                private void OnPlayButtonClicked()
+        private void OnPlayButtonClicked()
         {
-            // Ẩn màn hình Home
-            Hide();
+            if (_animation != null)
+            {
+                _animation.PlayTransitionAnimation(
+                    onSlideDown: () => {
+                        // Gọi trực tiếp event hoặc qua UIManager
+                        Core.GameEvents.TriggerSpawnInitialPlayerRequest();
+                    },
+                    onSlideUp: () => {
+                        Hide();
+                        OnPlayClicked?.Invoke();
+                        Debug.Log("[HomeScreen] Play button clicked - event emitted after transition.");
+                    }
+                );
+            }
+            else
+            {
+                // Ẩn màn hình Home
+                Hide();
 
-            // Emit event lên parent (UIManager) - pattern giống Vue
-            // Parent sẽ xử lý logic game loop
-            OnPlayClicked?.Invoke();
-            Debug.Log("[HomeScreen] Play button clicked - event emitted.");
+                // Spawn player (fallback)
+                Core.GameEvents.TriggerSpawnInitialPlayerRequest();
+
+                // Emit event lên parent (UIManager)
+                OnPlayClicked?.Invoke();
+                Debug.Log("[HomeScreen] Play button clicked - event emitted.");
+            }
+        }
+
+        /// <summary>
+        /// Xu ly khi user nhan nut Settings tren Home: emit event lên parent
+        /// (UIManager) care mo popup Settings.
+        /// </summary>
+        private void OnSettingsButtonClicked()
+        {
+            OnSettingsClicked?.Invoke();
         }
 
         /// <summary>

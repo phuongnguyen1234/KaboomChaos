@@ -136,6 +136,18 @@ PrefabInstance:
       propertyPath: _bombData
       value: 
       objectReference: {fileID: 11400000, guid: b08529b3eea2cd64b8161a9accb8a451, type: 2}
+    - target: {fileID: 7676959994998432775, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 7676959994998432775, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 7676959994998432775, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.4
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
