@@ -16,6 +16,11 @@ namespace Collectibles.Behaviors
             _data = data;
         }
 
+        /// <summary>
+        /// Do uutien mac dinh cua khien base.
+        /// </summary>
+        public virtual int Priority => 0;
+
         public virtual void OnApply(IPlayer player, IPlayerShieldController shieldController, IBaseShieldData data)
         {
             // Mặc định không làm gì khi áp dụng

@@ -59,11 +59,10 @@ namespace Bombs // Thay đổi
         public AudioSource BombAudioSource => _audioSource;
 
         /// <summary>
-        /// Cho biết bom này có phải là tên lửa (missile) hay không.
-        /// Dùng bởi Bubble Barrier để giữ tư thế đâm thẳng xuống khi bị đẩy ra.
-
+        /// Cho biet bom nay co phai la ten lua (missile/rocket) hay khong.
+        /// Dung boi Bubble Barrier de day len va hất ra xa theo truc cua ten lua.
         /// </summary>
-        public bool IsProjectile => _behavior is MissileBombBehavior;
+        public bool IsProjectile => _behavior is MissileBombBehavior || _behavior is TrackingRocketBehavior;
 
         /// <summary>
         /// Điểm 'nút thắt' (knot) trên quả bom dùng để buộc dây xích của thủy lôi.
@@ -72,6 +71,8 @@ namespace Bombs // Thay đổi
         public Transform TetherKnotPoint => _tetherKnotPoint;
 
         private AudioSource _audioSource;
+        // Handle al loop de ticking sound (dùng manager central pentru live volume SFX).
+        private ISfxLoopHandle _tickingLoopHandle;
         // Manager references (injected)
         private IDestructionManager _destructionManager;
         private IBombSpawnerManager _bombSpawnerManager;
@@ -250,9 +251,9 @@ namespace Bombs // Thay đổi
             _behavior?.OnSetup(this);
 
             // Play spawn sound if available
-            if (_bombData.SpawnSound != null && _audioSource != null)
+            if (_bombData.SpawnSound != null && SfxService.Instance != null)
             {
-                _audioSource.PlayOneShot(_bombData.SpawnSound);
+                SfxService.Instance.PlaySfx(_bombData.SpawnSound, transform.position);
             }
         }
 
@@ -278,6 +279,14 @@ namespace Bombs // Thay đổi
             _destructionManager = null;
             _bombSpawnerManager = null; // Null out injected manager references
             _playerManager = null; // Null out injected manager references
+
+            // Reset loop handle de ticking (neu a fost lazat de pool).
+            if (_tickingLoopHandle != null)
+            {
+                _tickingLoopHandle.Stop();
+                _tickingLoopHandle = null;
+            }
+
             transform.localScale = _originalLocalScale;
             if (_activeCoroutine != null)
             {
@@ -312,8 +321,11 @@ namespace Bombs // Thay đổi
             if (BombRigidbody != null)
             {
                 BombRigidbody.isKinematic = false;
-                BombRigidbody.linearVelocity = Vector3.zero;
-                BombRigidbody.angularVelocity = Vector3.zero;
+                if (!BombRigidbody.isKinematic)
+                {
+                    BombRigidbody.linearVelocity = Vector3.zero;
+                    BombRigidbody.angularVelocity = Vector3.zero;
+                }
             }
 
             // Reset lại các thuộc tính của collider dựa trên hành vi
@@ -450,13 +462,10 @@ namespace Bombs // Thay đổi
             // Sort stages by start time to ensure they trigger in order
             data.fuseStages.Sort((a, b) => a.startTime.CompareTo(b.startTime));
 
-            // Play ticking sound (sử dụng thuộc tính từ interface)
-            if (data.TickingSound != null && _audioSource != null)
+            // Play ticking sound (loop prin SfxManager de live volume)
+            if (data.TickingSound != null && SfxService.Instance != null)
             {
-                _audioSource.clip = data.TickingSound;
-                _audioSource.pitch = data.TickingSoundPitch;
-                _audioSource.loop = true;
-                _audioSource.Play();
+                _tickingLoopHandle = SfxService.Instance.PlaySfxLoop(data.TickingSound, transform, 1f, data.TickingSoundPitch);
             }
 
             while (_fuseTimer < data.fuseTime)
@@ -480,9 +489,9 @@ namespace Bombs // Thay đổi
         private void TriggerFuseStage(FuseStage stage)
         {
             // Play sound
-            if (stage.StageSound != null)
+            if (stage.StageSound != null && SfxService.Instance != null)
             {
-                _audioSource.PlayOneShot(stage.StageSound);
+                SfxService.Instance.PlaySfx(stage.StageSound, transform.position);
             }
 
             // Spawn visual effect
@@ -581,9 +590,10 @@ namespace Bombs // Thay đổi
                 _landingIndicatorVFXInstance = null;
             }
 
-            if (_audioSource != null && _audioSource.isPlaying)
+            if (_tickingLoopHandle != null)
             {
-                _audioSource.Stop();
+                _tickingLoopHandle.Stop();
+                _tickingLoopHandle = null;
             }
 
             // Delegate the explosion logic to the selected strategy
@@ -616,6 +626,9 @@ namespace Bombs // Thay đổi
 
         public void TriggerSingleExplosion(Vector3 explosionCenter, bool isSubExplosion = false)
         {
+            // Phat su kien vu no cho cac he thong (Camera Shake, Screen Overlay)
+            GameEvents.TriggerExplosionOccurred(explosionCenter, _effectiveRadius);
+
             // --- Giai đoạn 0: Hiệu ứng & Âm thanh --- (Sử dụng thuộc tính từ interface)
             if (_bombData.ExplosionVFX != null)
             {
@@ -839,15 +852,11 @@ namespace Bombs // Thay đổi
         {
             if (clip == null) return;
 
-            GameObject tempGO = new("TempAudio"); // Tạo một GameObject tạm thời
-            tempGO.transform.position = position;
-            AudioSource aSource = tempGO.AddComponent<AudioSource>();
-            aSource.clip = clip;
-            aSource.volume = volume;
-            aSource.pitch = pitch;
-            aSource.spatialBlend = 1.0f; // Âm thanh 3D
-            aSource.Play();
-            Destroy(tempGO, clip.length); // Hủy GameObject sau khi âm thanh phát xong
+            // Prin SfxManager central pentru a aplicara live volume SFX din Settings.
+            if (SfxService.Instance != null)
+            {
+                SfxService.Instance.PlaySfx(clip, position, volume, pitch);
+            }
         }
 
         /// <summary>
@@ -919,3 +928,4 @@ namespace Bombs // Thay đổi
         #endregion
     }
 }
+

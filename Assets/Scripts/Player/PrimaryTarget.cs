@@ -1,7 +1,14 @@
 using UnityEngine;
 using Core.Interfaces;
 
-public class PrimaryTarget : MonoBehaviour, IPrimaryExplosionTarget
+namespace Player
 {
-    // This script is just a marker, so it doesn't need any code inside.
+    /// <summary>
+    /// Component danh dau (marker) cho collider than chinh cua Player.
+    /// Trien khai interface IPrimaryExplosionTarget trong Core.Interfaces de cac assembly khac (Core, Collectibles, Bombs)
+    /// co the nhan dien qua interface ma khong bi phu thuoc vong tron vao assembly Player.
+    /// </summary>
+    public class PrimaryTarget : MonoBehaviour, IPrimaryExplosionTarget
+    {
+    }
 }

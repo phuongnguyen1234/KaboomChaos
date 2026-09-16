@@ -55,6 +55,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _Alpha: 0.982
     - _EmissionIntensity: 0
     - _Metallic: 0
     - _QueueControl: 0

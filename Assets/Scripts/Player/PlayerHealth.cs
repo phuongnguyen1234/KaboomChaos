@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Core.Interfaces;
 using System;
 using Core;
@@ -8,11 +8,11 @@ using System.Collections.Generic;
 namespace Player
 {
     /// <summary>
-    /// Quản lý máu của người chơi và xử lý việc chuyển đổi sang trạng thái ragdoll khi chết.
+    /// Qu?n l� m�u c?a ngu?i choi v� x? l� vi?c chuy?n d?i sang tr?ng th�i ragdoll khi ch?t.
     /// </summary>
     [RequireComponent(typeof(PlayerController))]
     [RequireComponent(typeof(PlayerAnimator))]
-    [RequireComponent(typeof(RagdollController))] // Phụ thuộc vào RagdollController để kích hoạt hiệu ứng
+    [RequireComponent(typeof(RagdollController))] // Ph? thu?c v�o RagdollController d? k�ch ho?t hi?u ?ng
     [RequireComponent(typeof(AudioSource))]
     public class PlayerHealth : MonoBehaviour, IExplosionDamageable, IStatusEffectable, IHealable, IInvincible
     {
@@ -33,51 +33,59 @@ namespace Player
         private bool _extremeModeEnabled;
 
         [Header("Status Effect Settings")]
-        [Tooltip("Sát thương mỗi tick từ hiệu ứng Burning/Electrified.")]
+        [Tooltip("S�t thuong m?i tick t? hi?u ?ng Burning/Electrified.")]
         [SerializeField] private float _statusDamagePerTick = 5f;
-        [Tooltip("Khoảng thời gian giữa mỗi lần gây sát thương từ hiệu ứng (giây).")]
+        [Tooltip("Kho?ng th?i gian gi?a m?i l?n g�y s�t thuong t? hi?u ?ng (gi�y).")]
         [SerializeField] private float _statusEffectDOTInterval = 0.5f;
 
         [Header("Contact Damage Immunity")]
-        [Tooltip("Thời gian miễn nhiễm (giây) sau khi nhận sát thương từ việc chạm vào một đối tượng có hiệu ứng hoặc môi trường.")]
+        [Tooltip("Th?i gian mi?n nhi?m (giy) sau khi nh?n st thuong t? vi?c ch?m vo m?t d?i tu?ng c hi?u ?ng ho?c mi tru?ng.")]
         [SerializeField] private float _contactDamageImmunityDuration = 0.5f;
         private readonly Dictionary<StatusEffectType, float> _statusEffectContactImmunityTimestamps = new();
         private float _lastEnvironmentalContactDamageTime;
 
-        [Header("SFX Settings")]
-        [Tooltip("Âm thanh sẽ phát khi người chơi chết.")]
+        [Header("VFX & SFX Settings")]
+        [Tooltip("Prefab VFX se duoc sinh ra tai vi tri player khi chet.")]
+        [SerializeField] private GameObject _deathVfxPrefab;
+        [Tooltip("m thanh s? pht khi ngu?i choi ch?t.")]
         [SerializeField] private AudioClip _deathSfx;
-        [Tooltip("Âm thanh sẽ phát khi người chơi nhận sát thương (chung).")]
+        [Tooltip("m thanh s? pht khi ngu?i choi nh?n st thuong (chung).")]
         [SerializeField] private AudioClip _takeDamageSfx;
-        [Tooltip("Âm thanh sẽ phát khi nhận sát thương từ hiệu ứng Burning.")]
+        [Tooltip("m thanh s? pht khi nh?n st thuong t? hi?u ?ng Burning.")]
         [SerializeField] private AudioClip _burningDamageSfx;
-        [Tooltip("Âm thanh sẽ phát khi nhận sát thương từ hiệu ứng Electrified.")]
+        [Tooltip("�m thanh s? ph�t khi nh?n s�t thuong t? hi?u ?ng Electrified.")]
         [SerializeField] private AudioClip _electrifiedDamageSfx;
-        [Tooltip("Âm thanh sẽ phát khi nhận sát thương từ hiệu ứng Poison.")]
+        [Tooltip("�m thanh s? ph�t khi nh?n s�t thuong t? hi?u ?ng Poison.")]
         [SerializeField] private AudioClip _poisonDamageSfx;
 
-        // Component để kích hoạt ragdoll
+        // Component d? k�ch ho?t ragdoll
         private RagdollController _ragdollController;
         private AudioSource _audioSource;
         private IPlayer _player;
         private Collider _collider; 
         private IPlayerShieldController _shieldController;
+        private StatusEffectReceiver _statusEffectReceiver;
 
         private Coroutine _statusEffectCoroutine;
 
         #endregion
 
         /// <summary>
-        /// Sự kiện được gọi khi người chơi chết.
-        /// Các hệ thống khác có thể đăng ký vào sự kiện này để xử lý logic khi người chơi chết.
+        /// S? ki?n du?c g?i khi ngu?i choi ch?t.
+        /// Cc h? th?ng khc c th? dang k vo s? ki?n ny d? x? l logic khi ngu?i choi ch?t.
         /// </summary>
         public event Action OnDied;
 
         public bool IsAlive { get; private set; }
         /// <summary>
-        /// Máu hiện tại của người chơi.
+        /// Mu hi?n t?i c?a ngu?i choi.
         /// </summary>
         public float CurrentHealth => _currentHealth;
+
+        /// <summary>
+        /// Mau toi da cua nguoi choi.
+        /// </summary>
+        public float MaxHealth => _maxHealth;
 
         /// <summary>
         /// Cho biet player co dang bat tu hay khong. (Duoc dung boi skill Forcefield.)
@@ -100,6 +108,7 @@ namespace Player
             _player = GetComponent<IPlayer>();
             _collider = GetComponent<Collider>();
             _shieldController = GetComponent<IPlayerShieldController>();
+            _statusEffectReceiver = GetComponent<StatusEffectReceiver>();
 
             _maxHealth = _baseMaxHealth;
             _currentHealth = _maxHealth;
@@ -113,13 +122,13 @@ namespace Player
                 _currentHealth = _maxHealth;
             }
 
-            // Cập nhật UI lần đầu
+            // C?p nh?t UI l?n d?u
             GameEvents.TriggerPlayerHealthChanged(_player, _currentHealth, _maxHealth);
         }
 
         private void OnEnable()
         {
-            // Đăng ký lắng nghe sự kiện reset cuối round
+            // �ang k� l?ng nghe s? ki?n reset cu?i round
             GameEvents.OnRoundEndPlayerReset += ResetState;
             // Listen for the character reset request (Roblox-style), so the player dies itself.
             GameEvents.OnPlayerResetRequested += HandlePlayerResetRequested;
@@ -129,13 +138,13 @@ namespace Player
 
         private void OnDisable()
         {
-            // Dừng coroutine nếu đối tượng bị vô hiệu hóa
+            // D?ng coroutine n?u d?i tu?ng b? v� hi?u h�a
             if (_statusEffectCoroutine != null)
             {
                 StopCoroutine(_statusEffectCoroutine);
             }
 
-            // Hủy đăng ký để tránh lỗi
+            // H?y dang k� d? tr�nh l?i
             GameEvents.OnRoundEndPlayerReset -= ResetState;
             GameEvents.OnPlayerResetRequested -= HandlePlayerResetRequested;
             GameEvents.OnExtremeModeStateChanged -= HandleExtremeModeChanged;
@@ -146,7 +155,7 @@ namespace Player
         #region Public Methods
 
         /// <summary>
-        /// Xử lý sát thương và lực từ một vụ nổ.
+        /// X? l� s�t thuong v� l?c t? m?t v? n?.
         /// </summary>
         public void TakeExplosionDamage(float amount, Vector3 force, Vector3 point, IBaseBombData bombData)
         {
@@ -166,7 +175,7 @@ namespace Player
         }
 
         /// <summary>
-        /// Nhận sát thương và kiểm tra nếu người chơi đã chết.
+        /// Nh?n s�t thuong v� ki?m tra n?u ngu?i choi d� ch?t.
         /// </summary>
         public void TakeDamage(float amount, DamageSourceType sourceType = DamageSourceType.Generic, StatusEffectType effectContext = StatusEffectType.None)
         {
@@ -177,19 +186,19 @@ namespace Player
 
             if (_isInvincible) return;
 
-            // --- LOGIC KHIÊN ---
-            // Tất cả sát thương đều phải đi qua khiên trước.
+            // --- LOGIC KHI�N ---
+            // T?t c? s�t thuong d?u ph?i di qua khi�n tru?c.
             float damageAfterShield = amount;
             if (_shieldController != null && _shieldController.IsShieldActive)
             {
                 damageAfterShield = _shieldController.ProcessDamage(amount, sourceType, effectContext);
             }
 
-            // KIỂM TRA MIỄN NHIỄM (LOGIC MỚI)
+            // KI?M TRA MI?N NHI?M (LOGIC M?I)
             bool isImmune = false;
             if (sourceType == DamageSourceType.StatusEffectContact && effectContext != StatusEffectType.None)
             {
-                // Kiểm tra miễn nhiễm cho từng loại hiệu ứng trạng thái riêng biệt.
+                // Ki?m tra mi?n nhi?m cho t?ng lo?i hi?u ?ng tr?ng th�i ri�ng bi?t.
                 if (_statusEffectContactImmunityTimestamps.TryGetValue(effectContext, out float lastDamageTime))
                 {
                     if (Time.time < lastDamageTime + _contactDamageImmunityDuration) isImmune = true;
@@ -202,15 +211,19 @@ namespace Player
                 if (!isImmune) _lastEnvironmentalContactDamageTime = Time.time;
             }
             
-            if (isImmune) return; // Nếu miễn nhiễm, không gây sát thương, không phát âm thanh, không hiện text nổi.
+            if (isImmune) return; // N?u mi?n nhi?m, kh�ng g�y s�t thuong, kh�ng ph�t �m thanh, kh�ng hi?n text n?i.
 
-            // Nếu sát thương sau khi qua khiên <= 0, không xử lý gì thêm.
+            // N?u s�t thuong sau khi qua khi�n <= 0, kh�ng x? l� g� th�m.
             if (damageAfterShield <= 0) return;
 
-            // --- Logic chọn và phát âm thanh sát thương ---
-            AudioClip clipToPlay = _takeDamageSfx; // Âm thanh mặc định
+            // YEU CAU MOI: Neu player dang dogng bang si nhan sat thuong sau khi qua khiên,
+            // gos bo hiêu ung dogng bang de xuca thoat player.
+            UnfreezePlayerIfFrozen();
 
-            // Chọn âm thanh cụ thể dựa trên ngữ cảnh hiệu ứng
+            // --- Logic ch?n v� ph�t �m thanh s�t thuong ---
+            AudioClip clipToPlay = _takeDamageSfx; // �m thanh m?c d?nh
+
+            // Ch?n �m thanh c? th? d?a tr�n ng? c?nh hi?u ?ng
             if (sourceType == DamageSourceType.StatusEffectContact || sourceType == DamageSourceType.StatusEffectDOT || sourceType == DamageSourceType.EnvironmentalContact)
             {
                 switch (effectContext)
@@ -226,22 +239,22 @@ namespace Player
                         break;
                 }
             }
-            // Phát âm thanh đã chọn
-            if (_audioSource != null && clipToPlay != null)
+            // Ph�t �m thanh d� ch?n (prin SfxManager central pentru live volume SFX din Settings)
+            if (clipToPlay != null && SfxService.Instance != null)
             {
-                _audioSource.PlayOneShot(clipToPlay);
+                SfxService.Instance.PlaySfx(clipToPlay, transform.position);
             }
 
-            // Hiển thị số sát thương bay lên CHỈ KHI sát thương thực sự được áp dụng
+            // Hi?n th? s? s�t thuong bay l�n CH? KHI s�t thuong th?c s? du?c �p d?ng
             ShowDamageNumber(damageAfterShield);
 
             _currentHealth -= damageAfterShield;
 
-            // Cập nhật UI
+            // C?p nh?t UI
             GameEvents.TriggerPlayerHealthChanged(_player, _currentHealth, _maxHealth);
 
-            // Thông báo sát thương thực tế đã được áp dụng (đã qua khien và miễn nhiễm).
-            // Dùng cho perk theo doi sat thuong nhan duoc (Regeneration, Anti-Freeze).
+            // Th�ng b�o s�t thuong th?c t? d� du?c �p d?ng (d� qua khien v� mi?n nhi?m).
+            // D�ng cho perk theo doi sat thuong nhan duoc (Regeneration, Anti-Freeze).
             GameEvents.TriggerPlayerDamageTaken(_player, damageAfterShield, sourceType, effectContext);
 
             if (_currentHealth <= 0)
@@ -251,27 +264,27 @@ namespace Player
         }
 
         /// <summary>
-        /// Áp dụng hiệu ứng trạng thái lên người chơi (ví dụ: đốt cháy).
+        /// �p d?ng hi?u ?ng tr?ng th�i l�n ngu?i choi (v� d?: d?t ch�y).
         /// </summary>
         public void ApplyStatusEffect(StatusEffectType effect, float duration)
         {
-            // --- LOGIC KHIÊN ---
-            // Kiểm tra xem khiên có chặn hiệu ứng này không.
+            // --- LOGIC KHI�N ---
+            // Ki?m tra xem khi�n c� ch?n hi?u ?ng n�y kh�ng.
             if (_shieldController != null && _shieldController.IsShieldActive)
             {
                 if (_shieldController.ProcessStatusEffect(effect))
                 {
-                    return; // Khiên đã chặn hiệu ứng.
+                    return; // Khi�n d� ch?n hi?u ?ng.
                 }
             }
-            // Dừng hiệu ứng cũ nếu có
+            // D?ng hi?u ?ng cu n?u c�
             if (_statusEffectCoroutine != null)
             {
                 StopCoroutine(_statusEffectCoroutine);
                 _statusEffectCoroutine = null;
             }
 
-            // Bắt đầu hiệu ứng mới nếu nó là loại gây sát thương
+            // B?t d?u hi?u ?ng m?i n?u n� l� lo?i g�y s�t thuong
             if (effect == StatusEffectType.Burning || effect == StatusEffectType.Electrified)
             {
                 _statusEffectCoroutine = StartCoroutine(DamageOverTimeRoutine(duration, effect));
@@ -279,39 +292,40 @@ namespace Player
         }
 
         /// <summary>
-        /// Coroutine gây sát thương theo thời gian.
+        /// Coroutine g�y s�t thuong theo th?i gian.
         /// </summary>
-        private IEnumerator DamageOverTimeRoutine(float duration, StatusEffectType effectContext) // Đây là sát thương DOT từ hiệu ứng áp dụng lên player
+        private IEnumerator DamageOverTimeRoutine(float duration, StatusEffectType effectContext) // ��y l� s�t thuong DOT t? hi?u ?ng �p d?ng l�n player
         {
             float timer = 0f;
-            while (timer < duration && IsAlive) // Thêm kiểm tra IsAlive để dừng khi chết
+            while (timer < duration && IsAlive) // Th�m ki?m tra IsAlive d? d?ng khi ch?t
             {
-                // Gây sát thương và chờ
+                // G�y s�t thuong v� ch?
                 TakeDamage(_statusDamagePerTick, DamageSourceType.StatusEffectDOT, effectContext);
                 yield return new WaitForSeconds(_statusEffectDOTInterval);
                 timer += _statusEffectDOTInterval;
             }
 
-            // Hiệu ứng kết thúc
+            // Hi?u ?ng k?t th�c
             _statusEffectCoroutine = null;
         }
 
         /// <summary>
-        /// Reset lại trạng thái máu và các hiệu ứng liên quan của người chơi, thường được gọi khi kết thúc một round.
+        /// Reset l?i tr?ng th�i m�u v� c�c hi?u ?ng li�n quan c?a ngu?i choi, thu?ng du?c g?i khi k?t th�c m?t round.
         /// </summary>
         public void ResetState()
         {
-            // Chỉ reset nếu người chơi còn sống. Người chơi đã chết sẽ được xử lý bởi quy trình hồi sinh.
+            // Ch? reset n?u ngu?i choi c�n s?ng. Ngu?i choi d� ch?t s? du?c x? l� b?i quy tr�nh h?i sinh.
             if (!IsAlive) return;
+            UnfreezePlayerIfFrozen(); // Rã đong player dang dogng bang khi round ket thuc (het gio), de xuca thoat lai lobby.
 
-            // Dừng mọi hiệu ứng sát thương theo thời gian (DOT) đang chạy trên component này.
+            // D?ng m?i hi?u ?ng s�t thuong theo th?i gian (DOT) dang ch?y tr�n component n�y.
             if (_statusEffectCoroutine != null)
             {
                 StopCoroutine(_statusEffectCoroutine);
                 _statusEffectCoroutine = null;
             }
 
-            // Phục hồi máu về giá trị tối đa.
+            // Ph?c h?i m�u v? gi� tr? t?i da.
             _maxHealth = _baseMaxHealth;
             // Neu Extreme Mode dang bat, gioi han max HP xuong 35 khi reset round.
             if (_extremeModeEnabled)
@@ -320,22 +334,22 @@ namespace Player
             }
             _currentHealth = _maxHealth;
 
-            // Xóa lịch sử miễn nhiễm sát thương để không mang sang round mới.
+            // X�a l?ch s? mi?n nhi?m s�t thuong d? kh�ng mang sang round m?i.
             _statusEffectContactImmunityTimestamps.Clear();
             _lastEnvironmentalContactDamageTime = 0f;
             // Tat trang thai bat tu khi reset round de khong mang sang round moi.,
 
             _isInvincible = false;
 
-            // Cập nhật lại UI máu cho người chơi.
+            // C?p nh?t l?i UI m�u cho ngu?i choi.
             GameEvents.TriggerPlayerHealthChanged(_player, _currentHealth, _maxHealth);
         }
 
         /// <summary>
-        /// Hồi một lượng máu cho người chơi.
+        /// H?i m?t lu?ng m�u cho ngu?i choi.
         /// </summary>
-        /// <param name="amount">Lượng máu cần hồi.</param>
-        /// <returns>Lượng máu thực tế đã được hồi.</returns>
+        /// <param name="amount">Lu?ng m�u c?n h?i.</param>
+        /// <returns>Lu?ng m�u th?c t? d� du?c h?i.</returns>
         public float Heal(float amount)
         {
             if (!IsAlive || amount <= 0) return 0f;
@@ -353,16 +367,16 @@ namespace Player
         }
 
         /// <summary>
-        /// Tăng máu tối đa của người chơi và hồi máu bằng lượng tương ứng.
+        /// Tang m�u t?i da c?a ngu?i choi v� h?i m�u b?ng lu?ng tuong ?ng.
         /// </summary>
-        /// <param name="amount">Lượng máu tối đa cần tăng.</param>
+        /// <param name="amount">Lu?ng m�u t?i da c?n tang.</param>
         public void IncreaseMaxHealth(float amount)
         {
             if (!IsAlive || amount <= 0) return;
 
             _maxHealth += amount;
-            // Không tự động hồi máu ở đây. Việc hồi máu sẽ do behavior quyết định.
-            // Chỉ cần thông báo cho UI biết là max health đã thay đổi.
+            // Kh�ng t? d?ng h?i m�u ? d�y. Vi?c h?i m�u s? do behavior quy?t d?nh.
+            // Ch? c?n th�ng b�o cho UI bi?t l� max health d� thay d?i.
             GameEvents.TriggerPlayerHealthChanged(_player, _currentHealth, _maxHealth);
         }
 
@@ -371,7 +385,7 @@ namespace Player
         #region Private Methods
 
         /// <summary>
-        /// Xử lý khi trạng thái Extreme Mode thay đổi: gioi han max HP xuong 35 khi bat,
+        /// X? l� khi tr?ng th�i Extreme Mode thay d?i: gioi han max HP xuong 35 khi bat,
         /// khoi phuc ve max HP co ban khi tat. Khi giam max HP (bat extreme), mau hien tai
         /// duoc clamp lai de khong vuot qua max moi. Khi TAT extreme, reset day mau ve MaxHP moi
         /// (truoc day chi clamp nen current HP van nam o gia tri cuoi cung cua extreme = 35).
@@ -416,64 +430,81 @@ namespace Player
         }
 
         /// <summary>
-        /// Xử lý khi người chơi chết, kích hoạt ragdoll.
+        /// X? l� khi ngu?i choi ch?t, k�ch ho?t ragdoll.
         /// </summary>
-        /// <param name="killingForce">Lực đã gây ra cái chết, để áp dụng cho ragdoll.</param>
-        /// <param name="hitPoint">Điểm tác động của lực.</param>
+        /// <param name="killingForce">L?c d� g�y ra c�i ch?t, d? �p d?ng cho ragdoll.</param>
+        /// <param name="hitPoint">�i?m t�c d?ng c?a l?c.</param>
         private void Die(Vector3 killingForce = default, Vector3 hitPoint = default)
         {
-            if (!IsAlive) return; // Đảm bảo Die() chỉ chạy một lần
+            if (!IsAlive) return; // �?m b?o Die() ch? ch?y m?t l?n
+
+            UnfreezePlayerIfFrozen(); // Rã đong player dang dogng bang inaiteat de xuca thoat lai lobby.
 
             Debug.Log("[PlayerHealth] Player has died.", this);
 
-            // SỬA LỖI: Gỡ bỏ tất cả các khiên ngay khi người chơi chết.
+            // S?A L?I: G? b? t?t c? cc khin ngay khi ngu?i choi ch?t.
             _shieldController?.RemoveAllShields();
 
-            // Phát âm thanh chết, nếu có
-            if (_audioSource != null && _deathSfx != null)
+            // Phat am thanh chet, neu co
+            if (_deathSfx != null && SfxService.Instance != null)
             {
-                _audioSource.PlayOneShot(_deathSfx); // This will be called before ShatterAndDie
+                SfxService.Instance.PlaySfx(_deathSfx, transform.position);
+            }
+
+            // Sinh VFX chet tai vi tri player neu co
+            if (_deathVfxPrefab != null)
+            {
+                GameEvents.TriggerVFXSpawnRequest(_deathVfxPrefab, transform.position, Quaternion.identity);
             }
 
             IsAlive = false;
             _currentHealth = 0;
             
-            // Cập nhật UI lần cuối để đảm bảo nó hiển thị giá trị 0.
             GameEvents.TriggerPlayerHealthChanged(_player, _currentHealth, _maxHealth);
             
-            // Kích hoạt hiệu ứng chết "vỡ ra" bằng cách phá hủy các khớp.
-            // Nếu không có lực, ShatterAndDie sẽ tự xử lý.
+            // K�ch ho?t hi?u ?ng ch?t "v? ra" b?ng c�ch ph� h?y c�c kh?p.
+            // N?u kh�ng c� l?c, ShatterAndDie s? t? x? l�.
             if (killingForce == default)
             {
                 _ragdollController?.ShatterAndDie(killingForce, hitPoint);
             }
             
-            // Kích hoạt các sự kiện chết
+            // K�ch ho?t c�c s? ki?n ch?t
             OnDied?.Invoke();
             GameEvents.TriggerPlayerDied(_player);
         }
 
         /// <summary>
-        /// Yêu cầu hệ thống hiển thị một text nổi cho biết lượng sát thương đã nhận.
+        /// Rã đong player daca dang dogng bang (prin component StatusEffectReceiver).
+        /// Dung la TakeDamage, Die si ResetState de garant ca player nu se tuma blocat.
         /// </summary>
-        /// <param name="amount">Lượng sát thương.</param>
+        private void UnfreezePlayerIfFrozen()
+        {
+            if (_statusEffectReceiver != null) _statusEffectReceiver.UnfreezePlayer();
+        }
+
+        /// <summary>
+        /// Y�u c?u h? th?ng hi?n th? m?t text n?i cho bi?t lu?ng s�t thuong d� nh?n.
+        /// </summary>
+        /// <param name="amount">Lu?ng s�t thuong.</param>
         private void ShowDamageNumber(float amount)
         {
             if (amount <= 0) return;
 
-            // Tính toán vị trí offset cục bộ cho text, ở phía trên đầu của player.
-            Vector3 offset = Vector3.up * 1.5f; // Giá trị mặc định nếu không có collider
+            // T�nh to�n v? tr� offset c?c b? cho text, ? ph�a tr�n d?u c?a player.
+            Vector3 offset = Vector3.up * 1.5f; // Gi� tr? m?c d?nh n?u kh�ng c� collider
             if (_collider != null)
             {
-                // Vị trí trên đỉnh của collider, chuyển thành offset so với transform.position của player.
+                // V? tr� tr�n d?nh c?a collider, chuy?n th�nh offset so v?i transform.position c?a player.
                 Vector3 topOfCollider = _collider.bounds.center + Vector3.up * _collider.bounds.extents.y;
                 offset = topOfCollider - transform.position;
             }
 
-            // Gửi yêu cầu thông qua GameEvents.
-            // Giả định rằng có một FloatingTextManager đang lắng nghe sự kiện này.
-            GameEvents.TriggerFloatingTextRequested(transform, offset, $"-{Mathf.RoundToInt(amount)}", Color.red, _player.HPTextContainer, false); // Không hiển thị icon cho HP
+            // G?i y�u c?u th�ng qua GameEvents.
+            // Gi? d?nh r?ng c� m?t FloatingTextManager dang l?ng nghe s? ki?n n�y.
+            GameEvents.TriggerFloatingTextRequested(transform, offset, $"-{Mathf.RoundToInt(amount)}", Color.red, _player.HPTextContainer, false); // Kh�ng hi?n th? icon cho HP
         }
         #endregion
     }
 }
+

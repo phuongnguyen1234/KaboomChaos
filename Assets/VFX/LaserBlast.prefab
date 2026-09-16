@@ -46,7 +46,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _animationStages.Array.data[1].duration
-      value: 0.3
+      value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _animationStages.Array.data[0].targetValue
@@ -109,16 +109,28 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
-      propertyPath: _animationStages.Array.data[1].easeCurve.m_Curve.Array.data[1].inSlope
+      propertyPath: _animationStages.Array.data[1].easeCurve.m_Curve.Array.data[0].inSlope
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _animationStages.Array.data[1].easeCurve.m_Curve.Array.data[1].inSlope
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _animationStages.Array.data[0].easeCurve.m_Curve.Array.data[1].outSlope
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
-      propertyPath: _animationStages.Array.data[1].easeCurve.m_Curve.Array.data[1].outSlope
+      propertyPath: _animationStages.Array.data[1].easeCurve.m_Curve.Array.data[0].outSlope
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _animationStages.Array.data[1].easeCurve.m_Curve.Array.data[1].outSlope
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4473756658289661954, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5488013012343082406, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: m_LocalPosition.x

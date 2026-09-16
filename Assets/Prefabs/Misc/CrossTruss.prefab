@@ -51,10 +51,10 @@ MonoBehaviour:
   _prefab2: {fileID: 0}
   _gridSize: {x: 1, y: 1, z: 1}
   _spacing: {x: 0, y: 0, z: 0}
-  _overrideMaterial: 1
+  _overrideMaterial: 0
   _sharedMaterial: {fileID: 2100000, guid: e53f5db2138479c4ebc3b06620b1dcd6, type: 2}
   _fitColliderToBounds: 1
-  _overrideElementColor: 1
+  _overrideElementColor: 0
   _elementColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!65 &2894036695286492981
 BoxCollider:

@@ -38,6 +38,17 @@ namespace Bombs.Behaviors
                 controller.StartFuse();
                 // Tìm mục tiêu ban đầu cho việc di chuyển.
                 FindTarget(controller, rocketData.trackingType);
+
+                // Chi loai homing rocket moi kich hoat hieu ung target locked tren world space (WorldTargetLockController)
+                if (rocketData.trackingType == TrackingType.Homing && _target != null && rocketData.targetLockVFXPrefab != null)
+                {
+                    Vector3 spawnPos = _target.position;
+                    GameObject vfx = Core.GameEvents.TriggerVFXSpawnRequest(rocketData.targetLockVFXPrefab, spawnPos, Quaternion.identity);
+                    if (vfx != null && vfx.TryGetComponent<Core.WorldTargetLockController>(out var lockController))
+                    {
+                        lockController.Trigger(_target);
+                    }
+                }
             }
         }
 
@@ -45,7 +56,16 @@ namespace Bombs.Behaviors
         {
             if (!controller.IsActive || controller.BombData is not TrackingRocketData rocketData) return;
 
-            // 1. Cập nhật mục tiêu
+            // Neu ten lua dang bi day giat lui doc theo truc cua no (van toc chieu nguoc huong mui transform.up)
+            // thi cho phap van toc giat lui duoc thuc thi va giam dan tu tu, chua ghi de bang bam muc tieu ngay.
+            float axisDotVelocity = Vector3.Dot(controller.BombRigidbody.linearVelocity, controller.transform.up);
+            if (axisDotVelocity < -0.5f)
+            {
+                controller.BombRigidbody.linearVelocity *= 0.95f;
+                return;
+            }
+
+            // 1. Cap nhat muc tieu
             // Nếu là Chasing, luôn tìm mục tiêu gần nhất.
             if (rocketData.trackingType == TrackingType.Chasing)
             {

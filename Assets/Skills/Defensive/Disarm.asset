@@ -20,11 +20,11 @@ MonoBehaviour:
   _duration: 3
   _rechargeTime: 19
   _price: 0
-  _castSfx: {fileID: 8300000, guid: 40ef87c0b8d783f4882f8a0968822802, type: 3}
+  _castSfx: {fileID: 8300000, guid: 89027753d8a5e584899c523d523a0405, type: 3}
   _castVfx: {fileID: 6099586771567139416, guid: d6efdc72431908343b2de8122768664a, type: 3}
   _playCastOnActivate: 0
   _playCastOnDeactivate: 1
   _castVfxSpawnMode: 1
   _castVfxExplosionRadius: 9
   _radius: 9
-  _chargeVfx: {fileID: 0}
+  _chargeVfx: {fileID: 4874989981598107660, guid: 9311f927ac9375e4d9fbe1231547818f, type: 3}

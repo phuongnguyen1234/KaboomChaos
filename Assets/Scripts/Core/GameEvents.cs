@@ -146,6 +146,12 @@ namespace Core
         /// Duoc dung boi skill Disarm de go vo cac bom trong khu vuc.
         /// </summary>
         public static event Func<IReadOnlyList<GameObject>> OnRequestActiveBombInstances;
+
+        /// <summary>
+        /// Duoc goi khi mot vu no xay ra trong game.
+        /// Tham so: vi tri vu no (Vector3) va ban kinh vu no (float).
+        /// </summary>
+        public static event Action<Vector3, float> OnExplosionOccurred;
         #endregion
 
         #region VFX Events
@@ -223,6 +229,17 @@ namespace Core
         /// Yêu cầu tiếp tục nhạc nền đã bị tạm dừng.
         /// </summary>
         public static event Action OnMusicResumeRequested;
+
+        /// <summary>
+        /// Yeu cau fade out nhac nen hien tai ve 0 trong mot khoang thoi gian (giay).
+        /// </summary>
+        public static event Action<float> OnMusicFadeOutRequested;
+
+        /// <summary>
+        /// Duoc goi khi do kho du kien cho round tiep theo (NextRoundIntensity) thay doi.
+        /// Tham so: NextRoundIntensity (float), MinIntensity (float), MaxIntensity (float).
+        /// </summary>
+        public static event Action<float, float, float> OnNextRoundIntensityChanged;
         #endregion
 
         #region Player Data Events
@@ -368,6 +385,8 @@ namespace Core
         public static void TriggerBombDespawnRequest(GameObject bombInstance) => OnBombDespawnRequest?.Invoke(bombInstance);
 
         public static IReadOnlyList<GameObject> TriggerRequestActiveBombInstances() => OnRequestActiveBombInstances?.Invoke() ?? new List<GameObject>();
+
+        public static void TriggerExplosionOccurred(Vector3 position, float radius) => OnExplosionOccurred?.Invoke(position, radius);
         #endregion
 
         #region VFX Triggers
@@ -395,6 +414,9 @@ namespace Core
 
         public static void TriggerMusicPauseRequested() => OnMusicPauseRequested?.Invoke();
         public static void TriggerMusicResumeRequested() => OnMusicResumeRequested?.Invoke();
+        public static void TriggerMusicFadeOutRequested(float duration = 1.0f) => OnMusicFadeOutRequested?.Invoke(duration);
+        public static void TriggerNextRoundIntensityChanged(float nextIntensity, float minIntensity, float maxIntensity)
+            => OnNextRoundIntensityChanged?.Invoke(nextIntensity, minIntensity, maxIntensity);
         #endregion
 
         #region Player Data Triggers
@@ -488,6 +510,19 @@ namespace Core
         /// Bao phio hieu khi gia tri SFX volume doi (Settings), de cac sistem SFX ap dung live.
         /// </summary>
         public static event Action<float> OnSettingsSfxVolumeChanged;
+        /// <summary>
+        /// Bao hieu khi cai dat Screen Shake & Overlay thay doi (Settings).
+        /// </summary>
+        public static event Action<bool> OnSettingsScreenShakeChanged;
+        /// <summary>
+        /// Bao hieu khi phim tat kich hoat skill thay doi (Settings).
+        /// </summary>
+        public static event Action<string> OnSettingsUseSkillKeyChanged;
+
+        /// <summary>
+        /// Yeu cau lam mo (muffle) hoac khoi phuc am thanh nhac nen BGM (dung khi player bi dong bang).
+        /// </summary>
+        public static event Action<bool> OnBgmAudioMuffleRequested;
 
         /// <summary>
         /// Trigger cho OnSettingsMusicVolumeChanged.
@@ -500,6 +535,24 @@ namespace Core
         /// </summary>
         /// <param name="value">Gia tri SFX volume moi.</param>
         public static void TriggerSettingsSfxVolumeChanged(float value) => OnSettingsSfxVolumeChanged?.Invoke(value);
+
+        /// <summary>
+        /// Trigger cho OnSettingsScreenShakeChanged.
+        /// </summary>
+        /// <param name="enabled">True neu bat hieu ung lac man hinh.</param>
+        public static void TriggerSettingsScreenShakeChanged(bool enabled) => OnSettingsScreenShakeChanged?.Invoke(enabled);
+
+        /// <summary>
+        /// Trigger cho OnSettingsUseSkillKeyChanged.
+        /// </summary>
+        /// <param name="keyName">Ten phim moi duoc cai dat (vi du: "E", "Space").</param>
+        public static void TriggerSettingsUseSkillKeyChanged(string keyName) => OnSettingsUseSkillKeyChanged?.Invoke(keyName);
+
+        /// <summary>
+        /// Trigger cho OnBgmAudioMuffleRequested.
+        /// </summary>
+        /// <param name="muffle">True de lam mo BGM, false de khoi phuc binh thuong.</param>
+        public static void TriggerBgmAudioMuffleRequested(bool muffle) => OnBgmAudioMuffleRequested?.Invoke(muffle);
         #endregion
 
         #region Collectible Triggers

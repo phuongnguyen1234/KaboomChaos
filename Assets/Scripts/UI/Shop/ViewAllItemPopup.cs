@@ -64,12 +64,24 @@ namespace UI
 
         #region Private Methods
         /// <summary>
+        /// Giai quyet tham chieu _skillDb tu ScriptableObject neu Awake chua chay.
+        /// </summary>
+        private void ResolveSkillDb()
+        {
+            if (_skillDb == null && _skillDatabase != null)
+            {
+                _skillDb = _skillDatabase as ISkillDatabase;
+            }
+        }
+
+        /// <summary>
         /// Tao cac ViewAllItemCard cho tat ca skill thuoc nhom hien tai.
         /// </summary>
         /// <param name="ownedSkillIds">Danh sach ID skill dang so huu de danh dau tick.</param>
         private void BuildGrid(IReadOnlyList<string> ownedSkillIds)
         {
             Clear();
+            ResolveSkillDb();
 
             if (_skillDb == null || _itemCardPrefab == null || _itemsContainer == null)
             {

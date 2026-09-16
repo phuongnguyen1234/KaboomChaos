@@ -20,7 +20,12 @@ MonoBehaviour:
   _duration: 1
   _rechargeTime: 20
   _price: 0
-  _castSfx: {fileID: 0}
-  _castVfx: {fileID: 0}
+  _castSfx: {fileID: 8300000, guid: ff3fafea963e52347ba6e20661f8d413, type: 3}
+  _castVfx: {fileID: 6854054583799781109, guid: 63012acb5a866ff49bb25de873cea23b, type: 3}
+  _playCastOnActivate: 1
+  _playCastOnDeactivate: 0
+  _castVfxSpawnMode: 0
+  _castVfxExplosionRadius: 2
   _platformPrefab: {fileID: 8655690492966594582, guid: 0e00f7a59e2b0df4891f89ece6c97741, type: 3}
   _spawnYOffset: 0.5
+  _playerLiftImpulse: 6

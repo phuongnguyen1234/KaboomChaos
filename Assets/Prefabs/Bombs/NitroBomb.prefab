@@ -5164,7 +5164,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d32f934f0591ee540bdaf682b8cb2d48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Core::MaterialEffectController
-  _applyMaterialOverrides: 1
+  _applyMaterialOverrides: 0
   _customBaseColor: {r: 1, g: 1, b: 1, a: 1}
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
@@ -5261,7 +5261,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d32f934f0591ee540bdaf682b8cb2d48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Core::MaterialEffectController
-  _applyMaterialOverrides: 1
+  _applyMaterialOverrides: 0
   _customBaseColor: {r: 1, g: 1, b: 1, a: 1}
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1

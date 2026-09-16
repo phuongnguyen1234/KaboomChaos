@@ -19,6 +19,9 @@ namespace UI
         [Tooltip("Image danh dau item dang duoc trang bi. Se bat/tat khi trang thai thay doi.")]
         [SerializeField] private Image _equipMarkerImage;
 
+        [Tooltip("Image nen/khung cua the. Neu khong gan se tu dong dung image cua Button hoac Image tren GameObject nay.")]
+        [SerializeField] private Image _cardBackgroundImage;
+
         [Tooltip("Button cua the. Neu khong gan se tu tim component Button tren GameObject nay.")]
         [SerializeField] private Button _button;
         #endregion
@@ -52,16 +55,21 @@ namespace UI
 
         #region Public Methods
         /// <summary>
-        /// Setup the item: gan icon, ID va trang thai trang bi.
+        /// Setup the item: gan icon, ID, trang thai trang bi va sprite nen/khung tuy chon.
         /// </summary>
         /// <param name="itemId">ID cua item.</param>
         /// <param name="icon">Sprite icon (co the null neu khong co).</param>
         /// <param name="isEquipped">True neu item dang duoc trang bi.</param>
-        public void Setup(string itemId, Sprite icon, bool isEquipped)
+        /// <param name="cardSprite">Sprite nen/khung cua card (tuy chon).</param>
+        public void Setup(string itemId, Sprite icon, bool isEquipped, Sprite cardSprite = null)
         {
             ItemId = itemId;
             SetIcon(icon);
             SetEquipped(isEquipped);
+            if (cardSprite != null)
+            {
+                SetCardSprite(cardSprite);
+            }
         }
 
         /// <summary>
@@ -73,6 +81,30 @@ namespace UI
             if (_iconImage != null)
             {
                 _iconImage.sprite = icon;
+            }
+        }
+
+        /// <summary>
+        /// Thay doi sprite nen/khung cua the.
+        /// </summary>
+        /// <param name="cardSprite">Sprite nen/khung moi.</param>
+        public void SetCardSprite(Sprite cardSprite)
+        {
+            if (cardSprite == null) return;
+
+            Image target = _cardBackgroundImage;
+            if (target == null && _button != null)
+            {
+                target = _button.image;
+            }
+            if (target == null)
+            {
+                target = GetComponent<Image>();
+            }
+
+            if (target != null)
+            {
+                target.sprite = cardSprite;
             }
         }
 

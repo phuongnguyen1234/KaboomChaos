@@ -25,12 +25,6 @@ namespace Collectibles.Behaviors
                 GameEvents.TriggerFloatingTextRequested(player.GameObject.transform, Vector3.up * 2f, $"+{data.CreditValue}", data.FloatingTextColor, player.CoinTextContainer, true);
             }
 
-            // 3. Phát VFX tại vị trí của vật phẩm
-            if (data.CollectionVFX != null)
-            {
-                GameEvents.TriggerVFXSpawnRequest(data.CollectionVFX, controller.GameObject.transform.position, Quaternion.identity);
-            }
-
             return true;
         }
     }

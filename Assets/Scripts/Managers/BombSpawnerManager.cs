@@ -676,7 +676,7 @@ namespace Managers
                 if (playerFeet == null || playerFeet.Count == 0) return false;
                 foreach (var feet in playerFeet)
                 {
-                    Vector2 delta = new Vector2(position.x - feet.x, position.z - feet.z);
+                    Vector2 delta = new(position.x - feet.x, position.z - feet.z);
                     if (delta.sqrMagnitude < sqrMinPlayerDist) return true;
                 }
                 return false;
@@ -717,7 +717,7 @@ namespace Managers
 
             float blockTop = GetBlockTopWorldY(block.gameObject);
             float halfWidth = Mathf.Max(_navalMineClearanceHalfWidth, 0.05f);
-            Vector3 center = new Vector3(block.transform.position.x, blockTop + 0.5f, block.transform.position.z);
+            Vector3 center = new(block.transform.position.x, blockTop + 0.5f, block.transform.position.z);
             Vector3 halfExtents = new(halfWidth, 0.5f, halfWidth);
 
             // Nếu phía trên có một khối phá hủy được khác, thì khối này không phải bề mặt trên cùng.
@@ -772,7 +772,7 @@ namespace Managers
 
             // Tâm box kiểm tra nằm phía trên anchor (từ ngay trên bề mặt anchor đến đỉnh hành lang).
             Vector3 center = anchorPosition + Vector3.up * (halfHeight + 0.2f);
-            Vector3 halfExtents = new Vector3(halfWidth, halfHeight, halfWidth);
+            Vector3 halfExtents = new(halfWidth, halfHeight, halfWidth);
 
             int hitCount = Physics.OverlapBoxNonAlloc(center, halfExtents, _navalMineClearanceHits, Quaternion.identity, ~0, QueryTriggerInteraction.Ignore);
             for (int i = 0; i < hitCount; i++)

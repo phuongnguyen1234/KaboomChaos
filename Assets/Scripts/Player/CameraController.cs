@@ -44,6 +44,19 @@ namespace Player{
         [Tooltip("Kéo Action tương ứng với nút Shift Lock vào đây")]
         public InputActionReference shiftLockAction;
 
+        [Header("Camera Shake Settings")]
+        [Tooltip("Do lech vi tri toi da khi rung lac (meters).")]
+        [SerializeField] private float _maxShakePositionOffset = 0.4f;
+        [Tooltip("Do lech goc xoay toi da khi rung lac (degrees).")]
+        [SerializeField] private float _maxShakeRotationOffset = 2.5f;
+        [Tooltip("Thoi gian rung lac toi da cho mot vu no (giay).")]
+        [SerializeField] private float _shakeDuration = 0.4f;
+        [Tooltip("Tan so rung lac Perlin Noise.")]
+        [SerializeField] private float _shakeFrequency = 25f;
+
+        private float _currentShakeIntensity;
+        private float _shakeTimer;
+
         // Components
         private CinemachineThirdPersonFollow thirdPersonFollow;
         private CinemachineOrbitalFollow orbitalFollow;
@@ -120,10 +133,30 @@ namespace Player{
 
             // Lấy instance của UI Manager
             _uiManager = IUIManager.Instance;
-
         }
 
-                void Update()
+        private void Start()
+        {
+            // Dong bo huong nhin ban dau cua camera theo goc quay cua nhan vat
+            if (_playerTransform != null)
+            {
+                SetCameraRotation(_playerTransform.eulerAngles.y, 0f);
+            }
+        }
+
+        private void OnEnable()
+        {
+            GameEvents.OnExplosionOccurred += HandleExplosionOccurred;
+            CinemachineCore.CameraUpdatedEvent.AddListener(OnCameraUpdated);
+        }
+
+        private void OnDisable()
+        {
+            GameEvents.OnExplosionOccurred -= HandleExplosionOccurred;
+            CinemachineCore.CameraUpdatedEvent.RemoveListener(OnCameraUpdated);
+        }
+
+        void Update()
         {
             if (Mouse.current == null) return;
 
@@ -160,7 +193,7 @@ namespace Player{
         
         // Sử dụng LateUpdate để xoay nhân vật theo camera sau khi tất cả các tính toán di chuyển đã hoàn tất.
         // Điều này đảm bảo camera và nhân vật luôn đồng bộ.
-                void LateUpdate()
+        void LateUpdate()
         {
             // Khi Pause Menu mở, không được xoay nhân vật theo camera.
             if (GameEvents.IsPauseMenuVisible) return;
@@ -168,7 +201,95 @@ namespace Player{
             HandleCharacterRotationWithCamera();
         }
 
+        #region Private Methods for Camera Shake
+
+        /// <summary>
+        /// Xu ly su kien khi mot vu no xay ra trong game.
+        /// </summary>
+        /// <param name="explosionCenter">Vi tri tam vu no.</param>
+        /// <param name="radius">Ban kinh anh huong cua vu no.</param>
+        private void HandleExplosionOccurred(Vector3 explosionCenter, float radius)
+        {
+            var settings = Core.Interfaces.SettingsService.Instance;
+            if (settings != null && !settings.ScreenShakeEnabled)
+            {
+                return;
+            }
+
+            Vector3 playerPos = _playerTransform != null ? _playerTransform.position : transform.position;
+            float distance = Vector3.Distance(explosionCenter, playerPos);
+            float maxDistance = Mathf.Max(radius * 3f, 18f);
+
+            if (distance < maxDistance)
+            {
+                float intensity = Mathf.Clamp01(1f - (distance / maxDistance));
+                _currentShakeIntensity = Mathf.Max(_currentShakeIntensity, intensity);
+                _shakeTimer = _shakeDuration;
+            }
+        }
+
+        /// <summary>
+        /// Callback duoc CinemachineCore goi ngay sau khi CinemachineBrain da cap nhat vi tri Camera.main.
+        /// </summary>
+        /// <param name="brain">CinemachineBrain cap nhat camera.</param>
+        private void OnCameraUpdated(CinemachineBrain brain)
+        {
+            ApplyCameraShake();
+        }
+
+        /// <summary>
+        /// Ap dung hieu ung rung lac camera sau khi Cinemachine Brain da tinh toan va cap nhat vi tri Camera.main.
+        /// </summary>
+        private void ApplyCameraShake()
+        {
+            if (_shakeTimer <= 0f || Camera.main == null)
+            {
+                _currentShakeIntensity = 0f;
+                return;
+            }
+
+            _shakeTimer -= Time.deltaTime;
+            float normalizedTime = Mathf.Clamp01(_shakeTimer / _shakeDuration);
+            float activeIntensity = _currentShakeIntensity * normalizedTime * normalizedTime;
+
+            float time = Time.time * _shakeFrequency;
+            float offsetX = (Mathf.PerlinNoise(time, 0f) - 0.5f) * 2f * _maxShakePositionOffset * activeIntensity;
+            float offsetY = (Mathf.PerlinNoise(0f, time) - 0.5f) * 2f * _maxShakePositionOffset * activeIntensity;
+            float offsetZ = (Mathf.PerlinNoise(time, time) - 0.5f) * 2f * _maxShakePositionOffset * activeIntensity;
+
+            float rotX = (Mathf.PerlinNoise(time + 10f, 0f) - 0.5f) * 2f * _maxShakeRotationOffset * activeIntensity;
+            float rotY = (Mathf.PerlinNoise(0f, time + 10f) - 0.5f) * 2f * _maxShakeRotationOffset * activeIntensity;
+            float rotZ = (Mathf.PerlinNoise(time + 10f, time + 10f) - 0.5f) * 2f * _maxShakeRotationOffset * activeIntensity;
+
+            Vector3 posOffset = new Vector3(offsetX, offsetY, offsetZ);
+            Quaternion rotOffset = Quaternion.Euler(rotX, rotY, rotZ);
+
+            Camera.main.transform.position += posOffset;
+            Camera.main.transform.rotation *= rotOffset;
+        }
+
+        #endregion
+
         #region Public Methods for Ragdoll
+
+        /// <summary>
+        /// Dat goc quay (yaw, pitch) cho camera.
+        /// </summary>
+        /// <param name="yaw">Goc quay theo truc Y tinh bang do.</param>
+        /// <param name="pitch">Goc quay theo truc X tinh bang do.</param>
+        public void SetCameraRotation(float yaw, float pitch = 0f)
+        {
+            if (orbitalFollow != null)
+            {
+                orbitalFollow.HorizontalAxis.Value = yaw;
+                orbitalFollow.VerticalAxis.Value = pitch;
+            }
+            if (firstPersonPanTilt != null)
+            {
+                firstPersonPanTilt.PanAxis.Value = yaw;
+                firstPersonPanTilt.TiltAxis.Value = pitch;
+            }
+        }
 
         /// <summary>
         /// Chuyển mục tiêu theo dõi của camera sang một transform khác (ví dụ: hông hoặc đầu của ragdoll).

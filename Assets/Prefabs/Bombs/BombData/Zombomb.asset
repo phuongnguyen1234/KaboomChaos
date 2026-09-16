@@ -184,7 +184,7 @@ MonoBehaviour:
   fuseColor: {r: 1, g: 0, b: 0, a: 1}
   persistentFuseVFX: {fileID: 0}
   fuseStages:
-  - startTime: 19
+  - startTime: 15
     visualEffect: {fileID: 0}
     stageSoundPitch: 0
     stageSound: {fileID: 0}
@@ -197,13 +197,13 @@ MonoBehaviour:
     decalPulseDuration: 0
     enableScalePulse: 1
     pulseScaleMultiplier: 1.25
-    pulseScaleDuration: 2
+    pulseScaleDuration: 10
   tickingSoundPitch: 1
   tickingSound: {fileID: 0}
   chaseRadius: 18
   stopRange: 1.5
   dashSpeed: 8
-  dashDuration: 1.5
-  restDuration: 2
+  dashDuration: 3
+  restDuration: 1.5
   rollMultiplier: 1
   restDeceleration: 8

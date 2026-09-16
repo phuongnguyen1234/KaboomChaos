@@ -86,18 +86,18 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 4
-      inSlope: -2
-      outSlope: -2
+      value: 5
+      inSlope: -2.5
+      outSlope: -2.5
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 1
-      value: 2
-      inSlope: -2
-      outSlope: -2
+      value: 2.5
+      inSlope: -2.5
+      outSlope: -2.5
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
@@ -138,7 +138,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   explosionVFX: {fileID: 2096552461435851326, guid: c3b2951fae4969c4394711b604af4208, type: 3}
   explosionSoundPitch: 1
-  explosionSound: {fileID: 8300000, guid: 7eb6bffa1fa7ac8448bf97314da3dce4, type: 3}
+  explosionSound: {fileID: 8300000, guid: eab69fb4f6ca94f4683b79b9d916d72f, type: 3}
   minPlayerSpawnChance: 50
   maxPlayerSpawnChance: 75
   playerSpawnRadius: 2

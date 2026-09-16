@@ -32,6 +32,9 @@ namespace Skills.Behaviors
             // Tao VFX particle 'charge' quanh player trong thoi gian duration (neu co cau hinh).
             SpawnChargeVfx(player);
 
+            // Sat bool 'Charge' tren animator de chay anh nion charge trong thoi gian duration.
+            SetChargeAnimation(player, true);
+
             // Neu skill khong co duration (tuc thoi), go bom ngay khi kich hoat.
             if (_data.Duration <= 0f)
             {
@@ -64,6 +67,9 @@ namespace Skills.Behaviors
 
             // Don dep VFX charge con sot lai.
             DespawnChargeVfx();
+
+            // Sat bool 'Charge' sau khong lung (ket thuc duration skill).
+            SetChargeAnimation(player, false);
             _activePlayer = null;
         }
 
@@ -113,6 +119,19 @@ namespace Skills.Behaviors
             }
 
             _chargeVfxInstance = null;
+        }
+
+        /// <summary>
+        /// Sat bool 'Charge' tren animator player: true trong thoi gian duration, false khi ket thuc.
+        /// </summary>
+        /// <param name="player">Nguoi choi dang su dung Disarm skill.</param>
+        /// <param name="charging">True neu skill dang din thoi gian charge.</param>
+        private void SetChargeAnimation(IPlayer player, bool charging)
+        {
+            if (player == null || player.GameObject == null) return;
+
+            var animBridge = player.GameObject.GetComponent<ISkillAnimationBridge>();
+            if (animBridge != null) animBridge.SetDisarmCharging(charging);
         }
 
         /// <summary>

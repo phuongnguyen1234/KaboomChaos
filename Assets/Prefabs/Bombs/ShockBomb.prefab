@@ -237,6 +237,7 @@ MonoBehaviour:
   _partsToPulse:
   - {fileID: 5247020594286987825}
   - {fileID: 8592307716436520536}
+  _tetherKnotPoint: {fileID: 0}
 --- !u!1001 &5144616253357123919
 PrefabInstance:
   m_ObjectHideFlags: 0

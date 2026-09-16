@@ -6,6 +6,11 @@ namespace Core.Interfaces
     public interface IShieldBehavior
     {
         /// <summary>
+        /// Do uutien xu ly sat thuong cua khien (gia tri cao hon se duoc xu ly truoc).
+        /// </summary>
+        int Priority { get; }
+
+        /// <summary>
         /// Được gọi khi khiên được áp dụng lần đầu cho người chơi.
         /// Dùng để thiết lập trạng thái ban đầu.
         /// </summary>

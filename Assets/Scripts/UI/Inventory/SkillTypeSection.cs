@@ -21,13 +21,16 @@ namespace UI
 
         [Tooltip("Prefab ItemButtonCard duoc nhan ban cho moi skill trong nhom.")]
         [SerializeField] private ItemButtonCard _itemCardPrefab;
+
+        [Tooltip("Sprite nen/khung card hien thi cho cac Skill trong tab Skills.")]
+        [SerializeField] private Sprite _skillCardSprite;
         #endregion
 
         #region Public Methods
         /// <summary>
         /// Gan ten hien thi cho nhom.
         /// </summary>
-        /// <param name="groupName">Ten nhom (vi du: Movement).</param>
+        /// <param name="name">Ten nhom (vi du: Movement).</param>
         public void Setup(string name)
         {
             if (_nameText != null)
@@ -53,7 +56,7 @@ namespace UI
             if (skillData == null) return;
 
             ItemButtonCard card = Instantiate(_itemCardPrefab, _gridLayout.transform);
-            card.Setup(skillData.Id, skillData.Icon, isEquipped);
+            card.Setup(skillData.Id, skillData.Icon, isEquipped, _skillCardSprite);
 
             // Khi click the, thong bao len inventory popup de hien thi thong tin + equip.
             card.OnClicked += _ => onSelect?.Invoke(skillData);

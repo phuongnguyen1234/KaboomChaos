@@ -37,7 +37,22 @@ namespace Skills.Behaviors
 
             invincible.IsInvincible = true;
             _applied = true;
+
+            // Sat bool 'IsForcefieldOn' tren animator de chay anh nion Forcefield trong thoi gian hieu luc.
+            SetForcefieldAnimation(player, true);
             Debug.Log("[ForcefieldBehavior] Player dang bat tu trong thoi gian hieu luc.");
+        }
+
+        /// <summary>
+        /// Sat bool 'IsForcefieldOn' tren animator player: true khi skill dang hoat dong, false khi ket thuc.
+        /// </summary>
+        /// <param name="player">Nguoi choi dang su dung Forcefield skill.</param>
+        /// <param name="active">True neu forcefield dang hoat dong.</param>
+        private void SetForcefieldAnimation(IPlayer player, bool active)
+        {
+            if (player == null || player.GameObject == null) return;
+
+            if (player.GameObject.TryGetComponent<ISkillAnimationBridge>(out var animBridge)) animBridge.SetForcefieldActive(active);
         }
 
         public void UpdateBehavior(IPlayer player, float deltaTime)
@@ -56,6 +71,9 @@ namespace Skills.Behaviors
                 invincible.IsInvincible = _wasInvincible;
                 Debug.Log("[ForcefieldBehavior] Het hieu luc bat tu.");
             }
+
+            // Sat bool 'IsForcefieldOn' sau khong lung (ket thuc hieu luc skill).
+            SetForcefieldAnimation(target, false);
 
             _applied = false;
             _player = null;

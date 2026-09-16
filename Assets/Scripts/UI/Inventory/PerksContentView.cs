@@ -26,6 +26,9 @@ namespace UI
 
         [Tooltip("(Tuy chon) Text hien thi khi nguoi choi chua so huu perk nao. De trong neu khong can.")]
         [SerializeField] private TextMeshProUGUI _emptyStateText;
+
+        [Tooltip("Sprite nen/khung card hien thi cho cac Perk trong tab Perks.")]
+        [SerializeField] private Sprite _perkCardSprite;
         #endregion
 
         #region Unity Lifecycle
@@ -95,7 +98,7 @@ namespace UI
 
                 ItemButtonCard card = Instantiate(_itemCardPrefab, _itemsContainer);
                 bool isEquipped = equippedPerkIds != null && equippedPerkIds.Contains(perkId);
-                card.Setup(perkId, perkData != null ? perkData.Icon : null, isEquipped);
+                card.Setup(perkId, perkData != null ? perkData.Icon : null, isEquipped, _perkCardSprite);
 
                 string capturedId = perkId;
                 card.OnClicked += _ => onSelect?.Invoke(capturedId);

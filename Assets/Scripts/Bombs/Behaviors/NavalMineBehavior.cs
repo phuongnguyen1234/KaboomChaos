@@ -92,33 +92,33 @@ namespace Bombs.Behaviors
                 }
             }
 
-            // Bóng bay: tắt trọng lực để mìn trôi lên như khí cầu, điều khiển vận tốc trực tiếp (không tích lũy lực vô hạn).
+            // Bong bay: tat trong luc de min troi len nhu khi cau, dieu khien van toc truc tiep.
             controller.BombRigidbody.useGravity = false;
             controller.BombRigidbody.isKinematic = false;
-            controller.BombRigidbody.linearVelocity = Vector3.zero; // Bắt đầu đứng yên, sau đó trôi lên theo OnFixedUpdate.
+            if (!controller.BombRigidbody.isKinematic)
+            {
+                controller.BombRigidbody.linearVelocity = Vector3.zero;
+            }
             controller.BombCollider.enabled = true;
             _isArmed = true;
         }
 
         public void OnFixedUpdate(BombController controller)
         {
-            if (controller.BombRigidbody == null) return;
+            var rb = controller.BombRigidbody;
+            if (rb == null) return;
 
-            // Trạng thái trôi nổi tự do sau khi mất anchor: trôi lên nhẹ, không rơi xuống.
+            // Trang thai troi noi tu do sau khi mat anchor: troi len nhe trong khong trung,
+            // cho phap bi day, troi di va xoay tu do do cac ngoai luc (vu no, va cham player).
             if (_isFreeFloating)
             {
                 if (controller.BombData is NavalMineData floatData)
                 {
-                    Vector3 floatVel = controller.BombRigidbody.linearVelocity;
-
-                    // Trôi lên với tốc độ nhỏ hơn tốc độ trôi-khi-được-neo (nổi trên không, không rơi).
-                    floatVel.y = Mathf.Lerp(floatVel.y, floatData.ascendSpeed * 0.5f, Time.fixedDeltaTime * 1.5f);
-
-                    // Giảm dần vận tốc ngang để mìn trôi đều, không văng lệch tích lũy.
-                    floatVel.x = Mathf.Lerp(floatVel.x, 0f, Time.fixedDeltaTime * HorizontalDamping);
-                    floatVel.z = Mathf.Lerp(floatVel.z, 0f, Time.fixedDeltaTime * HorizontalDamping);
-
-                    controller.BombRigidbody.linearVelocity = floatVel;
+                    // Luc noi nhe phia tren de giu min luon troi bồng bềnh trong khong trung
+                    if (rb.linearVelocity.y < floatData.ascendSpeed * 0.3f)
+                    {
+                        rb.AddForce(Vector3.up * (floatData.ascendSpeed * 0.5f), ForceMode.Acceleration);
+                    }
                 }
                 return;
             }
@@ -132,7 +132,6 @@ namespace Bombs.Behaviors
             }
 
             var mineData = (NavalMineData)controller.BombData;
-            var rb = controller.BombRigidbody;
 
             Vector3 anchorPos = _anchorObject.transform.position;
             Vector3 pos = controller.transform.position;
@@ -256,6 +255,10 @@ namespace Bombs.Behaviors
             {
                 controller.BombCollider.enabled = true;
             }
+
+            // Drag nhe de min troi noi tu do va xoay tu do theo ngoai luc nhung khong vang qua nhanh
+            controller.BombRigidbody.linearDamping = 0.5f;
+            controller.BombRigidbody.angularDamping = 0.5f;
 
             // Vẫn giữ _isArmed = true để mìn tiếp tục là mối đe dọa khi trôi: nổ khi chạm player.
         }

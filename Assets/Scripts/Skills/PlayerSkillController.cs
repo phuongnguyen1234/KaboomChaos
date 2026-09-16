@@ -4,6 +4,7 @@ using Core;
 using Core.Interfaces;
 using Skills.Data;
 using System;
+using System.Collections.Generic;
 
 namespace Skills
 {
@@ -39,6 +40,10 @@ namespace Skills
         private IEnergyable _energyable;
         private bool _isActive;
         private float _durationRemaining;
+
+        // Luu danh sach cac VFX (CastVfx) duoc spawn tu pool trong luc kich hoat skill.
+        // Khi skill het duration, cac VFX con hoat dong se duoc tra ve pool de tranh chong chat (stack) trong scene.
+        private readonly List<GameObject> _activeCastVfx = new();
 
         #endregion
 
@@ -128,6 +133,16 @@ namespace Skills
             {
                 UpdateActiveSkill();
             }
+        }
+
+        /// <summary>
+        /// Component cua Player duoc huy/recreated (vi du khi player chut hoac rot moi khoi thuc):
+        /// tra ve pool tat ca VFX track de tranh khong roi sen sau 'stack' trong scene.
+        /// Chi tac dung khi skill dang hoat dong va con co VFX luu dang hoat.
+        /// </summary>
+        private void OnDestroy()
+        {
+            DespawnActiveCastVfx();
         }
 
         #endregion
@@ -221,17 +236,23 @@ namespace Skills
         }
 
         /// <summary>
-        /// Phat SFX (qua AudioSource) va VFX (qua VFXPoolManager - GameEvents.TriggerVFXSpawnRequest)
+        /// Phat SFX (qua SfxManager) va VFX (qua VFXPoolManager - GameEvents.TriggerVFXSpawnRequest)
         /// tren vi tri Player khi su dung skill. SFX/VFX lay tu BaseSkillData (CastSfx/CastVfx).
         /// </summary>
-        private void PlayCastEffects()
+        /// <param name="trackVfx">
+        /// True (mac dinh): VFX nay thuoc danh sach _activeCastVfx de co the tra ve pool khi skill het duration.
+        /// Neu skill khong co ExplosionEffectController (chi la particle/shader/mesh thuong), nay la bat buoc.
+        /// False: dung cho one-shot burst (PlayCastOnDeactivate) na se tu dong tra ve pool sau animation;
+        /// khong theo do trong _activeCastVfx de tranh goi despawn ngay sau spawn.
+        /// </param>
+        private void PlayCastEffects(bool trackVfx = true)
         {
             if (_equippedSkillData == null) return;
 
-            // Phat SFX neu skill co cau hinh am thanh va tim duoc AudioSource.
-            if (_equippedSkillData.CastSfx != null && _skillSfxSource != null)
+            // Phat SFX neu skill co cau hinh am thanh (prin SfxManager de live volume).
+            if (_equippedSkillData.CastSfx != null && SfxService.Instance != null && _player != null)
             {
-                _skillSfxSource.PlayOneShot(_equippedSkillData.CastSfx);
+                SfxService.Instance.PlaySfx(_equippedSkillData.CastSfx, _player.GameObject.transform.position);
             }
 
             // Spawn VFX qua pool (do VFXPoolManager quan ly - Goi qua GameEvents de tranh phu thuoc assembly Managers).
@@ -246,6 +267,14 @@ namespace Skills
 
                 if (vfx != null)
                 {
+                    // Luu VFX nay de co the tra ve pool khi skill het duration (responde quan ly pool sau het duration).
+                    // Voi vfx cu ExplosionEffectController se tu dong tra ve pool sau animation,
+                    // dar de aici da luu ia 'activeInHierarchy' truoc go despawn de tranh double-enqueue trong pool.
+                    if (trackVfx)
+                    {
+                        _activeCastVfx.Add(vfx);
+                    }
+
                     // Tuy thuoc vao cau hinh spawn mode tu BaseSkillData:
                     // - LocalPlayer: gan VFX lam con cua Player de luon di cung player (giong cach Shield parent VFX len Player).
                     // - World: giu VFX trong world space tai vi tri Player, khong gan theo de tranh bi nho do scale
@@ -264,6 +293,23 @@ namespace Skills
                     if (explosion != null)
                     {
                         explosion.Trigger(_equippedSkillData.CastVfxExplosionRadius);
+                    }
+                    else
+                    {
+                        // Neu la ParticleSystem (prefab root rong voi cac object con ParticleSystem),
+                        // Explicitly Clear va Play de dam bao tat ca child particle system chay dung va sach khi lay tu pool.
+                        ParticleSystem[] particleSystems = vfx.GetComponentsInChildren<ParticleSystem>();
+                        if (particleSystems != null && particleSystems.Length > 0)
+                        {
+                            foreach (var ps in particleSystems)
+                            {
+                                if (ps != null)
+                                {
+                                    ps.Clear(true);
+                                    ps.Play(true);
+                                }
+                            }
+                        }
                     }
 
                     Debug.Log($"[PlayerSkillController] Da spawn VFX skill: {_equippedSkillData.DisplayName} (mode: {_equippedSkillData.CastVfxSpawnMode}).");
@@ -295,7 +341,7 @@ namespace Skills
         /// </summary>
         private Key ResolveUseSkillKey()
         {
-            Core.SettingsManager settings = Core.SettingsManager.Instance;
+            ISettingsManager settings = SettingsService.Instance;
             string configuredName = settings != null ? settings.UseSkillKey : _useSkillKey.ToString();
 
             if (_lastUseSkillKeyName != configuredName)
@@ -356,12 +402,46 @@ namespace Skills
             }
 
             // Phat SFX + VFX sau khi het duration (neu skill duoc cau hinh PlayCastOnDeactivate).
+            // VFX nay la one-shot burst (chi se tu dong tra ve pool sau animation ket thuc noi
+            // ExplosionEffectController/LifetimeController), khong theo do trong _activeCastVfx.
             if (_equippedSkillData != null && _equippedSkillData.PlayCastOnDeactivate)
             {
-                PlayCastEffects();
+                PlayCastEffects(false);
             }
+
+            // Tra ve pool tat ca VFX (CastVfx) duoc spawn trong luc kich hoat skill.
+            // Chi go nay sau PlayCastOnDeactivate de tranh danh sach _activeCastVfx khong goi
+            // su dung bang (spawn burst moi) de lai roi sau clear -> goi leak/stack.
+            DespawnActiveCastVfx();
+        }
+
+        /// <summary>
+        /// Tra ve pool (Despawn) tat ca VFX duoc spawn tu pool trong luc kich hoat skill.
+        /// VFX duoc pool quan ly se duoc tra ve sau het duration de dung se luu.
+        /// Chi VFX con dang hoat dong duoc despawn; VFX sau duoc tra ve tu dong (inactive)
+        /// de tranh goi despawn 2 lan gay trung lap trong pool.
+        /// </summary>
+        private void DespawnActiveCastVfx()
+        {
+            if (_activeCastVfx.Count == 0) return;
+
+            foreach (var vfx in _activeCastVfx)
+            {
+                if (vfx == null) continue;
+
+                // VFX cu ExplosionEffectController duoc tra ve pool (+ inactive) sau animation ket thuc.
+                // Chi despawn nhung object van con dang hoat dong de tranh double-enqueue trong pool.
+                if (vfx.activeInHierarchy)
+                {
+                    GameEvents.TriggerVFXDespawnRequest(vfx);
+                }
+            }
+
+            _activeCastVfx.Clear();
         }
 
         #endregion
     }
 }
+
+

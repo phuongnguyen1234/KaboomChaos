@@ -32,6 +32,19 @@ namespace Core
         [Tooltip("Hiệu ứng trạng thái ban đầu được áp dụng cho các khối RẢI RÁC (scattered blocks).")]
         public StatusEffectType scatterInitialEffect = StatusEffectType.None;
 
+        [Header("Rải rác theo cụm (Clustering)")]
+        [Tooltip("Số cụm (cluster) de khối phụ care vor fi create. 0 = auto, sistema calcula numărul din procent și kíchthước mediu al cụmului.")]
+        [Min(0)]
+        public int scatterClusterCount = 0;
+
+        [Tooltip("Bán kíchthước minimă (in celule) al unui cụm de khối phụ.")]
+        [Min(1)]
+        public int scatterClusterMinRadius = 1;
+
+        [Tooltip("Bán kíchthước maximă (in celule) al unui cụm de khối phụ. Valore mai mare = cụmuri mai imense.")]
+        [Min(1)]
+        public int scatterClusterMaxRadius = 3;
+
         [Header("Trạng thái ban đầu")]
         [Tooltip("Hiệu ứng trạng thái ban đầu được áp dụng cho các khối CHÍNH trong tầng này (ví dụ: Obsidian).")]
         public StatusEffectType initialEffect = StatusEffectType.None;

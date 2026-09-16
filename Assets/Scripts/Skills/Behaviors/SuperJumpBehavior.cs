@@ -18,12 +18,15 @@ namespace Skills.Behaviors
 
         public void Activate(IPlayer player)
         {
-            if (player != null)
-            {
-                // Ap dung luc bay len theo truc dung Y
-                player.AddMomentum(Vector3.up * _data.JumpForce);
-                Debug.Log($"[SuperJumpBehavior] Player {_data.DisplayName} da nhay cao voi luc: {_data.JumpForce}");
-            }
+            if (player == null || player.GameObject == null) return;
+
+            // Kich hoat anh nion SuperJump tren player truoc khi ap dung luc bay len.
+            var animBridge = player.GameObject.GetComponent<ISkillAnimationBridge>();
+            if (animBridge != null) animBridge.TriggerSuperJumpAnimation();
+
+            // Ap dung luc bay len selon truc dung Y
+            player.AddMomentum(Vector3.up * _data.JumpForce);
+            Debug.Log($"[SuperJumpBehavior] Player {_data.DisplayName} da nhay cao voi luc: {_data.JumpForce}");
         }
 
         public void UpdateBehavior(IPlayer player, float deltaTime)

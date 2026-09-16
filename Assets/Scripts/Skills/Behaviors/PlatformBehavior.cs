@@ -26,6 +26,10 @@ namespace Skills.Behaviors
 
             if (player == null || player.GameObject == null) return;
 
+            // Kich hoat anh nion Summon tren player khi active skill.
+            var animBridge = player.GameObject.GetComponent<ISkillAnimationBridge>();
+            if (animBridge != null) animBridge.TriggerSummonAnimation();
+
             Vector3 playerPos = player.GameObject.transform.position;
 
             // Buoc 1: Dua player len cao mot chut (day/thoi theo truc Y) de player khong bi

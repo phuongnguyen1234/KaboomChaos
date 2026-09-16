@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 
 namespace Core.Interfaces.UI
@@ -11,6 +12,21 @@ namespace Core.Interfaces.UI
         /// Thể hiện Singleton toàn cục của IUIManager.
         /// </summary>
         static IUIManager Instance { get; set; }
+
+        /// <summary>
+        /// Transform UI mặc định chứa các text nổi (floating text) như chỉ số sát thương, hồi máu...
+        /// </summary>
+        UnityEngine.RectTransform FloatingTextContainer { get; }
+
+        /// <summary>
+        /// Transform UI chứa các text nổi liên quan đến HP (sát thương, hồi máu).
+        /// </summary>
+        UnityEngine.RectTransform HpFloatingTextContainer { get; }
+
+        /// <summary>
+        /// Transform UI chứa các text nổi liên quan đến Collectible (Coin, Battery...).
+        /// </summary>
+        UnityEngine.RectTransform CollectibleFloatingTextContainer { get; }
 
         /// <summary>
         /// Hiển thị một thông báo trên màn hình trong một khoảng thời gian.
@@ -94,9 +110,25 @@ namespace Core.Interfaces.UI
         void ShowScoreCard(Core.ScoreCardData data);
 
         /// <summary>
-        /// Ẩn Score Card ngay lập tức.
+        /// Hiển thị Score Card ngay lập tức.
         /// </summary>
         void HideScoreCard();
 
+        /// <summary>
+        /// Chạy hiệu ứng transition màn hình (Scale logo, bung CircleMask).
+        /// </summary>
+        /// <param name="onCovered">Callback thực hiện hành động khi màn hình đã che hết (VD: Teleport player, dọn dẹp map).</param>
+        /// <param name="onComplete">Callback thực hiện khi transition hoàn tất.</param>
+        void PlayTransition(Action onCovered, Action onComplete = null);
+
+        /// <summary>
+        /// Phát tiếng còi khi round bắt đầu.
+        /// </summary>
+        void PlayRoundStartSfx();
+
+        /// <summary>
+        /// Phát tiếng còi + tiếng chuông khi round kết thúc.
+        /// </summary>
+        void PlayRoundEndSfx();
     }
 }

@@ -27,6 +27,10 @@ namespace Skills.Behaviors
 
             if (player == null || player.GameObject == null) return;
 
+            // Kich hoat anh nion Summon tren player khi active skill.
+            var animBridge = player.GameObject.GetComponent<ISkillAnimationBridge>();
+            if (animBridge != null) animBridge.TriggerSummonAnimation();
+
             Vector3 pos = player.GameObject.transform.position;
             Quaternion rot = Quaternion.identity;
 

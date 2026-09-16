@@ -15,7 +15,7 @@ PrefabInstance:
     - target: {fileID: -1551694745437751910, guid: 21c676af1fdf11743bac9855c57b6b3a, type: 3}
       propertyPath: _gameplayEffectProfiles.Array.data[1].effectVFX
       value: 
-      objectReference: {fileID: 8895673999334952703, guid: ce108e08b46b7fb4b82e6096589844de, type: 3}
+      objectReference: {fileID: 9027514048236820045, guid: effb650189dc5714e9e9801b1cfb3991, type: 3}
     - target: {fileID: -1551694745437751910, guid: 21c676af1fdf11743bac9855c57b6b3a, type: 3}
       propertyPath: _gameplayEffectProfiles.Array.data[2].effectVFX
       value: 
@@ -70,6 +70,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3536681037913576558, guid: 21c676af1fdf11743bac9855c57b6b3a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6422829287474631470, guid: 21c676af1fdf11743bac9855c57b6b3a, type: 3}
+      propertyPath: m_CastShadows
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7756762216282166330, guid: 21c676af1fdf11743bac9855c57b6b3a, type: 3}

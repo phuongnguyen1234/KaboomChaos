@@ -30,5 +30,9 @@ namespace Bombs.Data
 
         [Tooltip("Tốc độ di chuyển của tên lửa (đơn vị/giây).")]
         public float speed = 15f;
+
+        [Header("Target Lock VFX")]
+        [Tooltip("Prefab VFX hien thi hieu ung Target Lock tren world space (co component WorldTargetLockController).")]
+        public GameObject targetLockVFXPrefab;
     }
 }

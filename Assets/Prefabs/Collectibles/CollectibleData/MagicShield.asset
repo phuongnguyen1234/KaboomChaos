@@ -16,7 +16,7 @@ MonoBehaviour:
   _displayName: Magic Shield
   _lifespan: 0
   _collectionSFX: {fileID: 0}
-  _collectionVFX: {fileID: 0}
+  _collectionVFX: {fileID: 5759957805997048026, guid: 8baef26a3ef29be469ecbe348db508f1, type: 3}
   _floatingTextColor: {r: 0, g: 0, b: 0, a: 1}
   possibleVariants: []
   _rarityByDifficulty:

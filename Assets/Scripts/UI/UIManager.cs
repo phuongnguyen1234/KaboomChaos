@@ -6,6 +6,8 @@ using DG.Tweening;
 using Core.Interfaces.UI;
 using Core;
 using UnityEngine.InputSystem;
+using Core.Interfaces;
+using System;
 
 namespace UI
 {
@@ -51,41 +53,13 @@ namespace UI
         // Tranh phat SFX lap lai moi lan goi SetTimerDangerState(true).
         private bool _timerDangerSfxPlayed;
 
-        [Header("Intensity Bar")]
-        [Tooltip("Panel chứa thanh cường độ.")]
-        [SerializeField] private GameObject _intensityBarPanel;
-        [Tooltip("Mũi tên chỉ báo trên thanh cường độ.")]
-        [SerializeField] private RectTransform _intensityArrow;
-        [Tooltip("Khu vực có thể di chuyển của mũi tên (dùng để tính toán vị trí).")]
-        [SerializeField] private RectTransform _intensityRange;
-        
-        [Header("Intensity Bar Animation")]
-        [Tooltip("Vị trí bắt đầu của thanh cường độ (ngoài màn hình, tính từ vị trí gốc).")]
-        [SerializeField] private Vector2 _intensityBarStartOffset = new(0, 200f);
-        [Tooltip("Thời gian cho hiệu ứng trượt vào của thanh cường độ.")]
-        [SerializeField] private float _intensityBarSlideInDuration = 0.5f;
-        [Tooltip("Ease type cho hiệu ứng trượt vào.")]
-        [SerializeField] private Ease _intensityBarSlideInEase = Ease.OutQuad;
-        [Tooltip("Thời gian cho hiệu ứng chạy của mũi tên.")]
-        [SerializeField] private float _arrowMoveDuration = 0.8f;
-        [Tooltip("Ease type cho hiệu ứng chạy của mũi tên.")]
-        [SerializeField] private Ease _arrowMoveEase = Ease.InOutSine;
-
-        [Header("Current Intensity Display")]
-        [Tooltip("Panel hiển thị độ khó hiện tại của round.")]
-        [SerializeField] private GameObject _currentIntensityPanel;
-        [Tooltip("Text hiển thị giá trị độ khó hiện tại của round.")]
-        [SerializeField] private TextMeshProUGUI _currentIntensityText;
+        [Header("UI Animations & Effects")]
+        [Tooltip("Component quan ly tat ca animation va SFX cua UIManager.")]
+        [SerializeField] private UI.Animations.UIManagerAnimation _uiAnimation;
 
         [Header("Extreme Mode")]
         [Tooltip("Panel hien thi trang thai Extreme Mode. Hien khi bat, an khi tat.")]
         [SerializeField] private GameObject _extremeModePanel;
-
-        [Header("Countdown")]
-        [Tooltip("Panel chứa text đếm ngược đầu round.")]
-        [SerializeField] private GameObject _countdownPanel;
-        [Tooltip("Text hiển thị số đếm ngược.")]
-        [SerializeField] private TextMeshProUGUI _countdownText;
 
         [Header("Crosshair")]
         [Tooltip("CanvasGroup của crosshair cho Shift Lock. GameObject chứa nó phải có component CanvasGroup.")]
@@ -111,6 +85,18 @@ namespace UI
         [Tooltip("Main HUD (thanh máu, năng lượng...) hiển thị khi bắt đầu vào chơi, ẩn khi quay về Home.")]
         [SerializeField] private GameObject _mainHUD;
 
+        [Header("Floating Text Containers")]
+        [Tooltip("Container UI chung cho cac text noi. Neu khong gan container rieng se dung container nay.")]
+        [SerializeField] private RectTransform _floatingTextContainer;
+        [Tooltip("Container UI rieng de chua floating text lien quan den HP (sat thuong, hoi mau).")]
+        [SerializeField] private RectTransform _hpFloatingTextContainer;
+        [Tooltip("Container UI rieng de chua floating text lien quan den Collectible (Coin, Battery...).")]
+        [SerializeField] private RectTransform _collectibleFloatingTextContainer;
+
+        public RectTransform FloatingTextContainer => _floatingTextContainer;
+        public RectTransform HpFloatingTextContainer => _hpFloatingTextContainer != null ? _hpFloatingTextContainer : _floatingTextContainer;
+        public RectTransform CollectibleFloatingTextContainer => _collectibleFloatingTextContainer != null ? _collectibleFloatingTextContainer : _floatingTextContainer;
+
         [Header("Pause Menu Button")]
         [Tooltip("Nút mở Pause Menu (thường đặt trong Main HUD). Ngoài phím ESC.")]
         [SerializeField] private Button _pauseMenuButton;
@@ -122,28 +108,43 @@ namespace UI
         [SerializeField] private Button _inventoryButton;
         [Tooltip("Nút Option trên UI chính. Mở popup Option (không tab).")]
         [SerializeField] private Button _optionButton;
-        [Tooltip("Nút Settings trên UI chính. Mở popup Settings (Music/SFX/hotkeys).")]
+        [Tooltip("Nut Settings tren UI chinh. Mo popup Settings (Music/SFX/hotkeys).")]
         [SerializeField] private Button _settingsButton;
+        [Tooltip("Nut Info tren UI chinh. Mo popup Info.")]
+        [SerializeField] private Button _infoButton;
 
-        [Tooltip("Popup Shop - là PopupTab, quản lý việc mua bán vật phẩm.")]
+        [Tooltip("Popup Shop - la PopupTab, quan ly viec mua ban vat pham.")]
         [SerializeField] private ShopPopup _shopPopup;
-        [Tooltip("Popup Inventory - là PopupTab, hiển thị vật phẩm người chơi sở hữu.")]
+        [Tooltip("Popup Inventory - la PopupTab, hien thi vat pham nguoi choi so huu.")]
         [SerializeField] private InventoryPopup _inventoryPopup;
-        [Tooltip("Popup Option - hiển thị các thiết lập của game.")]
+        [Tooltip("Popup Option - hien thi cac thiet lap cua game.")]
         [SerializeField] private OptionPopup _optionPopup;
-        [Tooltip("Popup Settings - contie SettingsUI (slider Music/SFX si rebind UseSkillKey).")]
+        [Tooltip("Popup Settings - chua SettingsUI (slider Music/SFX va rebind UseSkillKey).")]
         [SerializeField] private SettingsPopup _settingsPopup;
+        [Tooltip("Popup Info - hien thi thong tin ve tro choi.")]
+        [SerializeField] private InfoPopup _infoPopup;
 
-        // Coroutine đang chạy để có thể dừng lại nếu cần
+        [Header("Popup Open SFX")]
+        [Tooltip("SFX phat khi mo Shop Popup.")]
+        [SerializeField] private AudioClip _openShopSfx;
+        [Tooltip("SFX phat khi mo Inventory Popup.")]
+        [SerializeField] private AudioClip _openInventorySfx;
+        [Tooltip("SFX phat khi mo Option Popup.")]
+        [SerializeField] private AudioClip _openOptionSfx;
+        [Tooltip("SFX phat khi mo Info Popup.")]
+        [SerializeField] private AudioClip _openInfoSfx;
+
+        // Tranh trigger toggle kep trong cung 1 frame khi nhieu event/button cung goi OpenPopup
+        private int _lastPopupActionFrame = -1;
+        private BasePopup _lastActionPopup = null;
+
+        // Coroutine dang chay de co the dung lai neu can
         private Coroutine _notificationCoroutine;
 
         // Dependencies
         private IHomeScreen _homeScreen;
         private IPauseMenu _pauseMenu;
         private IScoreCard _scoreCard;
-
-        // Cache vị trí gốc của thanh intensity để dùng cho animation
-        private Vector2 _intensityBarOriginalPosition;
         #endregion
 
         #region Unity Lifecycle
@@ -159,15 +160,20 @@ namespace UI
                 DontDestroyOnLoad(gameObject);
             }
 
+            _uiAnimation ??= GetComponentInChildren<UI.Animations.UIManagerAnimation>();
+            _infoPopup ??= GetComponentInChildren<InfoPopup>(true);
+            _settingsPopup ??= GetComponentInChildren<SettingsPopup>(true);
+
             // Inject IHomeScreen
             if (_homeScreenBehaviour != null)
             {
                 _homeScreen = _homeScreenBehaviour;
                 if (_homeScreen != null)
                 {
-                    // Subscribe vào event - pattern giống Vue parent-child communication
+                    // Subscribe vao event - pattern giong Vue parent-child communication
                     _homeScreen.OnPlayClicked += HandleHomeScreenPlayClicked;
                     _homeScreen.OnSettingsClicked += HandleHomeScreenSettingsClicked;
+                    _homeScreen.OnInfoClicked += HandleHomeScreenInfoClicked;
                 }
             }
 
@@ -182,13 +188,13 @@ namespace UI
                 _scoreCard = _scoreCardBehaviour;
             }
 
-            // Gán sự kiện cho nút mở Pause Menu thủ công (bên cạnh phím ESC)
+            // Gan su kien cho nut mo Pause Menu thu cong (ben canh phim ESC)
             if (_pauseMenuButton != null)
             {
                 _pauseMenuButton.onClick.AddListener(TogglePauseMenu);
             }
 
-            // Gán sự kiện cho các nút Shop / Inventory / Option trên UI chính
+            // Gan su kien cho cac nut Shop / Inventory / Option / Settings / Info tren UI chinh
             if (_shopButton != null)
             {
                 _shopButton.onClick.AddListener(OpenShopPopup);
@@ -204,6 +210,10 @@ namespace UI
             if (_settingsButton != null)
             {
                 _settingsButton.onClick.AddListener(OpenSettingsPopup);
+            }
+            if (_infoButton != null)
+            {
+                _infoButton.onClick.AddListener(OpenInfoPopup);
             }
 
             // Tu tim AudioSource de phat SFX canh bao timer neu chua gan.
@@ -232,11 +242,12 @@ namespace UI
 
         private void OnDestroy()
         {
-            // Unsubscribe để tránh memory leak
+            // Unsubscribe de tranh memory leak
             if (_homeScreen != null)
             {
                 _homeScreen.OnPlayClicked -= HandleHomeScreenPlayClicked;
                 _homeScreen.OnSettingsClicked -= HandleHomeScreenSettingsClicked;
+                _homeScreen.OnInfoClicked -= HandleHomeScreenInfoClicked;
             }
             if (_pauseMenuButton != null)
             {
@@ -258,6 +269,10 @@ namespace UI
             {
                 _settingsButton.onClick.RemoveListener(OpenSettingsPopup);
             }
+            if (_infoButton != null)
+            {
+                _infoButton.onClick.RemoveListener(OpenInfoPopup);
+            }
         }
 
         private void Update()
@@ -273,14 +288,8 @@ namespace UI
             // Ẩn các panel khi bắt đầu
             if (_notificationPanel != null) _notificationPanel.SetActive(false);
             if (_timerPanel != null) _timerPanel.SetActive(false);
-            if (_intensityBarPanel != null)
-            {
-                // Cache vị trí gốc của thanh intensity để dùng cho animation
-                _intensityBarOriginalPosition = _intensityBarPanel.GetComponent<RectTransform>().anchoredPosition;
-                _intensityBarPanel.SetActive(false);
-            }
-            if (_countdownPanel != null) _countdownPanel.SetActive(false);
-            if (_currentIntensityPanel != null) _currentIntensityPanel.SetActive(false);
+            _uiAnimation?.HideIntensityBar();
+            _uiAnimation?.HideCurrentIntensity();
             if (_scoreCard != null) _scoreCard.Hide();
             if (_mainHUD != null) _mainHUD.SetActive(false);          // Main HUD bắt đầu ẩn (chỉ hiện khi ấn Play)
             if (_pauseMenu != null) _pauseMenu.Hide();                 // Pause Menu bắt đầu ẩn
@@ -412,10 +421,10 @@ namespace UI
         /// </summary>
         private void PlayTimerDangerSfx()
         {
-            if (_timerDangerSfx == null || _bellDangerSfx == null || _timerSfxSource == null) return;
+            if (_timerDangerSfx == null || _bellDangerSfx == null || SfxService.Instance == null) return;
 
-            _timerSfxSource.PlayOneShot(_timerDangerSfx);
-            _timerSfxSource.PlayOneShot(_bellDangerSfx);
+            SfxService.Instance.PlaySfx(_timerDangerSfx);
+            SfxService.Instance.PlaySfx(_bellDangerSfx);
         }
 
         /// <inheritdoc/>
@@ -432,74 +441,28 @@ namespace UI
         /// <inheritdoc/>
         public IEnumerator AnimateIntensityBar(float currentIntensity, float minIntensity, float maxIntensity)
         {
-            // --- Safety Checks ---
-            if (_intensityBarPanel == null || _intensityArrow == null || _intensityRange == null)
+            if (_uiAnimation != null)
             {
-                Debug.LogWarning("[UIManager] Intensity Bar components are not fully assigned. Skipping animation.", this);
-                yield break;
+                yield return StartCoroutine(_uiAnimation.AnimateIntensityBar(currentIntensity, minIntensity, maxIntensity));
             }
-
-            // --- Animation Sequence ---
-
-            // 1. Chuẩn bị: Di chuyển thanh intensity ra ngoài màn hình và kích hoạt nó.
-            var intensityBarRect = _intensityBarPanel.GetComponent<RectTransform>();
-            intensityBarRect.anchoredPosition = _intensityBarOriginalPosition + _intensityBarStartOffset;
-            _intensityBarPanel.SetActive(true);
-
-            // 2. Hiệu ứng trượt vào
-            DOTween.To(() => intensityBarRect.anchoredPosition, x => intensityBarRect.anchoredPosition = x, _intensityBarOriginalPosition, _intensityBarSlideInDuration).SetEase(_intensityBarSlideInEase);
-            yield return new WaitForSeconds(_intensityBarSlideInDuration);
-
-            // 3. Hiệu ứng mũi tên chạy
-            // SỬA LỖI: Mathf.InverseLerp trả về 0 khi min == max (tránh chia cho 0),
-            // khiến mũi tên luôn đứng ở mép trái (vị trí số 1) dù intensity của round là bao nhiêu
-            // (ví dụ test min = max = 6 thì mũi tên vẫn chỉ số 1 thay vì số 6).
-            float normalizedValue;
-            if (Mathf.Approximately(minIntensity, maxIntensity))
-            {
-                // Toàn bộ thanh chỉ đại diện cho MỘT giá trị duy nhất:
-                // đạt đúng giá trị đó -> đẩy mũi tên hết cỡ về phía max, ngược lại giữ ở min.
-                normalizedValue = currentIntensity >= maxIntensity ? 1f : 0f;
-            }
-            else
-            {
-                // Clamp01 để chống trường hợp currentIntensity nằm ngoài khoảng [min, max].
-                normalizedValue = Mathf.Clamp01((currentIntensity - minIntensity) / (maxIntensity - minIntensity));
-            }
-            float rangeWidth = _intensityRange.rect.width;
-            float arrowTargetX = normalizedValue * rangeWidth;
-            DOTween.To(() => _intensityArrow.anchoredPosition, pos => _intensityArrow.anchoredPosition = pos, new Vector2(arrowTargetX, _intensityArrow.anchoredPosition.y), _arrowMoveDuration).SetEase(_arrowMoveEase);
-            yield return new WaitForSeconds(_arrowMoveDuration);
-
-            // 4. Chờ 1 giây
-            yield return _waitForSeconds1;
-
-            // 5. Ẩn thanh intensity và reset vị trí mũi tên cho lần sau
-            _intensityBarPanel.SetActive(false);
-            _intensityArrow.anchoredPosition = new Vector2(0, _intensityArrow.anchoredPosition.y);
         }
 
         /// <inheritdoc/>
         public void ShowCurrentIntensity(float currentIntensity)
         {
-            if (_currentIntensityPanel != null && _currentIntensityText != null)
-            {
-                _currentIntensityText.text = $"{currentIntensity:F1}"; // Định dạng hiển thị 1 chữ số thập phân, kể cả là số 0.
-                _currentIntensityPanel.SetActive(true);
-            }
-            else Debug.LogWarning("[UIManager] Current Intensity Panel or Text is not assigned. Cannot display current intensity.", this);
+            _uiAnimation?.ShowCurrentIntensity(currentIntensity);
         }
 
         /// <inheritdoc/>
         public void HideIntensityBar()
         {
-            if (_intensityBarPanel != null) _intensityBarPanel.SetActive(false);
+            _uiAnimation?.HideIntensityBar();
         }
 
         /// <inheritdoc/>
         public void HideCurrentIntensity()
         {
-            if (_currentIntensityPanel != null) _currentIntensityPanel.SetActive(false);
+            _uiAnimation?.HideCurrentIntensity();
         }
 
         /// <inheritdoc/>
@@ -522,30 +485,36 @@ namespace UI
         /// <inheritdoc/>
         public IEnumerator ShowCountdown()
         {
-            // Không ẩn intensity bar ở đây. Nó sẽ được hiển thị trong suốt round
-            // và chỉ được ẩn ở PostRoundStage.
-            // HideIntensityBar();
-            if (_countdownPanel == null || _countdownText == null)
+            if (_uiAnimation != null)
             {
-                Debug.LogWarning("[UIManager] Countdown panel or text is not assigned.", this);
-                yield break;
+                yield return StartCoroutine(_uiAnimation.ShowCountdown());
             }
+        }
 
-            _countdownPanel.SetActive(true);
+        /// <inheritdoc/>
+        public void PlayTransition(Action onCovered, Action onComplete = null)
+        {
+            if (_uiAnimation != null)
+            {
+                _uiAnimation.PlayTransition(onCovered, onComplete);
+            }
+            else
+            {
+                onCovered?.Invoke();
+                onComplete?.Invoke();
+            }
+        }
 
-            _countdownText.text = "3";
-            yield return _waitForSeconds1;
+        /// <inheritdoc/>
+        public void PlayRoundStartSfx()
+        {
+            _uiAnimation?.PlayRoundStartSfx();
+        }
 
-            _countdownText.text = "2";
-            yield return _waitForSeconds1;
-
-            _countdownText.text = "1";
-            yield return _waitForSeconds1;
-
-            _countdownText.text = "Go!";
-            yield return _waitForSeconds1;
-
-            _countdownPanel.SetActive(false);
+        /// <inheritdoc/>
+        public void PlayRoundEndSfx()
+        {
+            _uiAnimation?.PlayRoundEndSfx();
         }
 
         /// <inheritdoc/>
@@ -578,125 +547,166 @@ namespace UI
 
         #region Main Menu Popups
         /// <summary>
-        /// An tat ca cac popup chinh (Shop, Inventory, Option) de chi mot popup active tai mot thoi diem.
+        /// Kiem tra xem co bat ky popup chinh nao (Shop, Inventory, Option, Settings, Info) dang mo hay khong.
         /// </summary>
-        private void CloseMainPopups()
+        private bool IsAnyMainPopupOpen()
         {
-            if (_shopPopup != null)
+            return (_shopPopup != null && _shopPopup.IsVisible) ||
+                   (_inventoryPopup != null && _inventoryPopup.IsVisible) ||
+                   (_optionPopup != null && _optionPopup.IsVisible) ||
+                   (_settingsPopup != null && _settingsPopup.IsVisible) ||
+                   (_infoPopup != null && _infoPopup.IsVisible);
+        }
+
+        /// <summary>
+        /// An tat ca cac popup chinh (Shop, Inventory, Option, Settings, Info).
+        /// </summary>
+        /// <param name="animate">True de chay animation slide out, False de an ngay.</param>
+        private void CloseMainPopups(bool animate = true)
+        {
+            if (_shopPopup != null && _shopPopup.IsVisible) _shopPopup.Hide(animate);
+            if (_inventoryPopup != null && _inventoryPopup.IsVisible) _inventoryPopup.Hide(animate);
+            if (_optionPopup != null && _optionPopup.IsVisible) _optionPopup.Hide(animate);
+            if (_settingsPopup != null && _settingsPopup.IsVisible) _settingsPopup.Hide(animate);
+            if (_infoPopup != null && _infoPopup.IsVisible) _infoPopup.Hide(animate);
+        }
+
+        /// <summary>
+        /// Mo mot popup. Neu chua co popup nao mo -> Slide in (animate = true).
+        /// Neu dang co popup khac mo -> Hien thi ngay lap tuc khong slide in (animate = false).
+        /// Neu nhan vao chinh popup dang mo -> Dong popup (slide out).
+        /// Co guard debounce theo frame de tranh bi trigger kep trong cung 1 frame.
+        /// </summary>
+        private void OpenPopup(BasePopup targetPopup)
+        {
+            if (targetPopup == null) return;
+
+            // Tranh loi click 1 lan nhung bi trigger 2 lan trong cung 1 frame (vi du ca Button.onClick va Event tu HomeScreen)
+            if (_lastActionPopup == targetPopup && _lastPopupActionFrame == Time.frameCount)
             {
-                _shopPopup.Hide();
+                return;
             }
-            if (_inventoryPopup != null)
+
+            _lastPopupActionFrame = Time.frameCount;
+            _lastActionPopup = targetPopup;
+
+            if (targetPopup.IsVisible)
             {
-                _inventoryPopup.Hide();
+                targetPopup.Hide(true);
+                return;
             }
-            if (_optionPopup != null)
-            {
-                _optionPopup.Hide();
-            }
-            if (_settingsPopup != null)
-            {
-                _settingsPopup.Hide();
-            }
+
+            bool wasAnyPopupOpen = IsAnyMainPopupOpen();
+
+            // Dong cac popup khac (an ngay neu chuyen giua cac popup)
+            CloseMainPopups(animate: !wasAnyPopupOpen);
+
+            // Neu KHONG co popup nao dang mo -> Slide in (true)
+            // Neu DA CO popup khac dang mo -> Hien thi ngay (false)
+            targetPopup.Show(animate: !wasAnyPopupOpen);
         }
 
         /// <summary>
         /// Mo popup Shop khi nguoi choi nhan nut Shop tren UI chinh.
-        /// Dong het cac popup khac truoc khi mo de tranh nhieu popup cung hien thi.
         /// </summary>
         private void OpenShopPopup()
         {
-            CloseMainPopups();
-
-            if (_shopPopup != null)
+            if (_shopPopup != null && !_shopPopup.IsVisible)
             {
-                _shopPopup.Show();
+                if (_openShopSfx != null && SfxService.Instance != null)
+                {
+                    SfxService.Instance.PlaySfx(_openShopSfx);
+                }
             }
-            else
-            {
-                Debug.LogWarning("[UIManager] _shopPopup chua duoc gan tren Inspector.");
-            }
+            OpenPopup(_shopPopup);
         }
 
         /// <summary>
         /// Mo popup Inventory khi nguoi choi nhan nut Inventory tren UI chinh.
-        /// Dong het cac popup khac truoc khi mo de tranh nhieu popup cung hien thi.
         /// </summary>
         private void OpenInventoryPopup()
         {
-            CloseMainPopups();
-
-            if (_inventoryPopup != null)
+            if (_inventoryPopup != null && !_inventoryPopup.IsVisible)
             {
-                _inventoryPopup.Show();
+                if (_openInventorySfx != null && SfxService.Instance != null)
+                {
+                    SfxService.Instance.PlaySfx(_openInventorySfx);
+                }
             }
-            else
-            {
-                Debug.LogWarning("[UIManager] _inventoryPopup chua duoc gan tren Inspector.");
-            }
+            OpenPopup(_inventoryPopup);
         }
 
         /// <summary>
         /// Mo popup Option khi nguoi choi nhan nut Option tren UI chinh.
-        /// Dong het cac popup khac truoc khi mo de tranh nhieu popup cung hien thi.
         /// </summary>
         private void OpenOptionPopup()
         {
-            CloseMainPopups();
-
-            if (_optionPopup != null)
+            if (_optionPopup != null && !_optionPopup.IsVisible)
             {
-                _optionPopup.Show();
+                if (_openOptionSfx != null && SfxService.Instance != null)
+                {
+                    SfxService.Instance.PlaySfx(_openOptionSfx);
+                }
             }
-            else
-            {
-                Debug.LogWarning("[UIManager] _optionPopup chua duoc gan tren Inspector.");
-            }
+            OpenPopup(_optionPopup);
         }
 
         /// <summary>
-        /// Mo popup Settings khi user nhan nut Settings (tren Home o UI chinh).
-        /// Dong het cac popup khac inan de tranh nhieu popup cung hien thi.
+        /// Mo popup Settings khi user nhan nut Settings.
         /// </summary>
         private void OpenSettingsPopup()
         {
-            CloseMainPopups();
+            OpenPopup(_settingsPopup);
+        }
 
-            if (_settingsPopup != null)
+        /// <summary>
+        /// Mo popup Info khi user nhan nut Info tren UI chinh hoac Home.
+        /// </summary>
+        public void OpenInfoPopup()
+        {
+            _infoPopup ??= GetComponentInChildren<InfoPopup>(true);
+
+            if (_infoPopup != null && !_infoPopup.IsVisible)
             {
-                _settingsPopup.Show();
+                if (_openInfoSfx != null && SfxService.Instance != null)
+                {
+                    SfxService.Instance.PlaySfx(_openInfoSfx);
+                }
             }
-            else
-            {
-                Debug.LogWarning("[UIManager] _settingsPopup chua duoc gan tren Inspector.");
-            }
+            OpenPopup(_infoPopup);
         }
         #endregion
 
         #region Event Handlers
         private void HandleHomeScreenPlayClicked()
         {
-            // UIManager nhận event từ HomeScreen (HomeScreen đã tự ẩn trước khi emit event).
-            // Hiện Main HUD và đảm bảo Pause Menu bị ẩn khi bắt đầu chơi.
+            // UIManager nhan event tu HomeScreen (HomeScreen da tu an truoc khi emit event).
+            // Hien Main HUD va dam bao Pause Menu bi an khi bat dau choi.
             if (_mainHUD != null) _mainHUD.SetActive(true);
             _pauseMenu?.Hide();
             CloseMainPopups();
 
-            // Bắn event yêu cầu chạy game ngay lập tức.
-            // Player duoc spawn ngay; giai doan chao mung "Welcome to Kaboom Chaos!" 
-            // duoc xu ly ben trong GameloopManager nhu mot stage dau tien cua game loop.
+            // Ban event yeu cau chay game ngay lap tuc.
             Debug.Log("[UIManager] HomeScreen PlayClicked event received. Triggering GameEvents.OnStartGameRequest.");
             GameEvents.TriggerStartGameRequest();
         }
 
         /// <summary>
-        /// Xu ly event Settings da tu HomeScreen: mo popup Settings. HomeScreen khong sa inchide,
-        /// deci popup se hien tren deava Home.
+        /// Xu ly event Settings tu HomeScreen: mo popup Settings (Settings_Home).
         /// </summary>
         private void HandleHomeScreenSettingsClicked()
         {
             Debug.Log("[UIManager] HomeScreen SettingsClicked event received. Opening Settings popup.");
             OpenSettingsPopup();
+        }
+
+        /// <summary>
+        /// Xu ly event Info tu HomeScreen: mo popup Info.
+        /// </summary>
+        private void HandleHomeScreenInfoClicked()
+        {
+            Debug.Log("[UIManager] HomeScreen InfoClicked event received. Opening Info popup.");
+            OpenInfoPopup();
         }
 
         /// <summary>
@@ -753,9 +763,6 @@ namespace UI
         {
             if (_notificationPanel != null) _notificationPanel.SetActive(false);
             if (_timerPanel != null) _timerPanel.SetActive(false);
-            if (_intensityBarPanel != null) _intensityBarPanel.SetActive(false);
-            if (_countdownPanel != null) _countdownPanel.SetActive(false);
-            if (_currentIntensityPanel != null) _currentIntensityPanel.SetActive(false);
             if (_mainHUD != null) _mainHUD.SetActive(false);
             if (_scoreCard != null) _scoreCard.Hide();
 
@@ -766,3 +773,4 @@ namespace UI
         #endregion
     }
 }
+

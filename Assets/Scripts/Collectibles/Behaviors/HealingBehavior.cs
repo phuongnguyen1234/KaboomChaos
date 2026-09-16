@@ -35,12 +35,6 @@ namespace Collectibles.Behaviors
                 }
             }
 
-            // Chạy VFX
-            if (data.CollectionVFX != null)
-            {
-                GameEvents.TriggerVFXSpawnRequest(data.CollectionVFX, controller.GameObject.transform.position, Quaternion.identity);
-            }
-
             return true;
         }
     }

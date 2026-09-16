@@ -21,5 +21,10 @@ MonoBehaviour:
   _rechargeTime: 40
   _price: 0
   _castSfx: {fileID: 8300000, guid: 076cae69e8a0c824d845e421ecf273fb, type: 3}
-  _castVfx: {fileID: 0}
+  _castVfx: {fileID: 5928714624743693788, guid: 8151274b750a2994191f74b78cd94a99, type: 3}
+  _playCastOnActivate: 1
+  _playCastOnDeactivate: 0
+  _castVfxSpawnMode: 0
+  _castVfxExplosionRadius: 2
   _healAmount: 25
+  _slowMultiplier: 0.5

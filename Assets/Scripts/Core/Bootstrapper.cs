@@ -10,6 +10,12 @@ namespace Core
     /// </summary>
     public class Bootstrapper : MonoBehaviour
     {
+        [Header("Audio & System Services")]
+        [Tooltip("Cac manager am thanh va cai dat he thong.")]
+        [SerializeField] private GameObject _settingsManagerPrefab;
+        [SerializeField] private GameObject _sfxManagerPrefab;
+        [SerializeField] private GameObject _bgmControllerPrefab;
+
         [Header("Core Systems & Pools")]
         [Tooltip("Các manager hệ thống cốt lõi và các pool không có dependency chéo.")]
         [SerializeField] private GameObject _uiManagerPrefab;
@@ -35,6 +41,22 @@ namespace Core
         // Cờ static để đảm bảo quá trình khởi tạo chỉ chạy một lần duy nhất.
         private static bool _hasBeenInitialized = false;
 
+        /// <summary>
+        /// Tu dong nap Bootstrapper prefab tu Resources neu scene chua co Bootstrapper va chua duoc khoi tao.
+        /// </summary>
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void AutoLoadBootstrapper()
+        {
+            if (_hasBeenInitialized) return;
+            if (FindAnyObjectByType<Bootstrapper>() != null) return;
+
+            var prefab = Resources.Load<GameObject>("Bootstrapper");
+            if (prefab != null)
+            {
+                Instantiate(prefab);
+            }
+        }
+
         private void Awake()
         {
             // Ngăn bootstrapper chạy lại nếu nó vô tình tồn tại trong một scene được tải lại.
@@ -48,24 +70,29 @@ namespace Core
             DOTween.SetTweensCapacity(500, 50);
 
             // Khởi tạo các manager từ prefab theo thứ tự logic để dễ theo dõi.
+            // Nhóm 0: Audio & System Services
+            if (_settingsManagerPrefab != null) Instantiate(_settingsManagerPrefab);
+            if (_sfxManagerPrefab != null) Instantiate(_sfxManagerPrefab);
+            if (_bgmControllerPrefab != null) Instantiate(_bgmControllerPrefab);
+
             // Nhóm 1: Core Systems & Pools (ít hoặc không có dependency)
-            Instantiate(_uiManagerPrefab);
-            Instantiate(_spawnManagerPrefab);
-            Instantiate(_destructionManagerPrefab);
-            Instantiate(_mapManagerPrefab);
-            Instantiate(_vfxPoolManagerPrefab);
-            Instantiate(_blockPoolManagerPrefab);
-            Instantiate(_floatingTextManagerPrefab);
+            if (_uiManagerPrefab != null) Instantiate(_uiManagerPrefab);
+            if (_spawnManagerPrefab != null) Instantiate(_spawnManagerPrefab);
+            if (_destructionManagerPrefab != null) Instantiate(_destructionManagerPrefab);
+            if (_mapManagerPrefab != null) Instantiate(_mapManagerPrefab);
+            if (_vfxPoolManagerPrefab != null) Instantiate(_vfxPoolManagerPrefab);
+            if (_blockPoolManagerPrefab != null) Instantiate(_blockPoolManagerPrefab);
+            if (_floatingTextManagerPrefab != null) Instantiate(_floatingTextManagerPrefab);
             if (_undergroundGeneratorPrefab != null) Instantiate(_undergroundGeneratorPrefab);
             if (_playerDataManagerPrefab != null) Instantiate(_playerDataManagerPrefab);
             if (_collectiblePoolManagerPrefab != null) Instantiate(_collectiblePoolManagerPrefab);
 
             // Nhóm 2: Gameplay Managers (phụ thuộc vào nhóm 1)
-            Instantiate(_playerManagerPrefab);
-            Instantiate(_bombSpawnerManagerPrefab);
+            if (_playerManagerPrefab != null) Instantiate(_playerManagerPrefab);
+            if (_bombSpawnerManagerPrefab != null) Instantiate(_bombSpawnerManagerPrefab);
 
             // Nhóm 3: Game Loop (phụ thuộc vào các nhóm trên)
-            Instantiate(_gameloopManagerPrefab);
+            if (_gameloopManagerPrefab != null) Instantiate(_gameloopManagerPrefab);
 
             _hasBeenInitialized = true;
             Destroy(gameObject); // Bootstrapper đã hoàn thành nhiệm vụ.

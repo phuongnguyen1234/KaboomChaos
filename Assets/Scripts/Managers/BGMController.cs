@@ -23,8 +23,14 @@ namespace Managers
         [SerializeField] private BGMDatabase _bgmDatabase;
 
         private AudioSource _audioSource;
+        private AudioLowPassFilter _lowPassFilter;
         private Coroutine _musicCoroutine;
+        private Coroutine _muffleCoroutine;
+        private Coroutine _fadeCoroutine;
         private AudioClip _lastPlayedClip;
+
+        private const float NormalCutoffFrequency = 22000f;
+        private const float MuffledCutoffFrequency = 1000f;
 
         /// <summary>
         /// Cờ chặn BGM khi có nhạc riêng của khiên (Magic Shield) đang phát.
@@ -67,22 +73,10 @@ namespace Managers
         #region Unity Lifecycle
 
         /// <summary>
-        /// Tự khởi tạo BGMController ngay sau khi scene đầu tiên load nếu chưa có sẵn trong scene.
-        /// Giúp hệ thống nhạc nền hoạt động mà không cần sửa scene/prefab.
+        /// Khoi tao singleton va cau hinh AudioSource cho BGMController.
         /// </summary>
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        private static void AutoBootstrap()
-        {
-            if (Instance == null)
-            {
-                var audioObject = new GameObject("[BGMController]");
-                audioObject.AddComponent<BGMController>();
-            }
-        }
-
         private void Awake()
         {
-            // Tránh trùng lặp nếu người dùng đã đặt BGMController thủ công trong scene.
             if (Instance != null && Instance != this)
             {
                 Destroy(gameObject);
@@ -113,12 +107,19 @@ namespace Managers
                 _audioSource = gameObject.AddComponent<AudioSource>();
             }
 
+            _lowPassFilter = GetComponent<AudioLowPassFilter>();
+            if (_lowPassFilter == null)
+            {
+                _lowPassFilter = gameObject.AddComponent<AudioLowPassFilter>();
+            }
+            _lowPassFilter.cutoffFrequency = NormalCutoffFrequency;
+
             // Cấu hình AudioSource cho nhạc nền 2D, không bị ảnh hưởng bởi vị trí.
             _audioSource.spatialBlend = 0f;
             _audioSource.playOnAwake = false;
 
             // Ap dung music volume din Settings (0-100) cu AudioSource (0-1) backend la boot.
-            ApplyMusicVolume(Core.SettingsManager.Instance != null ? Core.SettingsManager.Instance.MusicVolume : 100f);
+            ApplyMusicVolume(SettingsManager.Instance != null ? SettingsManager.Instance.MusicVolume : 100f);
         }
 
         private void OnEnable()
@@ -127,7 +128,9 @@ namespace Managers
             GameEvents.OnReturnToHomeRequest += HandleReturnToHomeRequest;
             GameEvents.OnMusicPauseRequested += PauseMusic;
             GameEvents.OnMusicResumeRequested += ResumeMusic;
+            GameEvents.OnMusicFadeOutRequested += FadeOutMusic;
             GameEvents.OnSettingsMusicVolumeChanged += ApplyMusicVolume;
+            GameEvents.OnBgmAudioMuffleRequested += SetMuffled;
         }
 
         private void OnDisable()
@@ -136,7 +139,9 @@ namespace Managers
             GameEvents.OnReturnToHomeRequest -= HandleReturnToHomeRequest;
             GameEvents.OnMusicPauseRequested -= PauseMusic;
             GameEvents.OnMusicResumeRequested -= ResumeMusic;
+            GameEvents.OnMusicFadeOutRequested -= FadeOutMusic;
             GameEvents.OnSettingsMusicVolumeChanged -= ApplyMusicVolume;
+            GameEvents.OnBgmAudioMuffleRequested -= SetMuffled;
         }
 
                 private void ResolveDatabaseIfMissing()
@@ -178,26 +183,172 @@ namespace Managers
         }
 
         /// <summary>
-        /// Phát nhạc nền màn hình chính.
+        /// Thiet lap hoac khoi phuc hieu ung lam mo (muffle) nhac nen qua AudioLowPassFilter.
+        /// </summary>
+        /// <param name="muffle">True de lam mo BGM, false de khoi phuc binh thuong.</param>
+        public void SetMuffled(bool muffle)
+        {
+            if (_lowPassFilter == null) return;
+
+            if (_muffleCoroutine != null)
+            {
+                StopCoroutine(_muffleCoroutine);
+            }
+            _muffleCoroutine = StartCoroutine(SmoothMuffleRoutine(muffle ? MuffledCutoffFrequency : NormalCutoffFrequency, 0.3f));
+        }
+
+        private IEnumerator SmoothMuffleRoutine(float targetCutoff, float duration)
+        {
+            float startCutoff = _lowPassFilter.cutoffFrequency;
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+                if (_lowPassFilter != null) _lowPassFilter.cutoffFrequency = Mathf.Lerp(startCutoff, targetCutoff, t);
+                yield return null;
+            }
+
+            if (_lowPassFilter != null) _lowPassFilter.cutoffFrequency = targetCutoff;
+            _muffleCoroutine = null;
+        }
+
+        /// <summary>
+        /// Gia tri volume muc tieu tu cai dat (0-1).
+        /// </summary>
+        private float TargetVolume => (SettingsManager.Instance != null ? SettingsManager.Instance.MusicVolume : 100f) / 100f;
+
+        /// <summary>
+        /// Phat nhac nen man hinh chinh (Home) kem hieu ung transition crossfade. Reset shield suppression va interrupted state.
         /// </summary>
         public void PlayHomeMusic()
         {
+            _isSuppressed = false;
+            _hasInterruptedState = false;
             if (_bgmDatabase == null) return;
 
             AudioClip clip = _bgmDatabase.HomeMusic != null ? _bgmDatabase.HomeMusic : _bgmDatabase.LobbyMusic;
             _currentMode = BgmMode.Home;
-            PlayClip(clip, true);
+            PlayClipWithTransition(clip, true, 0.6f);
         }
 
         /// <summary>
-        /// Phát nhạc sảnh chờ (trong giai đoạn chọn map / chờ giữa các round).
+        /// Phát nhạc sảnh chờ (trong giai đoạn chọn map / chờ giữa các round) kèm hiệu ứng transition crossfade.
         /// </summary>
         public void PlayLobbyMusic()
         {
-            if (_isSuppressed || _bgmDatabase == null) return;
+            _isSuppressed = false;
+            _hasInterruptedState = false;
+            if (_bgmDatabase == null) return;
 
             _currentMode = BgmMode.Lobby;
-            PlayClip(_bgmDatabase.LobbyMusic, true);
+            PlayClipWithTransition(_bgmDatabase.LobbyMusic, true, 0.6f);
+        }
+
+        /// <summary>
+        /// Fade out nhạc nền hiện tại về 0 và dừng nhạc (dùng khi teleport vào arena hoặc chuyển cảnh).
+        /// </summary>
+        /// <param name="fadeDuration">Thời gian (giây) để fade out nhạc nền.</param>
+        public void FadeOutMusic(float fadeDuration = 1.0f)
+        {
+            if (_audioSource == null || !_audioSource.isPlaying)
+            {
+                StopMusic();
+                return;
+            }
+
+            if (_fadeCoroutine != null)
+            {
+                StopCoroutine(_fadeCoroutine);
+            }
+            _fadeCoroutine = StartCoroutine(FadeOutRoutine(fadeDuration));
+        }
+
+        private IEnumerator FadeOutRoutine(float duration)
+        {
+            float startVolume = _audioSource.volume;
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+                if (_audioSource != null)
+                {
+                    _audioSource.volume = Mathf.Lerp(startVolume, 0f, t);
+                }
+                yield return null;
+            }
+
+            StopAudioInternal();
+            ApplyMusicVolume(SettingsManager.Instance != null ? SettingsManager.Instance.MusicVolume : 100f);
+            _fadeCoroutine = null;
+        }
+
+        /// <summary>
+        /// Phát một audio clip với hiệu ứng transition (fade out clip hiện tại / fade in clip mới).
+        /// </summary>
+        public void PlayClipWithTransition(AudioClip clip, bool loop, float fadeDuration = 0.6f)
+        {
+            if (clip == null) return;
+
+            // Cùng bài và đang phát thì giữ nguyên.
+            if (_audioSource != null && _audioSource.clip == clip && _audioSource.isPlaying && !_isSuppressed) return;
+
+            if (_fadeCoroutine != null)
+            {
+                StopCoroutine(_fadeCoroutine);
+            }
+
+            _fadeCoroutine = StartCoroutine(FadeTransitionRoutine(clip, loop, fadeDuration));
+        }
+
+        private IEnumerator FadeTransitionRoutine(AudioClip newClip, bool loop, float duration)
+        {
+            float targetVol = TargetVolume;
+
+            if (_audioSource != null && _audioSource.isPlaying && _audioSource.clip != null && duration > 0f)
+            {
+                float startVol = _audioSource.volume;
+                float elapsed = 0f;
+
+                while (elapsed < duration)
+                {
+                    elapsed += Time.deltaTime;
+                    float t = Mathf.Clamp01(elapsed / duration);
+                    if (_audioSource != null)
+                    {
+                        _audioSource.volume = Mathf.Lerp(startVol, 0f, t);
+                    }
+                    yield return null;
+                }
+            }
+
+            StopAudioInternal();
+
+            if (newClip != null)
+            {
+                _audioSource.clip = newClip;
+                _audioSource.loop = loop;
+                _audioSource.volume = 0f;
+                _audioSource.Play();
+
+                float elapsed = 0f;
+                while (elapsed < duration)
+                {
+                    elapsed += Time.deltaTime;
+                    float t = Mathf.Clamp01(elapsed / duration);
+                    if (_audioSource != null)
+                    {
+                        _audioSource.volume = Mathf.Lerp(0f, targetVol, t);
+                    }
+                    yield return null;
+                }
+                _audioSource.volume = targetVol;
+            }
+
+            _fadeCoroutine = null;
         }
 
         /// <summary>
@@ -247,9 +398,9 @@ namespace Managers
         }
 
         /// <summary>
-        /// Dừng hoàn toàn mọi nhạc nền đang phát.
+        /// Dung audio source va dung playlist coroutine ma KHONG tu huy _fadeCoroutine dang chay.
         /// </summary>
-        public void StopMusic()
+        private void StopAudioInternal()
         {
             if (_musicCoroutine != null)
             {
@@ -260,6 +411,19 @@ namespace Managers
             {
                 _audioSource.Stop();
             }
+        }
+
+        /// <summary>
+        /// Dừng hoàn toàn mọi nhạc nền đang phát.
+        /// </summary>
+        public void StopMusic()
+        {
+            if (_fadeCoroutine != null)
+            {
+                StopCoroutine(_fadeCoroutine);
+                _fadeCoroutine = null;
+            }
+            StopAudioInternal();
         }
 
         /// <summary>
@@ -348,7 +512,9 @@ namespace Managers
 
         private void HandleReturnToHomeRequest()
         {
-            // Quay về màn hình chính → phát nhạc Home.
+            // Quay về màn hình chính → phát nhạc Home, reset suppression state.
+            _isSuppressed = false;
+            _hasInterruptedState = false;
             PlayHomeMusic();
         }
 

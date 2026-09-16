@@ -60980,6 +60980,26 @@ PrefabInstance:
       propertyPath: _customEmissionIntensity
       value: 1.45
       objectReference: {fileID: 0}
+    - target: {fileID: 7289873364278322524, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: InitialModule.startColor.maxColor.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7289873364278322524, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: InitialModule.startColor.maxColor.g
+      value: 0.9557071
+      objectReference: {fileID: 0}
+    - target: {fileID: 7289873364278322524, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: InitialModule.startColor.maxColor.r
+      value: 0.42075467
+      objectReference: {fileID: 0}
+    - target: {fileID: 7433509491896145726, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: m_RenderMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7433509491896145726, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 6dc251359a9f5a047a4c3546e49166c9, type: 2}
     - target: {fileID: 8365981775348852892, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 

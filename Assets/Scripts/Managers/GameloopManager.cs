@@ -39,6 +39,21 @@ namespace Managers
         public float CurrentIntensity { get; private set; } = 1f;
 
         /// <summary>
+        /// Độ khó dự kiến cho round tiếp theo.
+        /// </summary>
+        public float NextRoundIntensity => _nextRoundIntensity;
+
+        /// <summary>
+        /// Độ khó tối thiểu.
+        /// </summary>
+        public float MinIntensity => _minIntensity;
+
+        /// <summary>
+        /// Độ khó tối đa.
+        /// </summary>
+        public float MaxIntensity => _maxIntensity;
+
+        /// <summary>
         /// Tổng thời gian (giây) của round đấu hiện tại.
         /// Dùng để tính toán Survival Score theo tỷ lệ thời gian sống sót.
         /// </summary>
@@ -145,7 +160,8 @@ namespace Managers
             else
             {
                 Instance = this;
-                // Gan luon qua interface de cac assembly khac (UI) co the truy cap qua IGameStateProvider.Instance.
+                // Gan luon qua interface de cac assembly khac (UI) co the truy cap qua interface.
+                IGameloopManager.Instance = this;
                 IGameStateProvider.Instance = this;
                 DontDestroyOnLoad(gameObject); // Giữ Manager tồn tại khi chuyển đổi giữa các scene.
             }
@@ -187,6 +203,18 @@ namespace Managers
                 _topBorder = registry.TopBorder;
             }
             else Debug.LogError("[GameloopManager] SceneObjectRegistry.Instance is null!", this);
+
+            // Khoi tao va phat event NextRoundIntensity ban dau
+            SetNextRoundIntensity(_initialIntensity);
+        }
+
+        /// <summary>
+        /// Thiet lap gia tri NextRoundIntensity va phat event thong bao cho cac UI/World display.
+        /// </summary>
+        private void SetNextRoundIntensity(float value)
+        {
+            _nextRoundIntensity = Mathf.Clamp(value, _minIntensity, _maxIntensity);
+            GameEvents.TriggerNextRoundIntensityChanged(_nextRoundIntensity, _minIntensity, _maxIntensity);
         }
 
         public void StartGame()
@@ -198,7 +226,7 @@ namespace Managers
 
             // Đặt lại hạt giống độ khó về giá trị khởi tạo đã cấu hình trong Inspector,
             // để round đầu tiên của phiên mới không bị ép về luôn _minIntensity mặc định.
-            _nextRoundIntensity = Mathf.Clamp(_initialIntensity, _minIntensity, _maxIntensity);
+            SetNextRoundIntensity(_initialIntensity);
 
             _gameLoopActive = true;
 
@@ -330,8 +358,8 @@ namespace Managers
         {
             // --- Giai đoạn 1: Bỏ phiếu Map ---
             CurrentState = GameState.MapVoting;
-            Debug.Log("[GameloopManager] Giai đoạn 1: Bỏ phiếu Map");
-            _uiManager?.ShowPersistentNotification("Voting for the next map...");
+            Debug.Log("[GameloopManager] Giai đoạn 1: Chuẩn bị (Tạm thay thế vote map)");
+            _uiManager?.ShowPersistentNotification("Intermission");
 
             // Bắt đầu vòng lặp đếm ngược cho giai đoạn voting, đồng thời hiển thị timer.
             float votingTimer = _votingDuration;
@@ -417,7 +445,31 @@ namespace Managers
             _uiManager?.UpdateTimer(_roundDuration);
 
             _playerManager?.StartRound(); // Chuẩn bị danh sách người chơi cho round mới
-            TeleportPlayersToArena();
+
+            // Chay TransitionScreen truoc khi Teleport nguoi choi vao arena
+            bool transitionDone = false;
+            if (_uiManager != null)
+            {
+                _uiManager.PlayTransition(
+                    onCovered: () =>
+                    {
+                        TeleportPlayersToArena();
+                    },
+                    onComplete: () =>
+                    {
+                        transitionDone = true;
+                    }
+                );
+
+                while (!transitionDone)
+                {
+                    yield return null;
+                }
+            }
+            else
+            {
+                TeleportPlayersToArena();
+            }
 
             // Nhạc nền của sảnh chờ đã được dừng bên trong TeleportPlayersToArena().
             // Sẽ có một khoảng lặng cho đến khi round đấu chính thức bắt đầu.
@@ -433,11 +485,7 @@ namespace Managers
                 _uiManager.ShowCurrentIntensity(CurrentIntensity);
             }
 
-            // 4. Ghi nhận snapshot số lượng người chơi sống ban đầu của round này,
-            // để dùng cho công thức giảm intensity dựa trên tỉ lệ số người chết.
-            // Ngụ ý: "danh sách tham gia round" = những người chơi KHÔNG bị AFK ngay tại thời điểm round bắt đầu.
-            // TODO(AFK): Khi triển khai hệ thống AFK, hãy LỌC người chơi AFK khỏi danh sách tham gia
-            // trước khi snapshot, để độ khó chỉ được tính dựa trên danh sách non-AFK ban đầu này.
+            // 4. Ghi nhận snapshot số lượng người chơi sống ban đầu của round này
             _initialPlayerCountForRound = _playerManager?.GetAlivePlayerCount() ?? 0;
             _playersWhoDiedInRound = 0;
             Debug.Log($"[GameloopManager] Round {CurrentState}: {_initialPlayerCountForRound} active players. Intensity tracking initialized.");
@@ -446,10 +494,9 @@ namespace Managers
 
             // --- Giai đoạn 4: Đếm ngược & Bắt đầu ---
             Debug.Log("[GameloopManager] Giai đoạn 4: Đếm ngược và Bắt đầu");
-            // Sử dụng coroutine đếm ngược mới từ UIManager
             if (_uiManager != null) yield return StartCoroutine(_uiManager.ShowCountdown());
 
-            // Bắt đầu phát nhạc gameplay sau đây đếm ngược kết thúc (qua BGMController toàn cục).
+            // Bắt đầu phát nhạc gameplay sau khi đếm ngược kết thúc
             BGMController.Instance?.PlayGameplayMusic(CurrentIntensity);
         }
 
@@ -462,24 +509,17 @@ namespace Managers
             // --- Giai đoạn 5: Round đang diễn ra ---
             CurrentState = GameState.RoundActive;
             _bombSpawnerManager?.StartSpawning();
-            // Yeu cau: sau khi dem nguoc ket thuc va round bat dau, doi noi dung notification thanh Survive the bombs.
             _uiManager?.ShowPersistentNotification("Survive the bombs!");
             Debug.Log("[GameloopManager] Giai đoạn 5: Round đang diễn ra");
 
-            // Khởi tạo đồng hồ round (giây còn lại). Đồng hồ này là nguồn tính Survival Score theo thời gian của round.
             _roundTimeRemaining = _roundDuration;
             int lastDisplayedSecond = Mathf.CeilToInt(_roundTimeRemaining);
 
-            // Reset trang thai cam bao cua timer ve mau binh thuong truoc khi chay round moi.
             _uiManager?.SetTimerDangerState(false);
 
-            // Lấy số người chơi lúc bắt đầu round để xác định điều kiện thắng.
-            // Điều kiện kết thúc round: khi không còn người chơi nào sống sót (số người chơi còn lại là 0).
             int endConditionPlayerCount = 0;
             bool last30sMusicTriggered = false;
 
-            // Vòng lặp chính của round đấu.
-            // Điều kiện kết thúc: hết giờ, hoặc số người chơi còn lại đạt ngưỡng kết thúc.
             while (_roundTimeRemaining > 0f && (_playerManager?.GetAlivePlayerCount() > endConditionPlayerCount))
             {
                 _roundTimeRemaining -= Time.deltaTime;
@@ -491,16 +531,11 @@ namespace Managers
                     _uiManager?.UpdateTimer(lastDisplayedSecond);
                 }
 
-                // Kích hoạt nhạc 30 giây cuối
                 if (!last30sMusicTriggered && _roundTimeRemaining <= 30f)
                 {
-                                        // Kích hoạt nhạc 30 giây cuối (qua BGMController toàn cục)
                     BGMController.Instance?.PlayLast30sMusic(CurrentIntensity);
                     last30sMusicTriggered = true;
-
-                    // Doi mau text + icon TimerPanel thanh do va phat SFX canh bao song song.
                     _uiManager?.SetTimerDangerState(true);
-
                     Debug.Log("[GameloopManager] 30 seconds left. Playing final music.");
                 }
                 yield return null;
@@ -521,21 +556,20 @@ namespace Managers
             _uiManager?.HideTimer();
             _uiManager?.HideCurrentIntensity(); // Ẩn panel text độ khó của round vừa kết thúc.
 
-            // ===== SCORE CARD CHO NGƯỜI SỐNG SÓT KẾT THÚC ROUND =====
-            // Lấy danh sách người chơi còn sống sót TRƯỚC khi EndRound() xóa danh sách người chơi trong round.
+            // Phat SFX tieng coi + tieng chuong khi round ket thuc
+            _uiManager?.PlayRoundEndSfx();
+
             var survivors = _playerManager?.GetSurvivors();
 
-            // B1. Đưa (những) người chơi còn sống sót trong round về sảnh chờ TRƯỚC.
-            // Phương thức này phải được gọi TRƯỚC EndRound(), vì EndRound() sẽ xóa danh sách người chơi trong round.
+            // Dua nhung nguoi choi con song ve lobby va reset round trong PlayerManager
             _playerManager?.ReturnRoundSurvivorsToLobby();
-
-            // SỬA LỖI: Reset trạng thái người chơi (máu, khiên, buff) ngay khi round kết thúc, không chờ đợi.
             _playerManager?.EndRound();
 
-            // B2. Tính điểm, tặng credits và hiển thị Score Card cá nhân cho TỪNG người chơi sống sót.
-            // KHÔNG chặn game loop: dùng StartCoroutine (không yield) để cleanup + vòng lặp mới
-            // diễn ra bình thường trong lúc các Score Card lần lượt xuất hiện và tự ẩn (mỗi card 5 giây).
-            StartCoroutine(ShowScoreCardForSurvivors(survivors));
+            // Hien thi Score Card cho nguoi song sot doc lap (khong block gameloop)
+            if (survivors != null && survivors.Count > 0)
+            {
+                StartCoroutine(ShowScoreCardForSurvivors(survivors));
+            }
 
             // --- Intensity Adjustment Logic ---
             // Công thức: NextIntensity = CurrentIntensity + (có người sống sót ? +0.25 : +0) - (0.3 * số người chết / tổng số người tham gia round ban đầu)
@@ -563,7 +597,7 @@ namespace Managers
                 float deathRatio = (float)_playersWhoDiedInRound / _initialPlayerCountForRound;
                 nextIntensity -= _intensityMaxDeathPenalty * deathRatio;
 
-                _nextRoundIntensity = Mathf.Clamp(nextIntensity, _minIntensity, _maxIntensity);
+                SetNextRoundIntensity(nextIntensity);
                 Debug.Log($"[GameloopManager] Round ended. Deaths {_playersWhoDiedInRound}/{_initialPlayerCountForRound}. Next round intensity calculated: {_nextRoundIntensity}");
             }
 
@@ -696,11 +730,11 @@ namespace Managers
             var players = _playerManager?.GetPlayersInRound();
             if (players == null) return;
 
-            // Sau khi môi trường đã được định vị ở bước riêng (sau khi build map), tiến hành dịch chuyển người chơi.
+            // Fade out nhac nen sanh cho (Lobby BGM) khi teleport vao arena.
+            BGMController.Instance?.FadeOutMusic(1.0f);
+
             foreach (var player in players)
             {
-                // Dừng nhạc nền toàn cục (nhạc sảnh chờ) trước khi dịch chuyển vào arena.
-                BGMController.Instance?.StopMusic();
                 TeleportPlayerToArena(player);
             }
         }
@@ -776,6 +810,7 @@ namespace Managers
                     WinMultiplier = winMultiplier,
                     TotalCredits = totalCredits,
                     IsWinner = isVictory,
+                    IsExtremeMode = roundData.IsExtremeModeEnabled
                 };
                 _uiManager?.ShowScoreCard(scoreCard);
 

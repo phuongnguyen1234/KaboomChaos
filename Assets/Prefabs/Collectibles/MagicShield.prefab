@@ -114,6 +114,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: MagicShield
       objectReference: {fileID: 0}
+    - target: {fileID: 5175567799161593487, guid: 7952e67c615b53544bf7a6eb5fe7f6b4, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5835911723981711993, guid: 7952e67c615b53544bf7a6eb5fe7f6b4, type: 3}
+      propertyPath: _mainRenderer
+      value: 
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 4022716372110694921, guid: 7952e67c615b53544bf7a6eb5fe7f6b4, type: 3}

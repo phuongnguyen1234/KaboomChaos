@@ -10,9 +10,9 @@ using System;
 namespace UI
 {
     /// <summary>
-    /// Panel cai dat reusable (Settings): slider Music, slider SFX va nhu t rebind UseSkillKey.
-    /// Lua gia tri cu singleton SettingsManager (Core) de restaurare khi vao game.
-    /// Poate fi folosi in orice panel/popup (SettingsPopup, PauseMenu, MainUI).
+    /// Panel de setari reusable (Settings): slider Music, slider SFX si rebind UseSkillKey.
+    /// Citete giarile din singleton SettingsManager (Core) de restaurarea candse specta game.
+    /// Poate fi folosit in orice panel/popup (SettingsPopup, PauseMenu, MainUI).
     /// </summary>
     public class SettingsUI : MonoBehaviour
     {
@@ -25,21 +25,31 @@ namespace UI
         [SerializeField] private Slider _sfxSlider;
 
         [Header("Use Skill Key")]
-        [Tooltip("Nut rebind key dung de kich hoat Skill. Khi an, text chuyen sang 'Press a Key...'.")]
+        [Tooltip("Botton pentru rebind key-ului de skill. Cand anc apasai, textul se schimba in 'Press a Key...'.")]
         [SerializeField] private Button _useSkillKeyButton;
-        [Tooltip("(Tuy chon) Text label de pe nut. Neu khong gan, se tu tim object con.")]
+        [Tooltip("(Optional) Label text de pe botton. Neu nu este la, se accune dupa child Text.")]
         [SerializeField] private TextMeshProUGUI _useSkillKeyLabel;
 
-        // Trang thai cho doi nhan key.
+        [Header("Screen Shake & Overlay")]
+        [Tooltip("Toggle don hoac toggle bat hieu ung lac man hinh.")]
+        [SerializeField] private Toggle _screenShakeToggle;
+        [Tooltip("Toggle 'On' trong ToggleGroup (neu dung 2 toggle bat/tat).")]
+        [SerializeField] private Toggle _screenShakeOnToggle;
+        [Tooltip("Toggle 'Off' trong ToggleGroup (neu dung 2 toggle bat/tat).")]
+        [SerializeField] private Toggle _screenShakeOffToggle;
+        [Tooltip("(Tuy chon) ToggleGroup cho cac toggle Screen Shake.")]
+        [SerializeField] private ToggleGroup _screenShakeToggleGroup;
+
+        // Starea cand asteptam o key de rebind.
         private bool _isWaitingForKey;
 
-        // Guard tranh tinh cach sau khi Refresh().
+        // Guard pentru sincronizarea valorilor aplicate din Refresh().
         private bool _isApplyingState;
 
-        // Set key speciale (khong valid de rebind), comum pentru tut instance.
+        // Set de key speciale (nevalid pentru rebind), comun pentru tut instancele.
         private static readonly HashSet<Key> _specialKeys = new HashSet<Key>();
 
-        // Text hiển thi text khi rebind.
+        // Textul sau afisat cand rebind este activ.
         private static readonly string WaitingForKeyLabel = "Press a Key...";
 
         #endregion
@@ -47,7 +57,7 @@ namespace UI
         #region Properties
 
         /// <summary>
-        /// Tra ve true khi dang doi nhan key.
+        /// Returneaza true cand asteptam o key.
         /// </summary>
         public bool IsWaitingForKey => _isWaitingForKey;
 
@@ -57,9 +67,9 @@ namespace UI
 
         private void Awake()
         {
-            //SetupSpecialKeys();
+            SetupSpecialKeys();
 
-            // Dupa nu tut de label gan, tu tim din child Text al button.
+            // Dupa nu este labelul, accuna din child Text al bottonului.
             if (_useSkillKeyLabel == null && _useSkillKeyButton != null)
             {
                 _useSkillKeyLabel = _useSkillKeyButton.GetComponentInChildren<TextMeshProUGUI>();
@@ -76,6 +86,21 @@ namespace UI
             if (_useSkillKeyButton != null)
             {
                 _useSkillKeyButton.onClick.AddListener(OnUseSkillKeyClicked);
+            }
+            if (_screenShakeToggle != null)
+            {
+                _screenShakeToggle.onValueChanged.AddListener(HandleScreenShakeToggleChanged);
+            }
+            if (_screenShakeOnToggle != null && _screenShakeOffToggle != null)
+            {
+                if (_screenShakeToggleGroup != null)
+                {
+                    _screenShakeOnToggle.group = _screenShakeToggleGroup;
+                    _screenShakeOffToggle.group = _screenShakeToggleGroup;
+                }
+
+                _screenShakeOnToggle.onValueChanged.AddListener(HandleScreenShakeGroupToggleChanged);
+                _screenShakeOffToggle.onValueChanged.AddListener(HandleScreenShakeGroupToggleChanged);
             }
 
             Refresh();
@@ -95,11 +120,20 @@ namespace UI
             {
                 _useSkillKeyButton.onClick.RemoveListener(OnUseSkillKeyClicked);
             }
+            if (_screenShakeToggle != null)
+            {
+                _screenShakeToggle.onValueChanged.RemoveListener(HandleScreenShakeToggleChanged);
+            }
+            if (_screenShakeOnToggle != null && _screenShakeOffToggle != null)
+            {
+                _screenShakeOnToggle.onValueChanged.RemoveListener(HandleScreenShakeGroupToggleChanged);
+                _screenShakeOffToggle.onValueChanged.RemoveListener(HandleScreenShakeGroupToggleChanged);
+            }
         }
 
         /// <summary>
-        /// In Update: dang asteptam de o key, verificar care key ai fost apasat tren
-        /// InputSystem Keyboard.current pentru a rebind.
+        /// In Update: cand asteptam o key, verificam care key a fost apasat prin
+        /// InputSystem Keyboard.current pentru rebind.
         /// </summary>
         private void Update()
         {
@@ -114,11 +148,13 @@ namespace UI
                 return;
             }
 
-            // Cauta key apasat pe acest frame. Key.values() contine tot Key-ur
-            // (khong contine anyKey sintetic).
+            // Tim phim duoc nhan tren frame nay. Bo qua Key.None (khong hop le).
             foreach (Key key in Enum.GetValues(typeof(Key)))
             {
-                if (keyboard[key].wasPressedThisFrame)
+                if (key == Key.None) continue;
+
+                var keyControl = keyboard[key];
+                if (keyControl != null && keyControl.wasPressedThisFrame)
                 {
                     HandlePressedKey(key);
                     if (!_isWaitingForKey)
@@ -130,14 +166,15 @@ namespace UI
         }
 
         #endregion
-#region Public Methods
+
+        #region Public Methods
 
         /// <summary>
-        /// Dong bo UI voi gia tri din SettingsManager (apelat khi mo popup/panel).
+        /// Umple UI-ul cum valorile din SettingsManager (apelat cand dechidere o panel).
         /// </summary>
         public void Refresh()
         {
-            var settings = SettingsManager.Instance;
+            var settings = SettingsService.Instance;
 
             _isApplyingState = true;
             if (_musicSlider != null && settings != null)
@@ -148,13 +185,27 @@ namespace UI
             {
                 _sfxSlider.value = settings.SfxVolume;
             }
+
+            if (settings != null)
+            {
+                bool shakeEnabled = settings.ScreenShakeEnabled;
+                if (_screenShakeToggle != null)
+                {
+                    _screenShakeToggle.isOn = shakeEnabled;
+                }
+                if (_screenShakeOnToggle != null && _screenShakeOffToggle != null)
+                {
+                    _screenShakeOnToggle.isOn = shakeEnabled;
+                    _screenShakeOffToggle.isOn = !shakeEnabled;
+                }
+            }
             _isApplyingState = false;
 
             RefreshUseSkillKeyLabel();
         }
 
         /// <summary>
-        /// Cancela thao taci rebind dang dien ra (khi dong popup/panel) va reset text button.
+        /// Anula rebind-ul cand este in curs (cand inchide o panel) si reseteza textul bottonului.
         /// </summary>
         public void CancelRebind()
         {
@@ -172,79 +223,83 @@ namespace UI
         #region Private Methods
 
         /// <summary>
-        /// Tao danh sach key speciale/modifier/system (khong duoc dung cho rebind skill).
-        /// Escape duoc xu ly rieng de cancel rebind.
+        /// Construieste lista de key speciale/modifier/system (khong poate fi reboot pentru skill).
+        /// Escape este tratat separat pentru cancel rebind.
         /// </summary>
-        // private static void SetupSpecialKeys()
-        // {
-        //     if (!_specialKeys.isEmpty())
-        //     {
-        //         return;
-        //     }
+        private static void SetupSpecialKeys()
+        {
+            if (_specialKeys.Count > 0)
+            {
+                return;
+            }
 
-        //     // Key speciale chung de bo qua khi rebind.
-        //     _specialKeys.add(Key.LeftShift);
-        //     _specialKeys.add(Key.RightShift);
-        //     _specialKeys.add(Key.LeftCtrl);
-        //     _specialKeys.add(Key.RightCtrl);
-        //     _specialKeys.add(Key.LeftAlt);
-        //     _specialKeys.add(Key.RightAlt);
-        //     _specialKeys.add(Key.LeftMeta);
-        //     _specialKeys.add(Key.RightMeta);
-        //     _specialKeys.add(Key.LeftWindows);
-        //     _specialKeys.add(Key.RightWindows);
-        //     _specialKeys.add(Key.LeftCommand);
-        //     _specialKeys.add(Key.RightCommand);
-        //     _specialKeys.add(Key.LeftApple);
-        //     _specialKeys.add(Key.RightApple);
-        //     _specialKeys.add(Key.ContextMenu);
+            // Key speciale suoarbo ignorate cand rebind.
+            _specialKeys.Add(Key.LeftShift);
+            _specialKeys.Add(Key.RightShift);
+            _specialKeys.Add(Key.LeftCtrl);
+            _specialKeys.Add(Key.RightCtrl);
+            _specialKeys.Add(Key.LeftAlt);
+            _specialKeys.Add(Key.RightAlt);
+            _specialKeys.Add(Key.LeftMeta);
+            _specialKeys.Add(Key.RightMeta);
+            _specialKeys.Add(Key.LeftWindows);
+            _specialKeys.Add(Key.RightWindows);
+            _specialKeys.Add(Key.LeftCommand);
+            _specialKeys.Add(Key.RightCommand);
+            _specialKeys.Add(Key.LeftApple);
+            _specialKeys.Add(Key.RightApple);
+            _specialKeys.Add(Key.ContextMenu);
 
-        //     // Enter/Tab/Backspace.
-        //     _specialKeys.add(Key.Enter);
-        //     _specialKeys.add(Key.Tab);
-        //     _specialKeys.add(Key.Backspace);
+            // Enter/Tab/Backspace.
+            _specialKeys.Add(Key.Enter);
+            _specialKeys.Add(Key.Tab);
+            _specialKeys.Add(Key.Backspace);
 
-        //     // Navigation/lock/system.
-        //     _specialKeys.add(Key.ArrowUp);
-        //     _specialKeys.add(Key.ArrowDown);
-        //     _specialKeys.add(Key.ArrowLeft);
-        //     _specialKeys.add(Key.ArrowRight);
-        //     _specialKeys.add(Key.Home);
-        //     _specialKeys.add(Key.End);
-        //     _specialKeys.add(Key.PageUp);
-        //     _specialKeys.add(Key.PageDown);
-        //     _specialKeys.add(Key.Insert);
-        //     _specialKeys.add(Key.Delete);
-        //     _specialKeys.add(Key.CapsLock);
-        //     _specialKeys.add(Key.NumLock);
-        //     _specialKeys.add(Key.ScrollLock);
-        //     _specialKeys.add(Key.PrintScreen);
-        //     _specialKeys.add(Key.Pause);
+            // Navigation/lock/system.
+            _specialKeys.Add(Key.UpArrow);
+            _specialKeys.Add(Key.DownArrow);
+            _specialKeys.Add(Key.LeftArrow);
+            _specialKeys.Add(Key.RightArrow);
+            _specialKeys.Add(Key.Home);
+            _specialKeys.Add(Key.End);
+            _specialKeys.Add(Key.PageUp);
+            _specialKeys.Add(Key.PageDown);
+            _specialKeys.Add(Key.Insert);
+            _specialKeys.Add(Key.Delete);
+            _specialKeys.Add(Key.CapsLock);
+            _specialKeys.Add(Key.NumLock);
+            _specialKeys.Add(Key.ScrollLock);
+            _specialKeys.Add(Key.PrintScreen);
+            _specialKeys.Add(Key.Pause);
 
-        //     // Function keys F1-F24.
-        //     for (int i = 1; i <= 24; ++i)
-        //     {
-        //         _specialKeys.add(Key.valueOf("F" + i));
-        //     }
-        // }
+            // Function keys F1-F24.
+            for (int i = 1; i <= 24; ++i)
+            {
+                // Enum.TryParse tra ve false daca key-ul nu existe in enum.
+                if (Enum.TryParse("F" + i, true, out Key functionKey))
+                {
+                    _specialKeys.Add(functionKey);
+                }
+            }
+        }
 
         /// <summary>
-        /// Xu ly key apasat khi dang cho rebind: Escape cancel, key special bi bo qua,
-        /// cac key khac se duoc gan cho skill.
+        /// Xul ama key-ul apasat cand este rebind: Escape anula, key speciale suorbo ignorate,
+        /// iar restul este setat cum skill key.
         /// </summary>
-        /// <param name="key">Key duoc apasat.</param>
+        /// <param name="key">Key-ul apasat.</param>
         private void HandlePressedKey(Key key)
         {
             if (key == Key.Escape)
             {
-                // Escape cancel thao taci rebind.
+                // Escape anula rebind-ul.
                 CancelRebind();
                 return;
             }
 
             if (_specialKeys.Contains(key))
             {
-                //Debug.Log($"[SettingsUI] Ignoring special key for rebind: {key.name()}");
+                Debug.Log($"[SettingsUI] Ignoring special key for rebind: {key.ToString()}");
                 return;
             }
 
@@ -252,21 +307,21 @@ namespace UI
         }
 
         /// <summary>
-        /// Aplica key selectat como UseSkillKey din SettingsManager si iesi din rebind.
+        /// Aplica key-ul selectat cum UseSkillKey din SettingsManager si iesi din rebind.
         /// </summary>
-        /// <param name="key">Nou key al skill.</param>
+        /// <param name="key">Nou key de skill.</param>
         private void ApplyUseSkillKey(Key key)
         {
             _isWaitingForKey = false;
 
-            var settings = SettingsManager.Instance;
+            var settings = SettingsService.Instance;
             if (settings != null)
             {
-                //settings.SetUseSkillKey(key.name());
+                settings.SetUseSkillKey(key.ToString());
             }
 
-            //SetUseSkillKeyLabel(key.name());
-            //Debug.Log($"[SettingsUI] UseSkillKey rebound to: {key.name()}");
+            SetUseSkillKeyLabel(key.ToString());
+            Debug.Log($"[SettingsUI] UseSkillKey rebound to: {key.ToString()}");
         }
 
         private void OnUseSkillKeyClicked()
@@ -276,19 +331,19 @@ namespace UI
         }
 
         /// <summary>
-        /// Hien thi key configurat (din settings) strat text button.
+        /// Afiseaza key-ul configurat (din settings) in textul bottonului.
         /// </summary>
         private void RefreshUseSkillKeyLabel()
         {
-            var settings = SettingsManager.Instance;
+            var settings = SettingsService.Instance;
             string keyName = settings != null ? settings.UseSkillKey : "E";
             SetUseSkillKeyLabel(keyName);
         }
 
         /// <summary>
-        /// Set text label button rebind.
+        /// Setarea textului label bottonului de rebind.
         /// </summary>
-        /// <param name="text">Text de hien thi.</param>
+        /// <param name="text">Text de afisat.</param>
         private void SetUseSkillKeyLabel(string text)
         {
             if (_useSkillKeyLabel != null)
@@ -299,13 +354,13 @@ namespace UI
 
         private void HandleMusicSliderChanged(float value)
         {
-            // Bo qua cand sincronizare din Refresh (tranh tinh cach sau nu se rapid schimba cu Save lap tuc).
+            // Sai bo qua cand seteaza din Refresh (evita aplicarea de valori intermedi cand drag animat).
             if (_isApplyingState)
             {
                 return;
             }
 
-            var settings = SettingsManager.Instance;
+            var settings = SettingsService.Instance;
             if (settings != null)
             {
                 settings.SetMusicVolume(value);
@@ -319,10 +374,39 @@ namespace UI
                 return;
             }
 
-            var settings = SettingsManager.Instance;
+            var settings = SettingsService.Instance;
             if (settings != null)
             {
                 settings.SetSfxVolume(value);
+            }
+        }
+
+        private void HandleScreenShakeToggleChanged(bool isOn)
+        {
+            if (_isApplyingState)
+            {
+                return;
+            }
+
+            var settings = SettingsService.Instance;
+            if (settings != null)
+            {
+                settings.SetScreenShakeEnabled(isOn);
+            }
+        }
+
+        private void HandleScreenShakeGroupToggleChanged(bool _)
+        {
+            if (_isApplyingState)
+            {
+                return;
+            }
+
+            bool isShakeEnabled = _screenShakeOnToggle != null && _screenShakeOnToggle.isOn;
+            var settings = SettingsService.Instance;
+            if (settings != null)
+            {
+                settings.SetScreenShakeEnabled(isShakeEnabled);
             }
         }
 

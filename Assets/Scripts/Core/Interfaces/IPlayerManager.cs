@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 using Core;
 
@@ -40,10 +40,5 @@ namespace Core.Interfaces
         /// thời điểm bắt đầu round và trạng thái Extreme Mode.
         /// </summary>
         PlayerRoundData GetPlayerRoundData(IPlayer player);
-
-        // BGM Control Methods
-        void SetGameplayMusicForRoundPlayers(float intensity);
-        void SetLast30sMusicForRoundPlayers(float intensity);
-        void SetLobbyMusicForAllPlayers();
     }
 }

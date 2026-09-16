@@ -44,5 +44,16 @@ namespace Core.Interfaces
         /// </summary>
         /// <param name="keyName">Sam nume Key (vi du "E").</param>
         void SetUseSkillKey(string keyName);
+
+        /// <summary>
+        /// Trang thai bat/tat hieu ung lac man hinh va overlay khi co vu no.
+        /// </summary>
+        bool ScreenShakeEnabled { get; }
+
+        /// <summary>
+        /// Dat trang thai bat/tat hieu ung lac man hinh.
+        /// </summary>
+        /// <param name="enabled">True neu bat, false neu tat.</param>
+        void SetScreenShakeEnabled(bool enabled);
     }
 }

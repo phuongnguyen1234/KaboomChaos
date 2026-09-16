@@ -193,7 +193,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fdcc6663c22f0ad4892f61ffaa935049, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bombs.BombController
-  _bombData: {fileID: 11400000, guid: f177867cc09d48247814de41ccb25e86, type: 2}
   _obsidianBlockPrefab: {fileID: 0}
   _lavaInteractionRadius: 3
   _lavaLayer:
@@ -203,6 +202,7 @@ MonoBehaviour:
   _poisonGasScale: 5
   _partsToPulse:
   - {fileID: 2824521676902969308}
+  _tetherKnotPoint: {fileID: 0}
 --- !u!1 &8558303543393938716
 GameObject:
   m_ObjectHideFlags: 0
@@ -320,11 +320,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d32f934f0591ee540bdaf682b8cb2d48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Core::MaterialEffectController
-  _applyMaterialOverrides: 1
+  _applyMaterialOverrides: 0
   _customBaseColor: {r: 1, g: 1, b: 1, a: 1}
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!4 &6553524663063437510 stripped
 Transform:

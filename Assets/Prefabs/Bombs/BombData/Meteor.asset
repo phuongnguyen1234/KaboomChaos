@@ -1,0 +1,183 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66c0a8f62a442a447a21eacde9a15608, type: 3}
+  m_Name: Meteor
+  m_EditorClassIdentifier: Bombs::Bombs.Data.MissileBombData
+  id: meteor
+  displayName: Meteor
+  description: Meteor
+  radius: 9
+  damage: 20
+  damageFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  effect: 0
+  effectDuration: 0
+  statusEffectLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  applyForce: 1
+  force: 20
+  forceMode: 1
+  forceFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: -1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  upwardsModifier: 0.5
+  affectedLayers:
+    serializedVersion: 2
+    m_Bits: 1984
+  triggerLayers:
+    serializedVersion: 2
+    m_Bits: 1600
+  canDestroyTerrain: 1
+  terrainDestructionPowerFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 5
+      inSlope: -3
+      outSlope: -3
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 2
+      inSlope: -3
+      outSlope: -3
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  explodeMultipleTimes: 0
+  minNumberOfExplosions: 1
+  maxNumberOfExplosions: 3
+  spawnSound: {fileID: 0}
+  delayBetweenExplosions: 0.5
+  explosionSpreadRadius: 2
+  subExplosionDamage: 25
+  subExplosionDamageFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: -1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  explosionVFX: {fileID: 4115158409028047315, guid: 4746a1aabdadfba4691229623c3b765e, type: 3}
+  explosionSoundPitch: 1
+  explosionSound: {fileID: 8300000, guid: 3262456d329f6f24f870960ef42369bd, type: 3}
+  minPlayerSpawnChance: 40
+  maxPlayerSpawnChance: 65
+  playerSpawnRadius: 3
+  possibleVariants: []
+  spawnWeightByDifficulty:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 2.99
+      value: 0
+      inSlope: -0
+      outSlope: 23.255814
+      tangentMode: 69
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 6
+      value: 70
+      inSlope: 23.255814
+      outSlope: 23.255814
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  maxPerSpawnWave: 1
+  maxActiveInstances: 4
+  fallSpeed: 8
+  landingLightVFX: {fileID: 0}
+  landingLightColor: {r: 1, g: 1, b: 1, a: 1}

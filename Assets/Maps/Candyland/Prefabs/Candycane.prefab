@@ -47,6 +47,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2924168412395630930}
     m_Modifications:
+    - target: {fileID: 2195653322492841178, guid: a0ac0d17bfde4b34f925833658f1f14c, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5978226568768409130, guid: a0ac0d17bfde4b34f925833658f1f14c, type: 3}
       propertyPath: m_Name
       value: CandycaneWhite (1)
@@ -109,6 +113,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2924168412395630930}
     m_Modifications:
+    - target: {fileID: 2195653322492841178, guid: a0ac0d17bfde4b34f925833658f1f14c, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5978226568768409130, guid: a0ac0d17bfde4b34f925833658f1f14c, type: 3}
       propertyPath: m_Name
       value: CandycaneWhite
@@ -171,6 +179,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2924168412395630930}
     m_Modifications:
+    - target: {fileID: 2195653322492841178, guid: a0ac0d17bfde4b34f925833658f1f14c, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5978226568768409130, guid: a0ac0d17bfde4b34f925833658f1f14c, type: 3}
       propertyPath: m_Name
       value: CandycaneWhite (2)
@@ -481,6 +493,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2924168412395630930}
     m_Modifications:
+    - target: {fileID: 2195653322492841178, guid: a0ac0d17bfde4b34f925833658f1f14c, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5978226568768409130, guid: a0ac0d17bfde4b34f925833658f1f14c, type: 3}
       propertyPath: m_Name
       value: CandycaneWhite (3)

@@ -3019,6 +3019,10 @@ PrefabInstance:
       propertyPath: _customBaseColor.r
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (8)
@@ -7598,6 +7602,10 @@ PrefabInstance:
     - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: _customBaseColor.r
       value: 0.90943396
+      objectReference: {fileID: 0}
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4548169399529930332, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -36407,6 +36415,10 @@ PrefabInstance:
     - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: _customBaseColor.r
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name

@@ -46,5 +46,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Managers::Managers.FloatingTextManager
   _initialPoolSize: 20
   _poolExpansionChunkSize: 5
-  _floatingTextPrefab: {fileID: 3635001176574840572, guid: 68313ce69cb31664796c014c3d577b69, type: 3}
-  _containerTag: FloatingTextContainer
+  _floatingTextPrefab: {fileID: 1446069558551714674, guid: 67b6a1e0f92ec184084f99718641b974, type: 3}

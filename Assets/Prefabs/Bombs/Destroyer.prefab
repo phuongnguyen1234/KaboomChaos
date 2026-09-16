@@ -44,8 +44,8 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2606226552607457878}
   serializedVersion: 5
-  m_Mass: 1.5
-  m_LinearDamping: 0
+  m_Mass: 3
+  m_LinearDamping: 0.1
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -181,6 +181,7 @@ MonoBehaviour:
   _poisonGasScale: 5
   _partsToPulse:
   - {fileID: 2578050740288460508}
+  _tetherKnotPoint: {fileID: 0}
 --- !u!136 &3248255713580358640
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -326,7 +327,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d32f934f0591ee540bdaf682b8cb2d48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Core::MaterialEffectController
-  _applyMaterialOverrides: 1
+  _applyMaterialOverrides: 0
   _customBaseColor: {r: 1, g: 1, b: 1, a: 1}
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1

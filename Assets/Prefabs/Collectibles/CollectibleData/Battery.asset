@@ -16,7 +16,7 @@ MonoBehaviour:
   _displayName: Battery
   _lifespan: 90
   _collectionSFX: {fileID: 8300000, guid: 8a15ca672df6c954aaf109c397f8e836, type: 3}
-  _collectionVFX: {fileID: 0}
+  _collectionVFX: {fileID: 9027514048236820045, guid: 81a903fb3b6ff6d499fb7aa2bbf3e157, type: 3}
   _floatingTextColor: {r: 0, g: 0, b: 0, a: 1}
   possibleVariants: []
   _rarityByDifficulty:

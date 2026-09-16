@@ -1,11 +1,13 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 using Core;
 using Core.Interfaces;
+using Core.Utilities;
 using Random = UnityEngine.Random;
 
 namespace UI
@@ -31,12 +33,50 @@ namespace UI
         [Tooltip("Button Equip: trang bi skill cho Player roi close popup.")]
         [SerializeField] private Button _equipButton;
 
+        [Tooltip("CanvasGroup chua 2 nut Equip va Close (an bang alpha = 0 trong qua trinh quay).")]
+        [SerializeField] private CanvasGroup _buttonGroupCanvasGroup;
+
         [Tooltip("Data base cung cap danh sach Skill cua nhom de quay (inject qua Inspector).")]
         [SerializeField] private ScriptableObject _skillDatabase;
 
         [Header("Spin Settings")]
         [SerializeField] private float _spinDuration = 3f;
         [SerializeField] private float _iconChangeInterval = 0.1f;
+        [SerializeField] private float _spinStartScale = 0.4f;
+        [SerializeField] private float _spinEndScale = 1.0f;
+        [SerializeField] private string _revealPropertyName = "_Reveal";
+
+        [Header("Spin Effects & SFX")]
+        [Tooltip("SFX phat 1 lan khi bat dau quay slot machine.")]
+        [SerializeField] private AudioClip _spinTickSfx;
+
+        [Tooltip("SFX phat khi quay trung skill.")]
+        [SerializeField] private AudioClip _winSkillSfx;
+
+        [Tooltip("Prefab VFX UI hien thi khi quay trung skill.")]
+        [SerializeField] private GameObject _winVfxPrefab;
+
+        [Tooltip("Container (RectTransform) cho VFX UI win skill. Neu null se tu dong lay RectTransform cua _spinImage.")]
+        [SerializeField] private RectTransform _vfxContainer;
+
+        [Tooltip("So luong VFX instance duoc sinh ra tren UI khi win skill.")]
+        [SerializeField] private int _winVfxCount = 3;
+
+        [Tooltip("Khoang cach toi thieu (px) giua cac VFX instance de khong bi chim/sat nhau.")]
+        [SerializeField] private float _minVfxDistance = 80f;
+
+        [Tooltip("Thoi gian tu dong thuc hien Destroy cho cac UI VFX instance (giay).")]
+        [SerializeField] private float _vfxAutoDestroyDelay = 3f;
+
+        [Header("Restricted Equip")]
+        [Tooltip("Panel thong bao hien thi khi nguoi choi co trang bi skill trong giai doan khong duoc phep (arena).")]
+        [SerializeField] private GameObject _restrictedEquipPanel;
+
+        [Tooltip("Thoi gian panel 'Restricted Equip' hien thi truoc khi tu dong an (giay).")]
+        [SerializeField] private float _restrictedEquipDuration = 2f;
+
+        [Tooltip("SFX phat khi bi chan trang bi skill trong arena.")]
+        [SerializeField] private AudioClip _restrictedEquipSfx;
         #endregion
 
         #region Events
@@ -50,6 +90,9 @@ namespace UI
         private ISkillDatabase _skillDb;
         private ISkillData _winningSkill;
         private Coroutine _spinCoroutine;
+        private AudioSource _spinAudioSource;
+        private Coroutine _restrictedEquipCoroutine;
+        private int _revealPropId;
         #endregion
 
         #region Unity Lifecycle
@@ -57,6 +100,12 @@ namespace UI
         {
             base.Awake();
             _skillDb = _skillDatabase as ISkillDatabase;
+            _revealPropId = Shader.PropertyToID(_revealPropertyName);
+
+            if (_buttonGroupCanvasGroup == null && _equipButton != null)
+            {
+                _buttonGroupCanvasGroup = _equipButton.GetComponentInParent<CanvasGroup>();
+            }
 
             _equipButton?.onClick.AddListener(OnEquipClicked);
         }
@@ -64,6 +113,7 @@ namespace UI
         protected override void OnHidden()
         {
             TryStopSpin();
+            HideRestrictedEquipPanel();
 
             // Ca nut Equip lan nut Close deu quay ve Shop: bao Shop lam moi lai (so huu, gia).
             OnClosed?.Invoke();
@@ -83,7 +133,15 @@ namespace UI
             if (_descriptionText != null) _descriptionText.text = string.Empty;
             if (_equipButton != null) _equipButton.interactable = false;
 
-            Show();
+            if (_buttonGroupCanvasGroup != null)
+            {
+                _buttonGroupCanvasGroup.DOKill();
+                _buttonGroupCanvasGroup.alpha = 0f;
+                _buttonGroupCanvasGroup.interactable = false;
+                _buttonGroupCanvasGroup.blocksRaycasts = false;
+            }
+
+            ShowInstant();
 
             if (_spinCoroutine != null)
             {
@@ -128,20 +186,75 @@ namespace UI
                 yield break;
             }
 
+            // SFX phat 1 lan duy nhat khi bat dau quay slot machine.
+            if (_spinTickSfx != null && SfxService.Instance != null)
+            {
+                _spinAudioSource = SfxService.Instance.PlaySfx(_spinTickSfx, 0.6f);
+            }
+
+            if (_spinImage != null)
+            {
+                if (_spinImage.material != null)
+                {
+                    _spinImage.material.SetFloat(_revealPropId, 0f);
+                }
+                _spinImage.transform.localScale = Vector3.one * _spinStartScale;
+            }
+
+            ISkillData lastSkill = null;
             float elapsed = 0f;
             while (elapsed < _spinDuration)
             {
+                float progress = Mathf.Clamp01(elapsed / _spinDuration);
+                float currentScale = Mathf.Lerp(_spinStartScale, _spinEndScale, progress);
+
                 ISkillData randomSkill = allTypeSkills[Random.Range(0, allTypeSkills.Count)];
-                if (_spinImage != null) _spinImage.sprite = randomSkill.Icon;
+                if (allTypeSkills.Count > 1)
+                {
+                    while (randomSkill == lastSkill)
+                    {
+                        randomSkill = allTypeSkills[Random.Range(0, allTypeSkills.Count)];
+                    }
+                }
+                lastSkill = randomSkill;
+
+                if (_spinImage != null)
+                {
+                    _spinImage.sprite = randomSkill.Icon;
+                    _spinImage.transform.localScale = Vector3.one * currentScale;
+                }
 
                 yield return new WaitForSeconds(Mathf.Min(_iconChangeInterval, _spinDuration - elapsed));
                 elapsed += _iconChangeInterval;
             }
 
+            _spinAudioSource = null;
+
             // Dung lai tai mot skill CHUA SO HUU: khong bao gio trung skill da co.
             _winningSkill = winnableSkills[Random.Range(0, winnableSkills.Count)];
 
-            if (_spinImage != null) _spinImage.sprite = _winningSkill.Icon;
+            if (_spinImage != null)
+            {
+                if (_spinImage.material != null)
+                {
+                    _spinImage.material.SetFloat(_revealPropId, 1f);
+                }
+                _spinImage.sprite = _winningSkill.Icon;
+                _spinImage.transform.DOKill();
+                _spinImage.transform.localScale = Vector3.one * _spinStartScale;
+
+                Sequence winSeq = DOTween.Sequence().SetUpdate(true);
+                winSeq.Append(_spinImage.transform.DOScale(Vector3.one * 1.35f, 0.3f).SetEase(Ease.OutBack));
+                winSeq.Append(_spinImage.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.InOutQuad));
+
+                SpawnWinVfxOnUI();
+            }
+
+            if (_winSkillSfx != null && SfxService.Instance != null)
+            {
+                SfxService.Instance.PlaySfx(_winSkillSfx);
+            }
+
             if (_skillNameText != null) _skillNameText.text = _winningSkill.DisplayName;
             if (_descriptionText != null) _descriptionText.text = _winningSkill.Description;
 
@@ -153,16 +266,79 @@ namespace UI
 
             if (_equipButton != null) _equipButton.interactable = true;
 
+            if (_buttonGroupCanvasGroup != null)
+            {
+                _buttonGroupCanvasGroup.DOKill();
+                _buttonGroupCanvasGroup.DOFade(1f, 0.3f).SetUpdate(true);
+                _buttonGroupCanvasGroup.interactable = true;
+                _buttonGroupCanvasGroup.blocksRaycasts = true;
+            }
+
             _spinCoroutine = null;
         }
 
         /// <summary>
         /// Xu ly khi nguoi dung bam nut Equip: trang bi skill trung thuong cho player roi dong.
+        /// Neu dang trong arena, hien panel thong bao + phat SFX va khong cho phep trang bi.
         /// </summary>
         private void OnEquipClicked()
         {
+            if (RoundStateHelper.IsInRound())
+            {
+                ShowRestrictedEquipPanel();
+                return;
+            }
+
             EquipWinningSkill();
             CloseAndRefresh();
+        }
+
+        /// <summary>
+        /// Hien thi panel thong bao 'khong the trang bi trong arena' va phat SFX.
+        /// </summary>
+        private void ShowRestrictedEquipPanel()
+        {
+            if (_restrictedEquipSfx != null && SfxService.Instance != null)
+            {
+                SfxService.Instance.PlaySfx(_restrictedEquipSfx);
+            }
+
+            if (_restrictedEquipPanel == null) return;
+
+            _restrictedEquipPanel.SetActive(true);
+
+            if (_restrictedEquipCoroutine != null)
+            {
+                StopCoroutine(_restrictedEquipCoroutine);
+                _restrictedEquipCoroutine = null;
+            }
+
+            _restrictedEquipCoroutine = StartCoroutine(HideRestrictedEquipPanelAfterDelay());
+        }
+
+        private IEnumerator HideRestrictedEquipPanelAfterDelay()
+        {
+            yield return new WaitForSeconds(_restrictedEquipDuration);
+            _restrictedEquipCoroutine = null;
+
+            if (_restrictedEquipPanel != null)
+            {
+                _restrictedEquipPanel.SetActive(false);
+            }
+        }
+
+        private void HideRestrictedEquipPanel()
+        {
+            if (_restrictedEquipCoroutine != null)
+            {
+                StopCoroutine(_restrictedEquipCoroutine);
+                _restrictedEquipCoroutine = null;
+            }
+
+            if (_restrictedEquipPanel != null)
+            {
+                _restrictedEquipPanel.SetActive(false);
+            }
         }
 
         /// <summary>
@@ -171,6 +347,12 @@ namespace UI
         private void EquipWinningSkill()
         {
             if (_winningSkill == null) return;
+
+            if (RoundStateHelper.IsInRound())
+            {
+                Debug.LogWarning("[SkillPurchasePopup] Nguoi choi dang trong arena/round. Khong the trang bi skill.");
+                return;
+            }
 
             IPlayerManager manager = IPlayerManager.Instance;
             if (manager == null)
@@ -216,6 +398,20 @@ namespace UI
         /// </summary>
         private void TryStopSpin()
         {
+            if (_buttonGroupCanvasGroup != null)
+            {
+                _buttonGroupCanvasGroup.DOKill();
+                _buttonGroupCanvasGroup.alpha = 1f;
+                _buttonGroupCanvasGroup.interactable = true;
+                _buttonGroupCanvasGroup.blocksRaycasts = true;
+            }
+
+            if (_spinAudioSource != null)
+            {
+                _spinAudioSource.Stop();
+                _spinAudioSource = null;
+            }
+
             if (_spinCoroutine != null)
             {
                 StopCoroutine(_spinCoroutine);
@@ -240,6 +436,80 @@ namespace UI
                 }
             }
             return result;
+        }
+
+        /// <summary>
+        /// Tao cac instance VFX ngau nhien tren UI container khi win skill.
+        /// Cac vi tri duoc dam bao khong bi sat nhau (cach nhau toi thieu _minVfxDistance).
+        /// </summary>
+        private void SpawnWinVfxOnUI()
+        {
+            if (_winVfxPrefab == null) return;
+
+            RectTransform container = _vfxContainer != null ? _vfxContainer : (_spinImage != null ? _spinImage.rectTransform : null);
+            if (container == null) return;
+
+            Rect rect = container.rect;
+            float paddingX = Mathf.Min(20f, rect.width * 0.1f);
+            float paddingY = Mathf.Min(20f, rect.height * 0.1f);
+
+            float minX = rect.xMin + paddingX;
+            float maxX = rect.xMax - paddingX;
+            float minY = rect.yMin + paddingY;
+            float maxY = rect.yMax - paddingY;
+
+            if (minX > maxX) minX = maxX = rect.center.x;
+            if (minY > maxY) minY = maxY = rect.center.y;
+
+            List<Vector2> spawnedPositions = new();
+
+            for (int i = 0; i < _winVfxCount; i++)
+            {
+                Vector2 candidatePos = Vector2.zero;
+
+                for (int attempt = 0; attempt < 30; attempt++)
+                {
+                    float rx = Random.Range(minX, maxX);
+                    float ry = Random.Range(minY, maxY);
+                    Vector2 pos = new Vector2(rx, ry);
+
+                    bool isFarEnough = true;
+                    foreach (Vector2 existingPos in spawnedPositions)
+                    {
+                        if (Vector2.Distance(pos, existingPos) < _minVfxDistance)
+                        {
+                            isFarEnough = false;
+                            break;
+                        }
+                    }
+
+                    if (isFarEnough)
+                    {
+                        candidatePos = pos;
+                        break;
+                    }
+
+                    candidatePos = pos;
+                }
+
+                spawnedPositions.Add(candidatePos);
+
+                GameObject vfxInstance = Instantiate(_winVfxPrefab, container, false);
+                RectTransform vfxRect = vfxInstance.GetComponent<RectTransform>();
+                if (vfxRect != null)
+                {
+                    vfxRect.anchoredPosition = candidatePos;
+                }
+                else
+                {
+                    vfxInstance.transform.localPosition = candidatePos;
+                }
+
+                if (_vfxAutoDestroyDelay > 0f)
+                {
+                    Destroy(vfxInstance, _vfxAutoDestroyDelay);
+                }
+            }
         }
         #endregion
     }

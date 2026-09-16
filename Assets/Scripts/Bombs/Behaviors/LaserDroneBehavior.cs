@@ -41,6 +41,9 @@ namespace Bombs.Behaviors
         // VFX tai CUOI duong ngam (diem muc tieu).
         private GameObject _sightEndVFXInstance;
 
+        // Handle loop audio beep.
+        private ISfxLoopHandle _beepLoopHandle;
+
         // Vi tri muc tieu da lock (dung de co dinh duong ban sau khi ngam xong).
         private Vector3 _aimTargetPosition;
         private Coroutine _activeCoroutine;
@@ -59,11 +62,11 @@ namespace Bombs.Behaviors
             controller.BombCollider.enabled = false;
             if (controller.BombRigidbody != null)
             {
-                // QUAN TRONG: Phai xoa van toc TRUOC khi bat kinematic, vi Unity khong cho phep
-                // gan linear/angularVelocity len mot rigidbody dang kinematic (se in warning
-                // "Setting ... velocity of a kinematic body is not supported").
-                controller.BombRigidbody.linearVelocity = Vector3.zero;
-                controller.BombRigidbody.angularVelocity = Vector3.zero;
+                if (!controller.BombRigidbody.isKinematic)
+                {
+                    controller.BombRigidbody.linearVelocity = Vector3.zero;
+                    controller.BombRigidbody.angularVelocity = Vector3.zero;
+                }
                 controller.BombRigidbody.isKinematic = true;
                 controller.BombRigidbody.useGravity = false;
             }
@@ -95,12 +98,8 @@ namespace Bombs.Behaviors
             // Lay toc do quay Copter tu data (mac dinh 0 neu chua duoc cau hinh, se duoc gan trong OnActivate).
             _copterSpinSpeed = 0f;
 
-            // Reset trang thai moi khi duoc thiet lap tu pool.
-            _sightLineInstance = null;
-            _sightLineRenderer = null;
-            _sightLineHasRenderer = false;
-            _sightLineFade = 0f;
-            _sightEndVFXInstance = null;
+            // Reset trang thai va don dep sach VFX/Audio moi khi duoc thiet lap tu pool hoac khi despawn.
+            CleanupSightAndAudio(controller);
             _aimTargetPosition = controller.transform.position;
             _activeCoroutine = null;
             ResetCopterRotation();
@@ -198,14 +197,15 @@ namespace Bombs.Behaviors
             yield return new WaitForSeconds(data.preAimRestDuration);
 
             // Buoc 3: Chon mot player ngau nhien dang tham gia va con song, lock muc tieu.
-            Transform target = PickRandomTarget(controller);
-            if (target == null)
+            IPlayer targetPlayer = PickRandomTargetPlayer(controller);
+            if (targetPlayer == null)
             {
-                // Khong con player nao -> khong ban, bo qua giai doan ngam.
-                Debug.Log("[LaserDrone] Khong tim thay player nao, drone bay len va despawn.", controller);
+                // Khong con player nao hop le -> khong ban, bo qua giai doan ngam.
+                Debug.Log("[LaserDrone] Khong tim thay player nao hop le, drone bay len va despawn.", controller);
             }
             else
             {
+                Transform target = targetPlayer.GameObject.transform;
                 // Xoay Head (mat nhin Z+) ve phia player va co dinh muc tieu.
                 RotateHeadToward(controller, target.position);
                 _aimTargetPosition = target.position;
@@ -216,20 +216,37 @@ namespace Bombs.Behaviors
 
                 _sightLineFade = 0f;
                 float aimElapsed = 0f;
+                bool hasValidTarget = true;
+
                 while (aimElapsed < data.aimDuration)
                 {
-                    // Tien trinh ngam (0->1).
-                    float t = Mathf.Clamp01(data.aimDuration <= 0f ? 1f : aimElapsed / data.aimDuration);
-
-                    // Neu player van con hoat dong thi cap nhat vi tri de theo dau;
-                    // nguoc lai giu vi tri cuoi da lock.
-                    if (target != null && target.gameObject != null && target.gameObject.activeInHierarchy)
+                    // Kiem tra neu player muc tieu hien tai bi chet hoac khong con hop le trong round
+                    if (!IsTargetValid(targetPlayer, controller.PlayerManager))
+                    {
+                        // Chuyen sang muc tieu khac con song trong round
+                        IPlayer newTarget = PickRandomTargetPlayer(controller, targetPlayer);
+                        if (newTarget != null)
+                        {
+                            targetPlayer = newTarget;
+                            target = targetPlayer.GameObject.transform;
+                            _aimTargetPosition = target.position;
+                            RotateHeadToward(controller, _aimTargetPosition);
+                        }
+                        else
+                        {
+                            // Khong con player nao khac con song trong round
+                            hasValidTarget = false;
+                            break;
+                        }
+                    }
+                    else
                     {
                         _aimTargetPosition = target.position;
+                        RotateHeadToward(controller, _aimTargetPosition);
                     }
 
-                    // Pitch audio tang dan theo t va co dinh o cuoi (t=1 -> pitch = aimAudioPitchEnd).
-                    SetAimAudioPitch(controller, data, t);
+                    // Tien trinh ngam (0->1).
+                    float t = Mathf.Clamp01(data.aimDuration <= 0f ? 1f : aimElapsed / data.aimDuration);
 
                     // Duong ngam xuat hien DAN (fade in) theo t.
                     _sightLineFade = t;
@@ -241,48 +258,51 @@ namespace Bombs.Behaviors
                     aimElapsed += Time.deltaTime;
                     yield return null;
                 }
-                // Pitch co dinh o gia tri ket thuc ngam.
-                SetAimAudioPitch(controller, data, 1f);
-                StopAimAudio(controller);
 
-                // Audio beep rieng: play tai thoi diem ket thuc aim, loop trong 1 thoi gian ngau (beepLoopDuration).
-                PlayBeepAudio(controller, data);
-
-                // Luu lai diem xuat phat cua chum ban (Eye).
-                Vector3 fireStart = _eye.position;
-
-                // Buoc 5: Dung ngam follow player, co dinh duong ban, nghi 0.5s.
-                // Duong ngam va VFX cuoi van hien thi o vi tri co dinh trong lúc nay.
-                // Beep chi loop trong beepLoopDuration (ngan), trong luc van cho du postAimDelay.
-                float beepTime = Mathf.Min(data.postAimDelay, data.beepLoopDuration);
-                yield return new WaitForSeconds(beepTime);
-                StopBeepAudio(controller);
-                if (data.postAimDelay > beepTime)
+                if (hasValidTarget)
                 {
-                    yield return new WaitForSeconds(data.postAimDelay - beepTime);
+                    // Audio beep rieng: play tai thoi diem ket thuc aim, loop trong 1 thoi gian ngan (beepLoopDuration).
+                    PlayBeepAudio(controller, data);
+
+                    // Luu lai diem xuat phat cua chum ban (Eye).
+                    Vector3 fireStart = _eye.position;
+
+                    // Buoc 5: Dung ngam follow player, co dinh duong ban, nghi 0.5s.
+                    // Duong ngam va VFX cuoi van hien thi o vi tri co dinh trong luc nay.
+                    // Beep chi loop trong beepLoopDuration (ngan), trong luc van cho du postAimDelay.
+                    float beepTime = Mathf.Min(data.postAimDelay, data.beepLoopDuration);
+                    yield return new WaitForSeconds(beepTime);
+                    StopBeepAudio(controller);
+                    if (data.postAimDelay > beepTime)
+                    {
+                        yield return new WaitForSeconds(data.postAimDelay - beepTime);
+                    }
+
+                    // Khi khai hoa: AN duong ngam (line renderer) nhung GIU LAI VFX cuoi.
+                    HideSightLine(controller);
+
+                    // Buoc 6: Ban chum vu no chay tu Eye den muc tieu.
+                    yield return FireBeam(controller, fireStart, _aimTargetPosition, data);
+
+                    // VFX cuoi duong ngam bien mat SAU vu no cuoi cung cua chum ban.
+                    DespawnSightEndVFX(controller);
                 }
-
-                // Khi khai hoa: AN duong ngam (line renderer) nhung GIU LAI VFX cuoi.
-                HideSightLine(controller);
-
-                // Buoc 6: Ban chum vụ nổ chay tu Eye den muc tieu.
-                yield return FireBeam(controller, fireStart, _aimTargetPosition, data);
-
-                // VFX cuoi duong ngam bien mat SAU vụ nổ cuoi cung cua chum ban.
-                DespawnSightEndVFX(controller);
+                else
+                {
+                    // Don dep duong ngam va VFX vi khong con player nao de ban
+                    CleanupSightAndAudio(controller);
+                }
             }
 
-            // Buoc 7: Reset Head nhin thang truoc, bay len NHANH DAN (ease in) roi despawn.
+            // Buoc 7: Reset Head nhin thang truoc, bay len theo ease in back roi despawn.
             ResetHead(controller);
             ResetCopterRotation();
-            HideSightLine(controller);        // An toan neu chua an.
-            DespawnSightEndVFX(controller);    // An toan neu chua tao.
-            StopAimAudio(controller);          // An toan neu chua phat.
+            CleanupSightAndAudio(controller);
 
             Vector3 ascendFrom = controller.transform.position;
             Vector3 ascendTo = ascendFrom + Vector3.up * data.ascentDistance;
             float ascendDuration = data.ascentDistance / Mathf.Max(data.ascentSpeed, 0.001f);
-            yield return MoveEased(controller, ascendTo, ascendDuration, Ease.InQuad);
+            yield return MoveEased(controller, ascendTo, ascendDuration, Ease.InBack);
 
             controller.SetActivationState(false);
             GameEvents.TriggerBombDespawnRequest(controller.gameObject);
@@ -311,30 +331,61 @@ namespace Bombs.Behaviors
         }
 
         /// <summary>
-        /// Chon ngau nhien mot player dang tham gia round va con hoat dong.
+        /// Chon ngau nhien mot player dang tham gia round va con song.
         /// </summary>
         /// <param name="controller">Bomb controller ma hanh vi nay duoc gan vao.</param>
-        /// <returns>Transform cua player duoc chon, hoac null neu khong co ai.</returns>
-        private Transform PickRandomTarget(BombController controller)
+        /// <param name="exclude">Player muon loai tru khoi danh sach lua chon (vi du: player vua chet).</param>
+        /// <returns>IPlayer duoc chon, hoac null neu khong co ai hop le.</returns>
+        private IPlayer PickRandomTargetPlayer(BombController controller, IPlayer exclude = null)
         {
             IPlayerManager playerManager = controller.PlayerManager;
             if (playerManager == null) return null;
 
-            List<IPlayer> valid = new();
             var inRound = playerManager.GetPlayersInRound();
-            if (inRound == null) return null;
+            if (inRound == null || inRound.Count == 0) return null;
 
+            List<IPlayer> valid = new();
             for (int i = 0; i < inRound.Count; i++)
             {
-                IPlayer player = inRound[i];
-                if (player?.GameObject != null && player.GameObject.activeInHierarchy)
+                IPlayer p = inRound[i];
+                if (p != null && p != exclude && IsTargetValid(p, playerManager))
                 {
-                    valid.Add(player);
+                    valid.Add(p);
                 }
             }
 
             if (valid.Count == 0) return null;
-            return valid[Random.Range(0, valid.Count)].GameObject.transform;
+            return valid[Random.Range(0, valid.Count)];
+        }
+
+        /// <summary>
+        /// Kiem tra xem mot player co con hop le va con song trong round hay khong.
+        /// </summary>
+        /// <param name="player">Player can kiem tra.</param>
+        /// <param name="playerManager">PlayerManager de kiem tra danh sach trong round.</param>
+        /// <returns>True neu player hop le, con song va dang trong round.</returns>
+        private static bool IsTargetValid(IPlayer player, IPlayerManager playerManager)
+        {
+            if (player == null || player.GameObject == null || !player.GameObject.activeInHierarchy)
+            {
+                return false;
+            }
+
+            if (playerManager != null)
+            {
+                var inRound = playerManager.GetPlayersInRound();
+                if (inRound == null || !inRound.Contains(player))
+                {
+                    return false;
+                }
+            }
+
+            if (player.GameObject.TryGetComponent<IDamageable>(out var damageable) && !damageable.IsAlive)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -537,45 +588,26 @@ namespace Bombs.Behaviors
         }
 
         /// <summary>
-        /// Phat audio ngam (loop) trong suot thoi gian ngam. Pitch ban dau tai gia tri aimAudioPitchStart.
+        /// Don dep sach duong ngam, VFX cuoi duong ngam va cac audio loop khi drone despawn hoac duoc reset tu pool.
+        /// </summary>
+        private void CleanupSightAndAudio(BombController controller)
+        {
+            HideSightLine(controller);
+            DespawnSightEndVFX(controller);
+            StopBeepAudio(controller);
+            _sightLineFade = 0f;
+        }
+
+        /// <summary>
+        /// Phat audio ngam (one-shot) khi bat dau ngam.
         /// </summary>
         /// <param name="controller">Bomb controller ma hanh vi nay duoc gan vao.</param>
         /// <param name="data">Du lieu cau hinh cua Laser Drone.</param>
         private void PlayAimAudio(BombController controller, LaserDroneData data)
         {
-            AudioSource source = controller.BombAudioSource;
-            if (source == null || data.aimAudioClip == null) return;
+            if (data.aimAudioClip == null || SfxService.Instance == null) return;
 
-            source.clip = data.aimAudioClip;
-            source.pitch = data.aimAudioPitchStart;
-            source.loop = true;
-            source.Play();
-        }
-
-        /// <summary>
-        /// Cap nhat pitch cua audio ngam theo tien trinh ngam t (0->1).
-        /// Pitch tang dan tu aimAudioPitchStart den aimAudioPitchEnd va co dinh o cuoi.
-        /// </summary>
-        /// <param name="controller">Bomb controller ma hanh vi nay duoc gan vao.</param>
-        /// <param name="data">Du lieu cau hinh cua Laser Drone.</param>
-        /// <param name="t">Tien trinh ngam tu 0 (bat dau) den 1 (ket thuc).</param>
-        private void SetAimAudioPitch(BombController controller, LaserDroneData data, float t)
-        {
-            AudioSource source = controller.BombAudioSource;
-            if (source == null || !source.isPlaying) return;
-
-            source.pitch = Mathf.Lerp(data.aimAudioPitchStart, data.aimAudioPitchEnd, Mathf.Clamp01(t));
-        }
-
-        /// <summary>
-        /// Dung phat audio ngam.
-        /// </summary>
-        /// <param name="controller">Bomb controller ma hanh vi nay duoc gan vao.</param>
-        private void StopAimAudio(BombController controller)
-        {
-            AudioSource source = controller.BombAudioSource;
-            if (source == null) return;
-            if (source.isPlaying) source.Stop();
+            SfxService.Instance.PlaySfx(data.aimAudioClip, controller.transform.position);
         }
 
         /// <summary>
@@ -585,13 +617,9 @@ namespace Bombs.Behaviors
         /// <param name="data">Du lieu cau hinh cua Laser Drone.</param>
         private void PlayBeepAudio(BombController controller, LaserDroneData data)
         {
-            AudioSource source = controller.BombAudioSource;
-            if (source == null || data.beepAudioClip == null) return;
+            if (data.beepAudioClip == null || SfxService.Instance == null) return;
 
-            source.clip = data.beepAudioClip;
-            source.pitch = data.beepAudioPitch;
-            source.loop = true;
-            source.Play();
+            _beepLoopHandle = SfxService.Instance.PlaySfxLoop(data.beepAudioClip, controller.transform, 1f, data.beepAudioPitch, false);
         }
 
         /// <summary>
@@ -600,9 +628,11 @@ namespace Bombs.Behaviors
         /// <param name="controller">Bomb controller ma hanh vi nay duoc gan vao.</param>
         private void StopBeepAudio(BombController controller)
         {
-            AudioSource source = controller.BombAudioSource;
-            if (source == null) return;
-            if (source.isPlaying) source.Stop();
+            if (_beepLoopHandle != null)
+            {
+                _beepLoopHandle.Stop();
+                _beepLoopHandle = null;
+            }
         }
 
         /// <summary>
@@ -627,3 +657,4 @@ namespace Bombs.Behaviors
         #endregion
     }
 }
+

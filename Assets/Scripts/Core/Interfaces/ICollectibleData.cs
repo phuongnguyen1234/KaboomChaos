@@ -30,6 +30,11 @@ namespace Core.Interfaces
         AudioClip CollectionSFX { get; }
 
         /// <summary>
+        /// Hieu ung hinh anh (VFX) khi vat pham duoc thu thap.
+        /// </summary>
+        GameObject CollectionVFX { get; }
+
+        /// <summary>
         /// Danh sách các biến thể có thể thay thế cho vật phẩm này khi được sinh ra.
         /// Hệ thống sẽ duyệt qua danh sách này và chọn biến thể đầu tiên thỏa mãn xác suất.
         /// </summary>

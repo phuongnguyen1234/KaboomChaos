@@ -48,12 +48,6 @@ namespace Collectibles.Behaviors
                 Debug.Log($"[BatteryBehavior] Da sac day {restored} energy cho player.");
             }
 
-            // Chay VFX thu thap neu co.
-            if (data.CollectionVFX != null)
-            {
-                GameEvents.TriggerVFXSpawnRequest(data.CollectionVFX, controller.GameObject.transform.position, Quaternion.identity);
-            }
-
             // Tieu thu vat pham (despawn).
             return true;
         }

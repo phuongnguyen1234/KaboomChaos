@@ -1777,6 +1777,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (6)
@@ -2201,6 +2205,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 544756942292322315}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (2)
@@ -2779,6 +2787,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 544756942292322315}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (8)
@@ -3961,6 +3973,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 544756942292322315}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (1)
@@ -4031,6 +4047,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (4)
@@ -4183,6 +4203,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (28)
@@ -4315,6 +4339,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (16)
@@ -5867,6 +5895,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (3)
@@ -6591,6 +6623,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (21)
@@ -6723,6 +6759,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube
@@ -7019,6 +7059,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (22)
@@ -7295,6 +7339,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (26)
@@ -8465,6 +8513,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 544756942292322315}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (3)
@@ -9507,6 +9559,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (20)
@@ -11921,6 +11977,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (17)
@@ -11991,6 +12051,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (15)
@@ -12539,6 +12603,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (19)
@@ -13425,6 +13493,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (7)
@@ -14405,6 +14477,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (2)
@@ -14759,6 +14835,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (12)
@@ -14891,6 +14971,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (30)
@@ -15367,6 +15451,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (14)
@@ -15977,6 +16065,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (18)
@@ -16969,6 +17061,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (31)
@@ -17529,6 +17625,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 544756942292322315}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (7)
@@ -17723,6 +17823,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 544756942292322315}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (10)
@@ -19541,6 +19645,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (27)
@@ -20007,6 +20115,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (13)
@@ -20937,6 +21049,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (11)
@@ -21213,6 +21329,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (5)
@@ -21777,6 +21897,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (29)
@@ -24231,6 +24355,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (8)
@@ -24301,6 +24429,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (23)
@@ -25653,6 +25785,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (9)
@@ -26887,6 +27023,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (10)
@@ -27349,6 +27489,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 544756942292322315}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (9)
@@ -28235,6 +28379,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (24)
@@ -28429,6 +28577,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (25)
@@ -28639,6 +28791,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 544756942292322315}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube
@@ -29067,6 +29223,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8443316586355634325}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (1)
@@ -30069,6 +30229,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 544756942292322315}
     m_Modifications:
+    - target: {fileID: 1052660535981078843, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4761896201556638667, guid: b5a8f080e0fc95c4080263053d08849e, type: 3}
       propertyPath: m_Name
       value: Cube (4)

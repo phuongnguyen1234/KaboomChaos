@@ -1,6 +1,7 @@
 using UnityEngine;
 using Core;
 using Core.Interfaces;
+using Perks.Behaviors;
 
 namespace Perks.Data
 {

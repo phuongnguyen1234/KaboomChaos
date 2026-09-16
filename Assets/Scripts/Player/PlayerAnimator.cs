@@ -10,7 +10,7 @@ namespace Player
     /// Lớp này hoạt động như một cầu nối giữa IPlayer và Animator Controller.
     /// </summary>
     [RequireComponent(typeof(Animator))]
-    public class PlayerAnimator : MonoBehaviour
+    public class PlayerAnimator : MonoBehaviour, ISkillAnimationBridge
     {
         #region Fields
 
@@ -24,6 +24,12 @@ namespace Player
         private static readonly int ResetTriggerHash = Animator.StringToHash("Reset");
         private static readonly int IsClimbingHash = Animator.StringToHash("IsClimbing");
         private static readonly int ClimbingSpeedHash = Animator.StringToHash("ClimbingSpeed");
+
+        // Skill-related Animator trigger/bool parameters
+        private static readonly int SuperJumpTriggerHash = Animator.StringToHash("SuperJump");
+        private static readonly int SummonTriggerHash = Animator.StringToHash("Summon");
+        private static readonly int ChargeBoolHash = Animator.StringToHash("Charge");
+        private static readonly int IsForcefieldOnBoolHash = Animator.StringToHash("IsForcefieldOn");
 
         #endregion
 
@@ -88,6 +94,38 @@ namespace Player
         public void SetAnimationSpeed(float speed)
         {
             if (_animator != null) _animator.speed = speed;
+        }
+
+        /// <summary>
+        /// Kich hoat trigger 'SuperJump' tren Animator khi player dung skill SuperJump.
+        /// </summary>
+        public void TriggerSuperJumpAnimation()
+        {
+            if (_animator != null) _animator.SetTrigger(SuperJumpTriggerHash);
+        }
+
+        /// <summary>
+        /// Kich hoat trigger 'Summon' tren Animator khi player dung skill Platform, BubbleBarrier sau Heal.
+        /// </summary>
+        public void TriggerSummonAnimation()
+        {
+            if (_animator != null) _animator.SetTrigger(SummonTriggerHash);
+        }
+
+        /// <summary>
+        /// Sat bool 'Charge' tren Animator: true in thoi gian duration cua skill Disarm, false khi ket thuc.
+        /// </summary>
+        public void SetDisarmCharging(bool charging)
+        {
+            if (_animator != null) _animator.SetBool(ChargeBoolHash, charging);
+        }
+
+        /// <summary>
+        /// Sat bool 'IsForcefieldOn' tren Animator: true khi skill Forcefield dang hoat dong, false khi ket thuc.
+        /// </summary>
+        public void SetForcefieldActive(bool active)
+        {
+            if (_animator != null) _animator.SetBool(IsForcefieldOnBoolHash, active);
         }
 
         #endregion

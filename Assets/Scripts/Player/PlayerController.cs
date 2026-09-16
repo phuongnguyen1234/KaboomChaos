@@ -25,7 +25,6 @@ namespace Player
         private float _rotationVelocity;
 
         private CameraController _cameraController;
-        private PlayerBGMController _bgmController;
         private Vector3 _lastActualVelocity; // Vận tốc thực tế từ frame vật lý trước
         private Vector3 _groundAngularVelocity; // Vận tốc góc của mặt đất
 
@@ -122,7 +121,8 @@ namespace Player
         /// Di chuyển người chơi đến một vị trí mới một cách an toàn.
         /// </summary>
         /// <param name="position">Vị trí thế giới mới.</param>
-        public void Teleport(Vector3 position)
+        /// <param name="rotation">Góc quay thế giới mới (tùy chọn).</param>
+        public void Teleport(Vector3 position, Quaternion? rotation = null)
         {
             // Đối với controller CMF, việc thay đổi vị trí phải được thực hiện thông qua component 'Mover'.
             // Việc đặt 'transform.position' trực tiếp sẽ bị ghi đè trong lần cập nhật vật lý tiếp theo.
@@ -135,6 +135,16 @@ namespace Player
             else
             {
                 transform.position = position;
+            }
+
+            if (rotation.HasValue)
+            {
+                transform.rotation = rotation.Value;
+                _rotationVelocity = 0f;
+                if (_cameraController != null)
+                {
+                    _cameraController.SetCameraRotation(rotation.Value.eulerAngles.y, 0f);
+                }
             }
         }
 
@@ -213,54 +223,6 @@ namespace Player
             _jumpBonus = 0f;
         }
 
-        /// Yêu cầu BGM controller của người chơi này phát nhạc sảnh chờ.
-        /// </summary>
-        public void PlayLobbyMusic()
-        {
-            _bgmController?.PlayLobbyMusic();
-        }
-
-        /// <summary>
-        /// Yêu cầu BGM controller của người chơi này bắt đầu playlist nhạc gameplay.
-        /// </summary>
-        public void PlayGameplayMusic(float intensity)
-        {
-            // Tên phương thức trong PlayerBGMController là StartGameplayMusicPlaylist
-            _bgmController?.PlayGameplayMusic(intensity);
-        }
-
-        /// <summary>
-        /// Yêu cầu BGM controller của người chơi này phát nhạc 30 giây cuối.
-        /// </summary>
-        public void PlayLast30sMusic(float intensity)
-        {
-            _bgmController?.PlayLast30sMusic(intensity);
-        }
-
-        /// <summary>
-        /// Yêu cầu BGM controller của người chơi này dừng mọi nhạc đang phát.
-        /// </summary>
-        public void StopMusic()
-        {
-            _bgmController?.StopMusic();
-        }
-
-        /// <summary>
-        /// Tạm dừng nhạc nền hiện tại.
-        /// </summary>
-        public void PauseMusic()
-        {
-            _bgmController?.PauseMusic();
-        }
-
-        /// <summary>
-        /// Tiếp tục phát nhạc nền đã bị tạm dừng.
-        /// </summary>
-        public void ResumeMusic()
-        {
-            _bgmController?.ResumeMusic();
-        }
-
         #endregion
 
 
@@ -293,12 +255,6 @@ namespace Player
             
             // Lấy component Collider chính của player để dùng cho các phép tính vật lý
             _mainCollider = GetComponent<Collider>();
-
-            // Lấy BGM controller
-            _bgmController = GetComponent<PlayerBGMController>();
-            if (_bgmController == null) {
-                Debug.LogWarning("PlayerBGMController component not found on player prefab!", this);
-            }
         }
 
         /// <summary>

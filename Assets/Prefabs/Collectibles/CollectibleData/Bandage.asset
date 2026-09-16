@@ -16,7 +16,7 @@ MonoBehaviour:
   _displayName: Bandage
   _lifespan: 120
   _collectionSFX: {fileID: 8300000, guid: d02341d96b4dd46438b53c59ec3cc64d, type: 3}
-  _collectionVFX: {fileID: 0}
+  _collectionVFX: {fileID: 5928714624743693788, guid: a0fb044aabef7b5419996c3b5029b066, type: 3}
   _floatingTextColor: {r: 0.39394912, g: 0.82641506, b: 0.13565677, a: 1}
   possibleVariants:
   - variantCollectibleData: {fileID: 11400000, guid: 1a2e97af67592ff43888e2c2e6d1a403, type: 2}

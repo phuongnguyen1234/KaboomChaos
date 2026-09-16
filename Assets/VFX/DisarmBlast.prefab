@@ -200,6 +200,10 @@ PrefabInstance:
       propertyPath: _animationStages.Array.data[1].easeCurve.m_Curve.Array.data[1].tangentMode
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4473756658289661954, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4754107197624226471, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: m_IsActive
       value: 0

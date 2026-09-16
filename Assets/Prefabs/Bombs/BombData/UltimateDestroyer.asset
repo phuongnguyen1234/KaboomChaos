@@ -17,7 +17,7 @@ MonoBehaviour:
   description: 'Ultimate Destroyer
 
 '
-  radius: 18
+  radius: 21
   damage: 130
   damageFalloff:
     serializedVersion: 2
@@ -88,7 +88,7 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 8.5
+      value: 9
       inSlope: -3.5
       outSlope: -3.5
       tangentMode: 34
@@ -97,7 +97,7 @@ MonoBehaviour:
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 1
-      value: 5
+      value: 5.5
       inSlope: -3.5
       outSlope: -3.5
       tangentMode: 34
@@ -112,7 +112,7 @@ MonoBehaviour:
   maxNumberOfExplosions: 13
   spawnSound: {fileID: 0}
   delayBetweenExplosions: 0.5
-  explosionSpreadRadius: 6
+  explosionSpreadRadius: 9
   subExplosionDamage: 80
   subExplosionDamageFalloff:
     serializedVersion: 2

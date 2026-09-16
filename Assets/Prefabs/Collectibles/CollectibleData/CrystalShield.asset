@@ -16,7 +16,7 @@ MonoBehaviour:
   _displayName: Crystal Shield
   _lifespan: 0
   _collectionSFX: {fileID: 8300000, guid: 50fe9e7cc9ff1ca4f8910c3607ab5ee6, type: 3}
-  _collectionVFX: {fileID: 0}
+  _collectionVFX: {fileID: 9181321013441213623, guid: f7bd041a41b857449a5c855b1452d128, type: 3}
   _floatingTextColor: {r: 0, g: 0, b: 0, a: 1}
   possibleVariants: []
   _rarityByDifficulty:

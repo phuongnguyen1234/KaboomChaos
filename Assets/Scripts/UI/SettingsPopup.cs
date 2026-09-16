@@ -3,22 +3,19 @@ using UnityEngine;
 namespace UI
 {
     /// <summary>
-    /// Popup cai dat (Settings) care hosteaza component SettingsUI.
-    /// Show hien popup va sincroniza; Hide cancela orice rebind activ (dac user dong popup).
+    /// Popup cai dat (Settings) chua component SettingsUI.
+    /// Show hien popup va dong bo; Hide huy rebind dang thuc hien (neu nguoi dung dong popup).
     /// </summary>
     public class SettingsPopup : BasePopup
     {
         #region Fields
-
-        [Tooltip("Component SettingsUI care contine controlarea. Neu khong gan, se tu tim in child.")]
+        [Tooltip("Component SettingsUI chua cac thiet lap. Neu khong gan se tu dong tim trong child.")]
         [SerializeField] private SettingsUI _settingsUI;
-
         #endregion
 
         #region Unity Lifecycle
-
         /// <summary>
-        /// Cheama nu dong popup (base) va tu tim SettingsUI neu khong duoc gan tren Inspector.
+        /// Khoi tao popup va tu tim SettingsUI neu chua duoc gan qua Inspector.
         /// </summary>
         protected override void Awake()
         {
@@ -26,20 +23,23 @@ namespace UI
 
             if (_settingsUI == null)
             {
-                _settingsUI = GetComponentInChildren<SettingsUI>();
+                _settingsUI = GetComponentInChildren<SettingsUI>(true);
             }
         }
-
         #endregion
 
         #region Protected Virtual Hooks
-
         /// <summary>
-        /// Khi mo popup, sincroniza UI cu gia tri duoc luu in SettingsManager.
+        /// Khi mo popup, dong bo UI voi gia tri duoc luu trong SettingsManager.
         /// </summary>
         protected override void OnShow()
         {
             base.OnShow();
+
+            if (_settingsUI == null)
+            {
+                _settingsUI = GetComponentInChildren<SettingsUI>(true);
+            }
 
             if (_settingsUI != null)
             {
@@ -48,7 +48,7 @@ namespace UI
         }
 
         /// <summary>
-        /// Khi dong popup, cancela thao taci rebind in curs de tranh key khong se schimba nevoit.
+        /// Khi dong popup, huy thao tac rebind dang dien ra de tranh doi phim ngoai y muon.
         /// </summary>
         protected override void OnHidden()
         {
@@ -59,7 +59,6 @@ namespace UI
                 _settingsUI.CancelRebind();
             }
         }
-
         #endregion
     }
 }

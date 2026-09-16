@@ -871,7 +871,7 @@ ParticleSystem:
     rateOverTime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 5
+      scalar: 1
       minScalar: 10
       maxCurve:
         serializedVersion: 2
@@ -4854,4 +4854,6 @@ MonoBehaviour:
   _customDecalColor: {r: 0.4113207, g: 0, b: 0, a: 1}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []

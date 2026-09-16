@@ -16,7 +16,7 @@ MonoBehaviour:
   _displayName: Copper Coin
   _lifespan: 60
   _collectionSFX: {fileID: 8300000, guid: 863fcba4097a1ec408cd8b8713cb5978, type: 3}
-  _collectionVFX: {fileID: 0}
+  _collectionVFX: {fileID: 5120829404602587803, guid: e3d72f0ae5b22694b99f5f389ce6911a, type: 3}
   _floatingTextColor: {r: 1, g: 0.8039216, b: 0.16470589, a: 1}
   possibleVariants:
   - variantCollectibleData: {fileID: 11400000, guid: 4263c31eeee9fc14db9795591df8d7ce, type: 2}

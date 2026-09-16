@@ -16,7 +16,7 @@ MonoBehaviour:
   _displayName: Fire Shield
   _lifespan: 0
   _collectionSFX: {fileID: 8300000, guid: 976d8bb2b9a13574db3f1b09d2141d5f, type: 3}
-  _collectionVFX: {fileID: 0}
+  _collectionVFX: {fileID: 4785540172411343487, guid: 37b866ecc8ba1514986091bf686fd752, type: 3}
   _floatingTextColor: {r: 0, g: 0, b: 0, a: 1}
   possibleVariants: []
   _rarityByDifficulty:

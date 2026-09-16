@@ -196,6 +196,10 @@ PrefabInstance:
       propertyPath: _animationStages.Array.data[1].easeCurve.m_Curve.Array.data[1].tangentMode
       value: 34
       objectReference: {fileID: 0}
+    - target: {fileID: 4473756658289661954, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4968350108855374346, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: m_VersionIndex
       value: 211
@@ -60988,6 +60992,14 @@ PrefabInstance:
       propertyPath: _customEmissionIntensity
       value: 1.45
       objectReference: {fileID: 0}
+    - target: {fileID: 7433509491896145726, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: m_LengthScale
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7433509491896145726, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 37e1bf42f5177764897161ead62757ee, type: 2}
     - target: {fileID: 8365981775348852892, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 

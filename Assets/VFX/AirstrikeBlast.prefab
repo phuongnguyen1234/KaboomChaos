@@ -440,6 +440,10 @@ PrefabInstance:
       propertyPath: _customEmissionIntensity
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7289873364278322524, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: InitialModule.startColor.maxColor.g
+      value: 0.9512944
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

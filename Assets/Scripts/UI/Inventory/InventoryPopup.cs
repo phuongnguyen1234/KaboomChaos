@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 using Core;
 using Core.Enums;
 using Core.Interfaces;
@@ -40,6 +41,17 @@ namespace UI
         [Tooltip("Text hien thi so credits (so du) cua nguoi choi.")]
         [SerializeField] private TextMeshProUGUI _balanceText;
 
+        [Header("Container Slot")]
+        [Tooltip("Slot UI de chua container background cho tab tuong ung.")]
+        [SerializeField] private RectTransform _containerSlot;
+        [Tooltip("Prefab SkillContainer hien thi background cho tab Skill.")]
+        [SerializeField] private GameObject _skillContainerPrefab;
+        [Tooltip("Prefab PerkContainer hien thi background cho tab Perk.")]
+        [SerializeField] private GameObject _perkContainerPrefab;
+
+        // Instance container background dang duoc load trong slot.
+        private GameObject _currentContainerInstance;
+
         [Header("Info Panel")]
         [Tooltip("Root GameObject cua InfoPanel. Se an/hien khi chon item.")]
         [SerializeField] private GameObject _infoPanel;
@@ -74,6 +86,9 @@ namespace UI
         [Tooltip("Thoi gian panel 'Restricted Equip' hien thi truoc khi tu dong an (giay).")]
         [SerializeField] private float _restrictedEquipDuration = 2f;
 
+        [Tooltip("SFX phat khi nguoi choi co trang bi/thao trang bi khi dang trong arena.")]
+        [SerializeField] private AudioClip _restrictedEquipSfx;
+
         // Coroutine dang dem gio de tu dong an panel 'Restricted Equip'.
         private Coroutine _restrictedEquipCoroutine;
 
@@ -82,6 +97,29 @@ namespace UI
         private string _selectedId;
         // Luu ISkillData dang chon de co the Equip (EquipSkill can ISkillData, khong chi ID).
         private ISkillData _pendingSkillData;
+
+        // Chi so tab duoc chon lan gan nhat, dung de tranh clear info panel khi chi refresh tab hien tai.
+        private int _lastTabIndex = -1;
+
+        // Animation trang thai icon item.
+        private Vector2 _infoIconOriginalAnchoredPos;
+        private bool _hasOriginalIconPos;
+
+        [Header("Tab Dynamic Colors")]
+        [Tooltip("Image cua Main Container co mau thay doi theo tab.")]
+        [SerializeField] private Image _mainContainerImage;
+        [Tooltip("Image cua Info Container co mau thay doi theo tab.")]
+        [SerializeField] private Image _infoContainerImage;
+
+        [Header("Skills Tab Colors")]
+        [SerializeField] private Color _skillsMainContainerColor = Color.white;
+        [SerializeField] private Color _skillsInfoContainerColor = Color.white;
+        [SerializeField] private Color _skillsItemNameColor = Color.white;
+
+        [Header("Perks Tab Colors")]
+        [SerializeField] private Color _perksMainContainerColor = Color.white;
+        [SerializeField] private Color _perksInfoContainerColor = Color.white;
+        [SerializeField] private Color _perksItemNameColor = Color.white;
         #endregion
 
         #region Unity Lifecycle
@@ -105,7 +143,9 @@ namespace UI
         protected override void OnShow()
         {
             base.OnShow();
+            _lastTabIndex = -1;
             RefreshBalance();
+            ClearInfoPanel();
             RefreshCurrentTab();
         }
 
@@ -115,6 +155,7 @@ namespace UI
         protected override void OnHidden()
         {
             base.OnHidden();
+            StopIconAnimation();
 
             if (_restrictedEquipCoroutine != null)
             {
@@ -126,24 +167,51 @@ namespace UI
             {
                 _restrictedEquipPanel.SetActive(false);
             }
+
+            ClearContainerSlot();
         }
 
         /// <summary>
-        /// Khi chon tab, nap du lieu tuong ung (Skills hoac Perks) vao noi dung tab.
+        /// Khi chon tab, load container tuong ung vao slot va nap du lieu. Chi clear info khi thuc su doi tab.
         /// </summary>
         protected override void OnTabSelected(int index, RectTransform contentInstance)
         {
             base.OnTabSelected(index, contentInstance);
 
+            ApplyTabTheme(index);
+
+            // Chi clear info panel khi thuc su chuyen sang tab khac
+            if (index != _lastTabIndex)
+            {
+                _lastTabIndex = index;
+                ClearInfoPanel();
+            }
+
             switch (index)
             {
                 case SkillsTabIndex:
+                    LoadContainerPrefab(_skillContainerPrefab);
                     PopulateSkillsTab(contentInstance);
                     break;
                 case PerksTabIndex:
+                    LoadContainerPrefab(_perkContainerPrefab);
                     PopulatePerksTab(contentInstance);
                     break;
             }
+        }
+
+        /// <summary>
+        /// Ap dung mau sac theme cho main container, info container va item name dua theo tab dang chon.
+        /// </summary>
+        private void ApplyTabTheme(int index)
+        {
+            Color mainColor = index == SkillsTabIndex ? _skillsMainContainerColor : _perksMainContainerColor;
+            Color infoColor = index == SkillsTabIndex ? _skillsInfoContainerColor : _perksInfoContainerColor;
+            Color nameColor = index == SkillsTabIndex ? _skillsItemNameColor : _perksItemNameColor;
+
+            if (_mainContainerImage != null) _mainContainerImage.color = mainColor;
+            if (_infoContainerImage != null) _infoContainerImage.color = infoColor;
+            if (_infoNameText != null) _infoNameText.color = nameColor;
         }
         #endregion
 
@@ -256,9 +324,171 @@ namespace UI
                 _infoPanel.SetActive(true);
             }
 
-            if (_infoIconImage != null) _infoIconImage.sprite = icon;
+            if (_infoIconImage != null)
+            {
+                _infoIconImage.sprite = icon;
+                _infoIconImage.enabled = icon != null;
+
+                if (icon != null)
+                {
+                    PlayIconScaleDownAnimation();
+                }
+                else
+                {
+                    StopIconAnimation();
+                }
+            }
             if (_infoNameText != null) _infoNameText.text = name;
             if (_infoDescriptionText != null) _infoDescriptionText.text = description;
+        }
+
+        /// <summary>
+        /// Xoa thong tin item dang chon (clear text va icon) nhung giu panel Info luon hien thi.
+        /// </summary>
+        private void ClearInfoPanel()
+        {
+            _selectedKind = ItemKind.None;
+            _selectedId = null;
+            _pendingSkillData = null;
+
+            StopIconAnimation();
+            if (_infoIconImage != null)
+            {
+                _infoIconImage.sprite = null;
+                _infoIconImage.enabled = false;
+            }
+            if (_infoNameText != null) _infoNameText.text = string.Empty;
+            if (_infoDescriptionText != null) _infoDescriptionText.text = "Choose an item on the left to see information!";
+
+            if (_infoPanel != null)
+            {
+                _infoPanel.SetActive(true);
+            }
+
+            RefreshEquipButton();
+        }
+
+        #region Private Methods - Icon Animation
+        /// <summary>
+        /// Bat dau hieu ung idle cho item icon (lac qua lai -5 deg sang +5 deg va scale up/down nhe 1.0 -> 1.06).
+        /// Chay cac tween doc lap voi SetLoops(-1) va dung DOKill de khong vi phạm quy tac Sequence cua DOTween.
+        /// </summary>
+        private void StartIdleIconAnimation()
+        {
+            if (_infoIconImage == null || !_infoIconImage.enabled || _infoIconImage.sprite == null) return;
+
+            StopIconAnimation();
+
+            _infoIconImage.transform.localScale = Vector3.one;
+            _infoIconImage.transform.localRotation = Quaternion.identity;
+
+            _infoIconImage.transform.DOScale(new Vector3(1.06f, 1.06f, 1f), 1.5f)
+                .SetEase(Ease.InOutSine)
+                .SetLoops(-1, LoopType.Yoyo)
+                .SetUpdate(true);
+
+            _infoIconImage.transform.DORotate(new Vector3(0f, 0f, 5f), 1.2f)
+                .SetEase(Ease.InOutSine)
+                .SetLoops(-1, LoopType.Yoyo)
+                .SetUpdate(true);
+        }
+
+        /// <summary>
+        /// Play hieu ung scale down tu to (1.5x) ve binh thuong (1.0x) cho item icon, sau do chuyen sang hieu ung idle.
+        /// </summary>
+        private void PlayIconScaleDownAnimation()
+        {
+            if (_infoIconImage == null || !_infoIconImage.enabled || _infoIconImage.sprite == null) return;
+
+            StopIconAnimation();
+
+            RectTransform rect = _infoIconImage.rectTransform;
+            if (!_hasOriginalIconPos)
+            {
+                _infoIconOriginalAnchoredPos = rect.anchoredPosition;
+                _hasOriginalIconPos = true;
+            }
+
+            rect.anchoredPosition = _infoIconOriginalAnchoredPos;
+            rect.localScale = new Vector3(1.5f, 1.5f, 1f);
+            rect.localRotation = Quaternion.identity;
+
+            rect.DOScale(Vector3.one, 0.25f)
+                .SetEase(Ease.OutBack)
+                .SetUpdate(true)
+                .OnComplete(StartIdleIconAnimation);
+        }
+
+        /// <summary>
+        /// Dung va reset toan bo animation cua item icon.
+        /// </summary>
+        private void StopIconAnimation()
+        {
+            if (_infoIconImage != null)
+            {
+                _infoIconImage.transform.DOKill();
+                _infoIconImage.rectTransform.DOKill();
+
+                if (_hasOriginalIconPos)
+                {
+                    _infoIconImage.rectTransform.anchoredPosition = _infoIconOriginalAnchoredPos;
+                }
+
+                _infoIconImage.transform.localScale = Vector3.one;
+                _infoIconImage.transform.localRotation = Quaternion.identity;
+            }
+        }
+        #endregion
+
+        /// <summary>
+        /// Nhan ban prefab container vao _containerSlot tuong ung voi tab (set anchor, pivot va position theo bottom center).
+        /// </summary>
+        private void LoadContainerPrefab(GameObject prefab)
+        {
+            ClearContainerSlot();
+
+            if (prefab == null || _containerSlot == null) return;
+
+            GameObject instance = Instantiate(prefab, _containerSlot, false);
+            if (instance.TryGetComponent<RectTransform>(out var rectTransform))
+            {
+                Vector2 prefabPosition = Vector2.zero;
+                if (prefab.TryGetComponent<RectTransform>(out var prefabRect))
+                {
+                    prefabPosition = prefabRect.anchoredPosition;
+                }
+
+                // Set Anchor va Pivot sang Bottom Center (0.5, 0)
+                rectTransform.anchorMin = new Vector2(0.5f, 0f);
+                rectTransform.anchorMax = new Vector2(0.5f, 0f);
+                rectTransform.pivot = new Vector2(0.5f, 0f);
+
+                // Giu nguyen position tu prefab (khac (0, 0) neu duoc cau hinh tren prefab)
+                rectTransform.anchoredPosition = prefabPosition;
+                rectTransform.localScale = Vector3.one;
+            }
+
+            _currentContainerInstance = instance;
+        }
+
+        /// <summary>
+        /// Xoa instance container cu trong _containerSlot.
+        /// </summary>
+        private void ClearContainerSlot()
+        {
+            if (_currentContainerInstance != null)
+            {
+                Destroy(_currentContainerInstance);
+                _currentContainerInstance = null;
+            }
+
+            if (_containerSlot != null)
+            {
+                foreach (Transform child in _containerSlot)
+                {
+                    Destroy(child.gameObject);
+                }
+            }
         }
 
         /// <summary>
@@ -365,7 +595,7 @@ namespace UI
 
             if (_equipButtonText != null)
             {
-                _equipButtonText.text = isEquipped ? "Unequip" : "Equip";
+                _equipButtonText.text = isEquipped ? "UNEQUIP" : "EQUIP";
             }
 
             if (_equipButton != null)
@@ -500,6 +730,11 @@ namespace UI
         /// </summary>
         private void ShowRestrictedEquipPanel()
         {
+            if (_restrictedEquipSfx != null && SfxService.Instance != null)
+            {
+                SfxService.Instance.PlaySfx(_restrictedEquipSfx);
+            }
+
             if (_restrictedEquipPanel == null) return;
 
             _restrictedEquipPanel.SetActive(true);

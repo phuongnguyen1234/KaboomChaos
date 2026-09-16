@@ -57,7 +57,7 @@ MonoBehaviour:
   m_ChildAlignment: 0
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 426, y: 250}
+  m_CellSize: {x: 394.66666, y: 232}
   m_Spacing: {x: 16, y: 16}
   m_Constraint: 0
   m_ConstraintCount: 2
@@ -233,7 +233,7 @@ MonoBehaviour:
   m_text: No Perks left to sell. Check back later!
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5b5e183165d8fd54fb819914e0f836fe, type: 2}
-  m_sharedMaterial: {fileID: -5525497157746103730, guid: 5b5e183165d8fd54fb819914e0f836fe, type: 2}
+  m_sharedMaterial: {fileID: 6712662498939920853, guid: 5b5e183165d8fd54fb819914e0f836fe, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -257,8 +257,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 32
-  m_fontSizeBase: 32
+  m_fontSize: 36
+  m_fontSizeBase: 40
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 14

@@ -15,6 +15,10 @@ namespace Skills.Data
         [SerializeField] private float _healAmount = 25f;
         public float HealAmount => _healAmount;
 
+        [Tooltip("He so giam toc do di chuyen cua player trong thoi gian duy tri skill (duration). Vi du: 0.5 quy dinh player giam 50% toc do.")]
+        [SerializeField] private float _slowMultiplier = 0.5f;
+        public float SlowMultiplier => _slowMultiplier;
+
         private HealBehavior _behavior;
 
         public override ISkillBehavior Behavior => _behavior ??= new HealBehavior(this);

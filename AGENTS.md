@@ -32,7 +32,7 @@ public class ExampleClass : MonoBehaviour
 { ... }
 ```
 
-- Comment bằng tiếng việt không dấu, không comment bằng tiếng anh. Kệ các comment tiếng việt có dấu đã có sẵn (nhằm tránh để Agent gặp lỗi các ký tự unicode)
+- Comment bằng tiếng việt không dấu, không comment bằng tiếng anh. Kệ các comment tiếng việt có dấu đã có sẵn (nhằm tránh để Agent gặp lỗi các ký tự unicode). CẤM TRỘN CÙNG LÚC TIẾNG VIỆT, TIẾNG ANH, TIẾNG RUMANI HAY BẤT KỲ NGÔN NGỮ KHÁC
 
 ### 2.2 Regions & Code Organization
 

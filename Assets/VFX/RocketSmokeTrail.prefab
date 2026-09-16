@@ -32,6 +32,14 @@ PrefabInstance:
       propertyPath: _customDecalColor.r
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2146397865091444451, guid: a5e201511f27dfe4cb987a50226f91cc, type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2146397865091444451, guid: a5e201511f27dfe4cb987a50226f91cc, type: 3}
+      propertyPath: EmissionModule.rateOverTime.minMaxState
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3632386489981309391, guid: a5e201511f27dfe4cb987a50226f91cc, type: 3}
       propertyPath: m_Name
       value: RocketSmokeTrail

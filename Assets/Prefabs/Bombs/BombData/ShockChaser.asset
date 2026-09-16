@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: Shock Chaser
   description: Shock Chaser
   radius: 6
-  damage: 10
+  damage: 5
   damageFalloff:
     serializedVersion: 2
     m_Curve:
@@ -184,7 +184,7 @@ MonoBehaviour:
   fuseColor: {r: 1, g: 0, b: 0, a: 1}
   persistentFuseVFX: {fileID: 0}
   fuseStages:
-  - startTime: 15
+  - startTime: 25
     visualEffect: {fileID: 0}
     stageSoundPitch: 0.1
     stageSound: {fileID: 0}
@@ -198,7 +198,7 @@ MonoBehaviour:
     enableScalePulse: 0
     pulseScaleMultiplier: 0
     pulseScaleDuration: 0
-  - startTime: 17
+  - startTime: 27
     visualEffect: {fileID: 0}
     stageSoundPitch: 0.1
     stageSound: {fileID: 0}
@@ -212,7 +212,7 @@ MonoBehaviour:
     enableScalePulse: 0
     pulseScaleMultiplier: 0
     pulseScaleDuration: 0
-  - startTime: 18.5
+  - startTime: 28.5
     visualEffect: {fileID: 0}
     stageSoundPitch: 0.1
     stageSound: {fileID: 0}
@@ -226,7 +226,7 @@ MonoBehaviour:
     enableScalePulse: 0
     pulseScaleMultiplier: 0
     pulseScaleDuration: 0
-  - startTime: 19.5
+  - startTime: 29.5
     visualEffect: {fileID: 0}
     stageSoundPitch: 0
     stageSound: {fileID: 0}
@@ -243,4 +243,4 @@ MonoBehaviour:
   tickingSoundPitch: 1
   tickingSound: {fileID: 0}
   trackingType: 1
-  speed: 6
+  speed: 5

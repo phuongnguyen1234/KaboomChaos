@@ -1,9 +1,8 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
-using System;
 using Core.Interfaces.UI;
 using Core;
-using Core.Interfaces;
+using DG.Tweening;
 
 namespace UI
 {
@@ -16,14 +15,16 @@ namespace UI
         [SerializeField] private Button _resumeButton;
         [SerializeField] private Button _backToHomeButton;
         [SerializeField] private Button _resetCharacterButton;
-        [Tooltip("Nut mo Settings (settings de Music/SFX si use skill key rebind).")]
-        [SerializeField] private Button _settingsButton;
 
         [Header("Settings")]
         [Tooltip("(Option 1) Panel SettingsUI tamplasar direct tan Pause Menu (in-place panel).")]
         [SerializeField] private SettingsUI _settingsUI;
-        [Tooltip("(Option 2) Popup Settings chung (SettingsPopup) de deschide suprapus. Neu _settingsUI nu khong, khong se usa.")]
-        [SerializeField] private SettingsPopup _settingsPopup;
+
+        [Header("Animation")]
+        [Tooltip("CanvasGroup để thực hiện hiệu ứng fade in/out.")]
+        [SerializeField] private CanvasGroup _canvasGroup;
+        [Tooltip("Thời gian hiệu ứng fade.")]
+        [SerializeField] private float _fadeDuration = 0.3f;
 
         public bool IsVisible => gameObject.activeSelf;
 
@@ -32,20 +33,28 @@ namespace UI
             if (_resumeButton != null) _resumeButton.onClick.AddListener(Hide);
             if (_backToHomeButton != null) _backToHomeButton.onClick.AddListener(OnBackToHomeClicked);
             if (_resetCharacterButton != null) _resetCharacterButton.onClick.AddListener(OnResetCharacterClicked);
-            if (_settingsButton != null) _settingsButton.onClick.AddListener(OnSettingsClicked);
+
+            if (_canvasGroup == null) _canvasGroup = GetComponent<CanvasGroup>();
         }
 
-                public void Show()
+        public void Show()
         {
             gameObject.SetActive(true);
+            
+            if (_canvasGroup != null)
+            {
+                _canvasGroup.DOKill();
+                _canvasGroup.alpha = 0f;
+                _canvasGroup.DOFade(1f, _fadeDuration).SetUpdate(true);
+            }
+
             Time.timeScale = 0f; // Tạm dừng game
             GameEvents.IsPauseMenuVisible = true; // Báo cho CameraController & các input handler ngừng hoạt động
+            GameEvents.TriggerMusicPauseRequested(); // Tam dung BGM khi mo Pause Menu
         }
 
         public void Hide()
         {
-            gameObject.SetActive(false);
-
             // Cancel orice rebind in curs cand user dong Pause Menu (si khong inchide popup).
             if (_settingsUI != null)
             {
@@ -54,40 +63,19 @@ namespace UI
 
             Time.timeScale = 1f; // Tiếp tục game
             GameEvents.IsPauseMenuVisible = false;
-        }
+            GameEvents.TriggerMusicResumeRequested(); // Tiep tuc BGM khi dong Pause Menu
 
-        /// <summary>
-        /// Xu ly nut Settings din Pause Menu: neu co SettingsUI in-place, duoc mo/toggle
-        /// in panel; neu khong, deschide popup Settings (SettingsPopup chung).
-        /// </summary>
-        private void OnSettingsClicked()
-        {
-            if (_settingsUI != null)
+            if (_canvasGroup != null)
             {
-                bool wasVisible = _settingsUI.gameObject.activeSelf;
-                _settingsUI.gameObject.SetActive(!wasVisible);
-
-                if (wasVisible)
+                _canvasGroup.DOKill();
+                _canvasGroup.DOFade(0f, _fadeDuration).SetUpdate(true).OnComplete(() =>
                 {
-                    _settingsUI.CancelRebind();
-                }
-                else
-                {
-                    _settingsUI.Refresh();
-                }
-                return;
+                    gameObject.SetActive(false);
+                });
             }
-
-            if (_settingsPopup != null)
+            else
             {
-                if (_settingsPopup.IsVisible)
-                {
-                    _settingsPopup.Hide();
-                }
-                else
-                {
-                    _settingsPopup.Show();
-                }
+                gameObject.SetActive(false);
             }
         }
 

@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 1948526732995498121}
   - component: {fileID: 593161704018555229}
   - component: {fileID: 3180441647290710479}
+  - component: {fileID: 9162879802801627334}
   m_Layer: 0
   m_Name: ButtonTextIconSquare
   m_TagString: Untagged
@@ -79,7 +80,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 2
+  m_PixelsPerUnitMultiplier: 1.5
 --- !u!114 &1948526732995498121
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -170,6 +171,26 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &9162879802801627334
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3731613538764651871}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6bc1dca79695a64ea1be2bb1dbe719c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UI::UI.UIButtonEffect
+  _effectType: 0
+  _hoverScale: 1.1
+  _animationDuration: 0.2
+  _easeType: 27
+  _targetGraphic: {fileID: 0}
+  _hoverColor: {r: 0.9, g: 0.9, b: 0.9, a: 1}
+  _clickSound: {fileID: 8300000, guid: 5564b6ddd71179c44aceb5238d15c89a, type: 3}
+  _hoverSound: {fileID: 0}
 --- !u!1 &6069134447955213059
 GameObject:
   m_ObjectHideFlags: 0
@@ -335,7 +356,7 @@ MonoBehaviour:
   m_text: New Text
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5b5e183165d8fd54fb819914e0f836fe, type: 2}
-  m_sharedMaterial: {fileID: -5525497157746103730, guid: 5b5e183165d8fd54fb819914e0f836fe, type: 2}
+  m_sharedMaterial: {fileID: 6712662498939920853, guid: 5b5e183165d8fd54fb819914e0f836fe, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -359,7 +380,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 40
+  m_fontSize: 23.2
   m_fontSizeBase: 28
   m_fontWeight: 400
   m_enableAutoSizing: 1

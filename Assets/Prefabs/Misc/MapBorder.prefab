@@ -198,6 +198,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &367643815102949531
 GameObject:
@@ -349,6 +351,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &630786037723700686
 GameObject:
@@ -553,6 +557,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &871786061128056013
 GameObject:
@@ -704,6 +710,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &1221189678959137906
 GameObject:
@@ -908,6 +916,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &1527632284257550004
 GameObject:
@@ -1149,6 +1159,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &1688447428069432656
 GameObject:
@@ -1298,6 +1310,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &1775275311041628844
 GameObject:
@@ -1407,6 +1421,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &1779429125822958541
 GameObject:
@@ -1606,6 +1622,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &2070013670734689422
 GameObject:
@@ -1805,6 +1823,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &2292789132691483180
 GameObject:
@@ -2094,6 +2114,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &2559356206394802788
 GameObject:
@@ -2203,6 +2225,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &2631791540913939576
 GameObject:
@@ -2312,6 +2336,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &2699763484981411742
 GameObject:
@@ -2463,6 +2489,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &2907609685693883021
 GameObject:
@@ -2572,6 +2600,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &2923243065938433104
 GameObject:
@@ -2681,6 +2711,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &2959336549265287416
 GameObject:
@@ -2790,6 +2822,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &3131889338851613506
 GameObject:
@@ -2989,6 +3023,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &3485899922300017414
 GameObject:
@@ -3098,6 +3134,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &3505605478195190244
 GameObject:
@@ -3297,6 +3335,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &3895248433545970751
 GameObject:
@@ -3406,6 +3446,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &4188201713865178786
 GameObject:
@@ -3695,6 +3737,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &4471870913134578734
 GameObject:
@@ -3804,6 +3848,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &4500018206029525305
 GameObject:
@@ -3913,6 +3959,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &4689653195817876911
 GameObject:
@@ -4022,6 +4070,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &4740952484353356502
 GameObject:
@@ -4131,6 +4181,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &5083241721353409528
 GameObject:
@@ -4420,6 +4472,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &5601886306150881116
 GameObject:
@@ -4529,6 +4583,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &5683296739818065375
 GameObject:
@@ -4638,6 +4694,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &5753559917611665880
 GameObject:
@@ -4747,6 +4805,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &5763164205344666842
 GameObject:
@@ -4946,6 +5006,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &6140933951050152775
 GameObject:
@@ -5055,6 +5117,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &6155379482644085313
 GameObject:
@@ -5254,6 +5318,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &6232364857049328555
 GameObject:
@@ -5453,6 +5519,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &6491308967900681474
 GameObject:
@@ -5562,6 +5630,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &6546515337971858548
 GameObject:
@@ -5671,6 +5741,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &6565295468544207170
 GameObject:
@@ -5780,6 +5852,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &6590731888556687521
 GameObject:
@@ -5979,6 +6053,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &6823906900644621813
 GameObject:
@@ -6088,6 +6164,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &6865430345017353117
 GameObject:
@@ -6197,6 +6275,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &6917390232205786614
 GameObject:
@@ -6306,6 +6386,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &7078927309188654800
 GameObject:
@@ -6415,6 +6497,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &7334648226519620645
 GameObject:
@@ -6524,6 +6608,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &7436978103900219398
 GameObject:
@@ -6633,6 +6719,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &7582049487728848163
 GameObject:
@@ -6742,6 +6830,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &7597688972539789528
 GameObject:
@@ -6851,6 +6941,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &7893332677972666085
 GameObject:
@@ -7362,6 +7454,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &8192689244836503736
 GameObject:
@@ -7471,6 +7565,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &8376250515735123348
 GameObject:
@@ -7580,6 +7676,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &8443772306560683002
 GameObject:
@@ -7689,6 +7787,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &8749375544356451250
 GameObject:
@@ -7798,6 +7898,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &8764970218739179424
 GameObject:
@@ -7907,6 +8009,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &8808941607809019161
 GameObject:
@@ -8016,6 +8120,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &9062897726413156086
 GameObject:
@@ -8125,6 +8231,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &9097133538546598797
 GameObject:
@@ -8324,6 +8432,8 @@ MonoBehaviour:
   _customDecalColor: {r: 0, g: 0, b: 0, a: 0}
   _customAlpha: 1
   _customEmissionIntensity: 0
+  _customFresnelPower: 1
+  _customThickness: 0.6
   _statusEffectProfiles: []
 --- !u!1 &9154627737597360653
 GameObject:

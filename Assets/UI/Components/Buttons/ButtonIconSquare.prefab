@@ -88,6 +88,7 @@ GameObject:
   - component: {fileID: 5734263305598910977}
   - component: {fileID: 1948526732995498121}
   - component: {fileID: 593161704018555229}
+  - component: {fileID: -117221854113746771}
   m_Layer: 0
   m_Name: ButtonIconSquare
   m_TagString: Untagged
@@ -217,3 +218,23 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &-117221854113746771
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3731613538764651871}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6bc1dca79695a64ea1be2bb1dbe719c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UI::UI.UIButtonEffect
+  _effectType: 0
+  _hoverScale: 1.1
+  _animationDuration: 0.2
+  _easeType: 27
+  _targetGraphic: {fileID: 0}
+  _hoverColor: {r: 0.9, g: 0.9, b: 0.9, a: 1}
+  _clickSound: {fileID: 8300000, guid: 5564b6ddd71179c44aceb5238d15c89a, type: 3}
+  _hoverSound: {fileID: 0}

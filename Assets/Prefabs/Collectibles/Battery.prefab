@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5116374943373265501}
+  - component: {fileID: 924255486982734285}
   m_Layer: 8
   m_Name: Visual
   m_TagString: Untagged
@@ -26,12 +27,27 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 2073994761183498760}
   m_Father: {fileID: 5589319488569662409}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &924255486982734285
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 626090868940759403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5000c1ca13e477409967b4331dd0bcc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Core::Core.Utilities.ObjectRotator
+  _rotationSpeed: {x: 0, y: 90, z: 0}
+  _rotationSpace: 1
+  _usePhysics: 0
 --- !u!1 &7705609366092609127
 GameObject:
   m_ObjectHideFlags: 0
@@ -130,8 +146,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Collectibles::Collectibles.CollectibleController
   _collider: {fileID: 2797354896812210712}
   _mainRenderer: {fileID: 957840039152270990}
-  _rotatingVisuals: {fileID: 5116374943373265501}
-  _rotationSpeed: 90
   _indicatorArrow: {fileID: 7706782640218506292}
 --- !u!1 &7706782640218506292
 GameObject:
@@ -159,9 +173,9 @@ Transform:
   m_GameObject: {fileID: 7706782640218506292}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.8, z: 0}
-  m_LocalScale: {x: 0.48, y: 0.24, z: 0.48}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalScale: {x: 0.6, y: 0.3, z: 0.6}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 5589319488569662409}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

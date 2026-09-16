@@ -45,8 +45,17 @@ namespace UI
         [Tooltip("Thoi gian panel 'Not Enough Credits' hien thi truoc khi tu dong an (giay).")]
         [SerializeField] private float _notEnoughCreditsDuration = 2f;
 
+        [Header("Shop SFX")]
+        [Tooltip("SFX phat khi mua perk/skill thanh cong.")]
+        [SerializeField] private AudioClip _purchaseSuccessSfx;
+
+        [Tooltip("SFX phat khi mua thất bại hooc khong du credits.")]
+        [SerializeField] private AudioClip _purchaseFailedSfx;
+
         // Coroutine dang dem gio de tu dong an panel 'Not Enough Credits'.
         private Coroutine _notEnoughCreditsCoroutine;
+        // Co danh dau dang mo PurchasePopup de khong dung _skillPurchasePopup khi an Shop.
+        private bool _isOpeningPurchasePopup;
         #endregion
 
         #region Unity Lifecycle
@@ -82,16 +91,16 @@ namespace UI
             base.OnHidden();
             HideNotEnoughCredits();
 
-            // Popup quay thuong la dialog con cua Shop: dong theo khi Shop dong.
-            if (_skillPurchasePopup != null)
+            // Popup quay thuong la dialog con cua Shop: dong theo khi Shop dong (neu khong phai do dang mo PurchasePopup).
+            if (!_isOpeningPurchasePopup && _skillPurchasePopup != null)
             {
-                _skillPurchasePopup.Hide();
+                _skillPurchasePopup.HideInstant();
             }
 
             // Dong luon popup 'View all' (dialog con) khi Shop dong.
             if (_viewAllPopup != null)
             {
-                _viewAllPopup.Hide();
+                _viewAllPopup.HideInstant();
             }
         }
 
@@ -196,10 +205,13 @@ namespace UI
 
             RefreshBalance();
 
-            // Mo popup quay thuong de xac dinh skill nhan duoc trong nhom.
+            // Mo popup quay thuong de xac dinh skill nhan duoc trong nhom va an ShopPopup tuc thi.
             if (_skillPurchasePopup != null)
             {
+                _isOpeningPurchasePopup = true;
                 _skillPurchasePopup.BeginSpin(type);
+                HideInstant();
+                _isOpeningPurchasePopup = false;
             }
         }
 
@@ -227,6 +239,11 @@ namespace UI
             GameEvents.TriggerAddCreditsRequest(-price);
             GameEvents.TriggerAddOwnedPerk(perkData.Id);
 
+            if (_purchaseSuccessSfx != null && SfxService.Instance != null)
+            {
+                SfxService.Instance.PlaySfx(_purchaseSuccessSfx);
+            }
+
             Debug.Log($"[ShopPopup] Da mua perk: {perkData.DisplayName}.");
             RefreshBalance();
             RefreshCurrentTab();
@@ -248,10 +265,11 @@ namespace UI
         }
 
         /// <summary>
-        /// Goi khi popup quay thuong dong lai: lam moi lai so du va tab de cap nhat so huu/price.
+        /// Goi khi popup quay thuong dong lai (ca Equip va Close): hien lai Shop tuc thi va lam moi lai so du + tab.
         /// </summary>
         private void HandlePurchasePopupClosed()
         {
+            ShowInstant();
             RefreshBalance();
             RefreshCurrentTab();
         }
@@ -264,6 +282,11 @@ namespace UI
         /// </summary>
         private void ShowNotEnoughCredits()
         {
+            if (_purchaseFailedSfx != null && SfxService.Instance != null)
+            {
+                SfxService.Instance.PlaySfx(_purchaseFailedSfx);
+            }
+
             if (_notEnoughCreditsPanel == null) return;
 
             _notEnoughCreditsPanel.SetActive(true);

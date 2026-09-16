@@ -58,7 +58,8 @@ namespace Core.Interfaces
         /// Di chuyển người chơi đến một vị trí mới một cách an toàn, đồng thời reset lại các lực tác động.
         /// </summary>
         /// <param name="position">Vị trí thế giới mới.</param>
-        void Teleport(Vector3 position);
+        /// <param name="rotation">Góc quay mới (tùy chọn).</param>
+        void Teleport(Vector3 position, Quaternion? rotation = null);
 
         /// <summary>
         /// Them luc quan tinh (momentum) vao nguoi choi de day hoac hất tung ho.
@@ -97,38 +98,6 @@ namespace Core.Interfaces
         /// Cho biết người chơi có đang bị đóng băng hay không.
         /// </summary>
         bool IsFrozen { get; }
-
-        /// <summary>
-        /// Yêu cầu người chơi phát nhạc của sảnh chờ (lobby).
-        /// </summary>
-        void PlayLobbyMusic();
-
-        /// <summary>
-        /// Yêu cầu người chơi bắt đầu playlist nhạc gameplay dựa trên độ khó.
-        /// </summary>
-        /// <param name="intensity">Độ khó của round đấu.</param>
-        void PlayGameplayMusic(float intensity);
-
-        /// <summary>
-        /// Yêu cầu người chơi phát nhạc cho 30 giây cuối của round đấu.
-        /// </summary>
-        /// <param name="intensity">Độ khó của round đấu.</param>
-        void PlayLast30sMusic(float intensity);
-
-        /// <summary>
-        /// Yêu cầu người chơi dừng tất cả nhạc đang phát.
-        /// </summary>
-        void StopMusic();
-
-        /// <summary>
-        /// Tạm dừng nhạc nền hiện tại.
-        /// </summary>
-        void PauseMusic();
-
-        /// <summary>
-        /// Tiếp tục phát nhạc nền đã bị tạm dừng.
-        /// </summary>
-        void ResumeMusic();
 
         /// <summary>
         /// Reset toàn bộ chỉ số cộng dồn về trạng thái gốc.

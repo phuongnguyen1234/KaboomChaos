@@ -86,9 +86,9 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 7.5
-      inSlope: -3
-      outSlope: -3
+      value: 8
+      inSlope: -3.5
+      outSlope: -3.5
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
@@ -96,8 +96,8 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 1
       value: 4.5
-      inSlope: -3
-      outSlope: -3
+      inSlope: -3.5
+      outSlope: -3.5
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
@@ -187,6 +187,6 @@ MonoBehaviour:
     m_RotationOrder: 4
   maxPerSpawnWave: 1
   maxActiveInstances: 3
-  fallSpeed: 5.75
+  fallSpeed: 5.5
   landingLightVFX: {fileID: 1805167288089911798, guid: 41a1b5e54e513e84e9defb3a091a203a, type: 3}
   landingLightColor: {r: 1, g: 0, b: 0, a: 1}

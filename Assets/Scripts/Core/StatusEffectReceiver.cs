@@ -38,6 +38,11 @@ namespace Core
         [Tooltip("Thời gian (giây) người chơi bị đóng băng. Ghi đè thời gian mặc định của hiệu ứng.")]
         [SerializeField] private float _playerFrozenDuration = 8.0f;
 
+        [Header("Obsidian Settings")]
+        [Tooltip("Độ cứng (toughness) al khốiului Obsidian. Un vụ nổ cu destructionPower mai miciă decât aceasta valoare nu puede phá hủy khối obsidian. Mai mare = mai greu de phá hủy.")]
+        [Min(1)]
+        [SerializeField] private int _obsidianToughness = 6;
+
         [Header("Hiệu ứng Hình ảnh Gameplay")]
         [Tooltip("GameObject trực quan (ví dụ: khối băng) sẽ được bật khi người chơi bị đóng băng. Nên là một object con của player.")]
         [SerializeField] private GameObject _frozenBlockVisual;
@@ -94,8 +99,11 @@ namespace Core
             _player = GetComponent<IPlayer>(); // Lấy IPlayer thay vì PlayerController
             _rigidbody = GetComponent<Rigidbody>();
             _damageable = GetComponent<IDamageable>(); // Lấy component IDamageable
-            _audioSource = GetComponent<AudioSource>();
             _shieldController = GetComponent<IPlayerShieldController>();
+            if (_shieldController == null)
+            {
+                _shieldController = GetComponentInParent<IPlayerShieldController>();
+            }
             _objectCollider = GetComponent<Collider>();
 
             if (_objectCollider != null)
@@ -195,13 +203,18 @@ namespace Core
         {
             if (newEffect == StatusEffectType.None) return;
 
-            // --- LOGIC KHIÊN ---
-            // Nếu đây là người chơi, kiểm tra xem khiên có chặn hiệu ứng này không.
+            // --- LOGIC KHIEN ---
+            if (_player != null && _shieldController == null)
+            {
+                _shieldController = _player.GameObject.GetComponent<IPlayerShieldController>() ?? _player.GameObject.GetComponentInParent<IPlayerShieldController>();
+            }
+
+            // Neu day la nguoi choi, kiem tra xem khien co chan hieu ung nay khong.
             if (_player != null && _shieldController != null && _shieldController.IsShieldActive)
             {
                 if (_shieldController.ProcessStatusEffect(newEffect))
                 {
-                    return; // Khiên đã chặn hiệu ứng.
+                    return; // Khien da chan hieu ung.
                 }
             }
 
@@ -300,6 +313,20 @@ namespace Core
 
             // --- 2. Áp dụng hiệu ứng mới ---
             _statusEffectCoroutine = StartCoroutine(StatusEffectRoutine(newEffect, duration));
+        }
+
+        /// <summary>
+        /// Rã đong player imediat: gos bo hiêu ung dogng bang daca player dang dogng bang.
+        /// Dung cand player nhan sat thuong sau cand player chit sau khi round ket thuc (het gio),
+        /// de garant ca player nu se ramaine blocat si duoc adu sau lai lobby.
+        /// </summary>
+        /// <returns>True neu hiêu ung dogng bang a bat gos bo (da rã đong), false neu player nu era dogng bang.</returns>
+        public bool UnfreezePlayer()
+        {
+            if (_player == null || _currentEffect != StatusEffectType.Frozen) return false;
+
+            RevertAllEffects();
+            return true;
         }
         
         /// <summary>
@@ -451,7 +478,7 @@ namespace Core
                 if (_destructibleBlock != null)
                 {
                     _originalToughness = _destructibleBlock.Toughness;
-                    _destructibleBlock.Toughness = int.MaxValue; // Obsidian không thể bị phá hủy
+                    _destructibleBlock.Toughness = _obsidianToughness; // Obsidian acum puede fi phá hủy, doar număi cu suficiente sức phá hủy
                 }
                 if (_destructiblePart != null)
                 {
@@ -496,9 +523,9 @@ namespace Core
                     // CHỈ phát âm thanh nếu đối tượng còn sống.
                     // Tránh phát âm thanh khi người chơi đã chết và đang được reset.
                     // Sử dụng interface IDamageable để tránh phụ thuộc trực tiếp vào PlayerHealth.
-                    if (_audioSource != null && _unfreezeSfx != null && _damageable.IsAlive)
+                    if (_unfreezeSfx != null && _damageable.IsAlive && SfxService.Instance != null)
                     {
-                        _audioSource.PlayOneShot(_unfreezeSfx);
+                        SfxService.Instance.PlaySfx(_unfreezeSfx, transform.position);
                     }
 
                     // Luôn khôi phục trạng thái di chuyển bình thường sau khi rã đông,
@@ -764,3 +791,4 @@ namespace Core
         #endregion
     }
 }
+

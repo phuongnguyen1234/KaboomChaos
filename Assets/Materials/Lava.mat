@@ -38,15 +38,15 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Density: 1
-    - _GradientNoiseScale: 0.1
+    - _Density: 0
+    - _GradientNoiseScale: 0.3
     - _QueueControl: 0
     - _QueueOffset: 0
     - _Speed: 1
-    - _WaveSpeed: 3
+    - _WaveSpeed: 2
     m_Colors:
-    - _BaseColor: {r: 0.79622644, g: 0.29364496, b: 0.16675687, a: 1}
-    - _RippleColor: {r: 4.307496, g: 1.7172103, b: 0.42849445, a: 1}
+    - _BaseColor: {r: 1.4142135, g: 0.10365964, b: 0, a: 1}
+    - _RippleColor: {r: 0.7490196, g: 0.05490196, b: 0, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &8222343088582303556

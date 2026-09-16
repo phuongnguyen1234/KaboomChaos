@@ -17,9 +17,13 @@ MonoBehaviour:
   _description: Create a magic bubble that keeps bombs out!
   _icon: {fileID: 21300000, guid: 51ae199273effde4ba218ceb0dec0001, type: 3}
   _type: 1
-  _duration: 1
+  _duration: 1.5
   _rechargeTime: 19
   _price: 0
   _castSfx: {fileID: 8300000, guid: 59bed708326c11948a15c54448a473af, type: 3}
   _castVfx: {fileID: 0}
+  _playCastOnActivate: 1
+  _playCastOnDeactivate: 0
+  _castVfxSpawnMode: 0
+  _castVfxExplosionRadius: 2
   _bubblePrefab: {fileID: 7267022090112080444, guid: 4f59e58817b951f4eab66c26aa53eabf, type: 3}

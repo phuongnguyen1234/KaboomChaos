@@ -7,6 +7,11 @@ namespace Collectibles.Behaviors
     {
         public FireShieldBehavior(FireShieldData data) : base(data) { }
 
+        /// <summary>
+        /// Do uutien cao cho Fire Shield de kiem tra mien nhiem sat thuong lua/dung nham truoc khien vo.
+        /// </summary>
+        public override int Priority => 50;
+
         public override void OnApply(IPlayer player, IPlayerShieldController shieldController, IBaseShieldData data) { }
 
         public override void OnFixedUpdate(IPlayer player, IBaseShieldData data) { }

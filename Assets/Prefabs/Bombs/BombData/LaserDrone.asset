@@ -138,7 +138,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   explosionVFX: {fileID: 8198415535437106912, guid: 1a6d0264d119d514e94485520fd2f97e, type: 3}
   explosionSoundPitch: 1
-  explosionSound: {fileID: 8300000, guid: f586ce32d4c0b2049ad4bfa72c501835, type: 3}
+  explosionSound: {fileID: 8300000, guid: c95ee545424d204428678a98525d09e8, type: 3}
   minPlayerSpawnChance: 0
   maxPlayerSpawnChance: 10
   playerSpawnRadius: 2
@@ -186,23 +186,23 @@ MonoBehaviour:
   fuseStages: []
   tickingSoundPitch: 1
   tickingSound: {fileID: 0}
-  descentDistanceMin: 12
-  descentDistanceMax: 24
-  descentSpeed: 6
+  descentDistanceMin: 24
+  descentDistanceMax: 36
+  descentSpeed: 8
   ascentDistance: 30
-  ascentSpeed: 8
+  ascentSpeed: 12
   copterSpinSpeed: 360
   preAimRestDuration: 3
   aimDuration: 3
-  postAimDelay: 0.1
+  postAimDelay: 0.2
   sightLineVFX: {fileID: 367236314761623532, guid: 609c1c7185cf97c499ce0fc245ace5fa, type: 3}
   sightLineWidth: 0.5
   sightEndVFX: {fileID: 2570416947074364618, guid: 07913c2d057287e4eb8f94b125b084c6, type: 3}
-  aimAudioClip: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
+  aimAudioClip: {fileID: 8300000, guid: 9d4d017ff0947324d929d142013bf62d, type: 3}
   aimAudioPitchStart: 0.5
   aimAudioPitchEnd: 1
   beepAudioClip: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
   beepAudioPitch: 1
   beepLoopDuration: 0.6
-  beamTravelSpeed: 120
-  explosionInterval: 0.05
+  beamTravelSpeed: 200
+  explosionInterval: 0.015

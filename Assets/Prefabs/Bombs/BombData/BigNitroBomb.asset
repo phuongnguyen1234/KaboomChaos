@@ -177,7 +177,7 @@ MonoBehaviour:
   fuseStages:
   - startTime: 0
     visualEffect: {fileID: 0}
-    stageSoundPitch: 1
+    stageSoundPitch: 0.7
     stageSound: {fileID: 8300000, guid: df96f5ddac7c8e147b78b1b01c42adf0, type: 3}
     vfxRadius: 0
     enableBaseColorPulse: 1

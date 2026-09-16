@@ -1,6 +1,5 @@
 using UnityEngine;
 using DG.Tweening;
-using System.Collections;
 using System.Collections.Generic;
 using Core.Interfaces;
 
@@ -115,6 +114,19 @@ public class MaterialEffectController : MonoBehaviour
         set
         {
             _customBaseColor = value;
+            UpdateColor();
+        }
+    }
+
+    /// <summary>
+    /// Cho phap truy cap va thay doi cuong do phat sang (emission intensity) tu cac script khac.
+    /// </summary>
+    public float CustomEmissionIntensity
+    {
+        get => _customEmissionIntensity;
+        set
+        {
+            _customEmissionIntensity = Mathf.Max(0f, value);
             UpdateColor();
         }
     }

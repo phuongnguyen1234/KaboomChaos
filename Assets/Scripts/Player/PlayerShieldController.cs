@@ -122,15 +122,15 @@ namespace Player
 
                     if (existingShield.ShieldAudioSource != null)
                     {
-                        // Dừng rồi phát lại để "restart" bản nhạc với pitch mới từ đầu.
-                        // Nhạc khiên KHÔNG loop nên Stop + Play luôn đảm bảo nghe lại từ đầu ở pitch mới.
+                        // Dung roi phat lai de restart ban nhac voi pitch moi tu dau.
                         existingShield.ShieldAudioSource.pitch = magicData.BasePitch + (pitchLevel - 1) * magicData.PitchPerStack;
                         existingShield.ShieldAudioSource.Stop();
-                        existingShield.ShieldAudioSource.Play(); 
+                        existingShield.ShieldAudioSource.Play();
                     }
-                    // KHÔNG gọi lại OnApply ở đây: tốc độ/nhảy chỉ nên áp dụng MỘT LẦN
-                    // khi tạo khiên magic mới (đã chuyển vào SetupAndAddShield).
-                    return; 
+
+                    // Goi OnApply de dam bao ra dong player neu dang bi dong bang
+                    existingShield.Behavior.OnApply(_player, this, magicData);
+                    return;
                 }
 
                 // Nếu là Fire Shield (hoặc các loại có duration): Refresh duration
@@ -253,8 +253,10 @@ namespace Player
             float damageToProcess = amount;
             List<ActiveShield> shieldsToRemove = new();
 
-            // Duyệt qua một bản sao của danh sách để an toàn khi sửa đổi
-            foreach (var shield in _activeShields.ToList())
+            // Duyet qua danh sach khien duoc sap xep theo do uutien tu cao xuong thap (uu tien khien mien nhiem truoc khien vo)
+            var sortedShields = _activeShields.OrderByDescending(s => s.Behavior.Priority).ToList();
+
+            foreach (var shield in sortedShields)
             {
                 float result = shield.Behavior.OnDamageTaken(damageToProcess, sourceType, effectContext, shield.Data);
 

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8746610664970893544}
   - component: {fileID: 2434781683014878555}
   - component: {fileID: 112675918859426308}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: SuperJumpParticle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -27,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 1489550388378782852}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -2.4, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

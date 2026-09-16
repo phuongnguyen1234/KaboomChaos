@@ -20,10 +20,10 @@ MonoBehaviour:
   _duration: 1
   _rechargeTime: 20
   _price: 0
-  _castSfx: {fileID: 0}
+  _castSfx: {fileID: 8300000, guid: 05eec271c99089d41862d92cbeb05fab, type: 3}
   _castVfx: {fileID: 1489550388378782852, guid: 81e4a6235e2c32c4eb59cda1ed309b0d, type: 3}
   _playCastOnActivate: 1
   _playCastOnDeactivate: 0
   _castVfxSpawnMode: 0
   _castVfxExplosionRadius: 2
-  _jumpForce: 70
+  _jumpForce: 55

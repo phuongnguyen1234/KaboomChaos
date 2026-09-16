@@ -38,11 +38,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _animationStages.Array.data[0].duration
-      value: 0.1
+      value: 0.05
       objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _animationStages.Array.data[1].duration
-      value: 0.8
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _animationStages.Array.data[0].targetValue
@@ -211,6 +211,10 @@ PrefabInstance:
     - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customEmissionIntensity
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7289873364278322524, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: InitialModule.startColor.maxColor.g
+      value: 0.11638953
       objectReference: {fileID: 0}
     - target: {fileID: 8365981775348852892, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'

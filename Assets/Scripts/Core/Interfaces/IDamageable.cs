@@ -17,6 +17,14 @@ namespace Core.Interfaces
         /// </summary>
         bool IsAlive { get; }
 
-        float CurrentHealth {get;}
+        /// <summary>
+        /// Mau hien tai cua doi tuong.
+        /// </summary>
+        float CurrentHealth { get; }
+
+        /// <summary>
+        /// Mau toi da cua doi tuong.
+        /// </summary>
+        float MaxHealth { get; }
     }
 }

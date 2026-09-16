@@ -5,12 +5,26 @@ namespace Core
     [RequireComponent(typeof(BoxCollider))] // Đảm bảo đối tượng luôn có BoxCollider
     public class PlayerSpawn : MonoBehaviour
     {
+        [Header("Spawn Orientation")]
+        [Tooltip("Huong quay mat (facing direction) cua nguoi choi khi spawn. Mac dinh huong facing -X (Vector3.left).")]
+        [SerializeField] private Vector3 _facingDirection = new Vector3(-1f, 0f, 0f);
+
         private BoxCollider _boxCollider;
 
         private void Awake()
         {
             _boxCollider = GetComponent<BoxCollider>();
         }
+
+        /// <summary>
+        /// Huong quay mat (facing direction) cua nguoi choi khi spawn (mac dinh -X).
+        /// </summary>
+        public Vector3 FacingDirection => _facingDirection.sqrMagnitude > 0.001f ? _facingDirection.normalized : Vector3.left;
+
+        /// <summary>
+        /// Goc quay Quaternion cua nguoi choi dua tren FacingDirection (mac dinh facing -X).
+        /// </summary>
+        public Quaternion SpawnRotation => Quaternion.LookRotation(FacingDirection);
 
         // Trả về vị trí đỉnh giữa (top-center) của AABB của BoxCollider trong không gian thế giới
         public Vector3 SpawnPoint
@@ -47,6 +61,10 @@ namespace Core
                 // Vẽ điểm SpawnPoint thực tế
                 Gizmos.color = Color.yellow;
                 Gizmos.DrawSphere(SpawnPoint, 0.2f);
+
+                // Ve huong quay mat facing direction (mac dinh -X)
+                Gizmos.color = Color.blue;
+                Gizmos.DrawRay(SpawnPoint, FacingDirection * 1.2f);
             }
             else
             {
@@ -66,6 +84,7 @@ namespace Core
             }
 
             _boxCollider.isTrigger = true; // Thường thì điểm spawn nên là trigger
+            _facingDirection = new Vector3(-1f, 0f, 0f);
         }
     }
 }

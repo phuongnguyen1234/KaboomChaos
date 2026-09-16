@@ -61,14 +61,14 @@ namespace Bombs.Data
         public GameObject sightEndVFX;
 
         [Header("Audio Ngam")]
-        [Tooltip("Audio phat trong loi ngam 3 giay (loop).")]
+        [Tooltip("Audio phat mot lan (one-shot) khi bat dau ngam.")]
         public AudioClip aimAudioClip;
 
-        [Tooltip("Cao do (pitch) cua audio ngam tai THOI DIEM BAT DAU ngam. Tang dan len trong suot 3 giay ngam.")]
+        [Tooltip("Gia tri pitch ban dau de tuong hop du lieu (khong con dung cho loop/scale pitch).")]
         [Range(0.1f, 3f)]
         public float aimAudioPitchStart = 0.5f;
 
-        [Tooltip("Cao do (pitch) cua audio ngam tai THOI DIEM KET THUC ngam. Trong 3 giay ngam, pitch tang dan tu aimAudioPitchStart den gia tri nay va co dinh o day.")]
+        [Tooltip("Gia tri pitch ket thuc de tuong hop du lieu (khong con dung cho loop/scale pitch).")]
         [Range(0.1f, 3f)]
         public float aimAudioPitchEnd = 2f;
 

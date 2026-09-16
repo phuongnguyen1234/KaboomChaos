@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7852951484808368494}
   - component: {fileID: 739184276635015325}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: AimLine
   m_TagString: Untagged
   m_Icon: {fileID: 0}

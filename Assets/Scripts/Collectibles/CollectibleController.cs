@@ -139,9 +139,10 @@ namespace Collectibles
             // frame, causing OnTriggerEnter (and thus heal/coin) to run more than once.
             if (_isCollected) return;
 
-            // Check if the collector is a player
+            // Kiem tra doi tuong nhat item phai la than chinh cua Player (co IPrimaryExplosionTarget trong Core.Interfaces)
+            bool isPrimaryTarget = other.GetComponentInParent<IPrimaryExplosionTarget>() != null;
             IPlayer player = other.GetComponentInParent<IPlayer>();
-            if (player != null)
+            if (player != null && (isPrimaryTarget || player.GameObject == other.gameObject))
             {
                 OnCollect(player);
             }
@@ -191,15 +192,19 @@ namespace Collectibles
                 return;
             }
 
-            // 2. Phát âm thanh thu thập.
-            // Phát âm thanh thu thập (có thể được quản lý bởi một audio manager toàn cục,
-            // nhưng để đơn giản, chúng ta sẽ phát từ người chơi đã thu thập)
-            if (_data?.CollectionSFX != null)
+            // 2. Phat hieu ung hinh anh (VFX) va am thanh (SFX) thu thap.
+            if (_data?.CollectionVFX != null)
             {
-                if (player.GameObject.TryGetComponent<AudioSource>(out var playerAudio))
+                GameObject vfxInstance = GameEvents.TriggerVFXSpawnRequest(_data.CollectionVFX, transform.position, Quaternion.identity);
+                if (vfxInstance == null)
                 {
-                    playerAudio.PlayOneShot(_data.CollectionSFX);
+                    Instantiate(_data.CollectionVFX, transform.position, Quaternion.identity);
                 }
+            }
+
+            if (_data?.CollectionSFX != null && SfxService.Instance != null)
+            {
+                SfxService.Instance.PlaySfx(_data.CollectionSFX, player.GameObject.transform.position);
             }
 
             // 3. Yêu cầu despawn vật phẩm.
@@ -248,3 +253,4 @@ namespace Collectibles
         }
     }
 }
+

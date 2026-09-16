@@ -7,5 +7,6 @@ namespace Core
         public float WinMultiplier;
         public int TotalCredits;
         public bool IsWinner;
+        public bool IsExtremeMode;
     }
 }
