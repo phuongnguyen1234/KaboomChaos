@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b72250d5d2cf3740b72b235da7ded92, type: 3}
+  m_Name: Forcefield
+  m_EditorClassIdentifier: Skills::Skills.Data.ForcefieldSkillData
+  _id: forcefield
+  _displayName: Forcefield
+  _description: Temporarily shield yourself from all forms of damage!
+  _icon: {fileID: 21300000, guid: 70218aa271d23444c8a30b5da3d15fb8, type: 3}
+  _type: 1
+  _duration: 6
+  _rechargeTime: 19
+  _price: 0
+  _castSfx: {fileID: 8300000, guid: d027a937dddf00541b5625815a11525e, type: 3}
+  _castVfx: {fileID: 7065807850240833516, guid: 641bab6a2f2adb44aa7d35a723f5f93f, type: 3}
+  _playCastOnActivate: 1
+  _playCastOnDeactivate: 0
+  _castVfxSpawnMode: 0
+  _castVfxExplosionRadius: 2

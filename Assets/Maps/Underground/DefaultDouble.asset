@@ -1,0 +1,77 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd9e263894515f7489b57e21b41a06e3, type: 3}
+  m_Name: DefaultDouble
+  m_EditorClassIdentifier: Core::UndergroundProfile
+  gridSize: {x: 11, y: 11}
+  layers:
+  - blockPrefab: {fileID: 9066696034182284053, guid: dd6d0707b72bc634281fb4f2eec64bd5, type: 3}
+    height: 1
+    enableScattering: 0
+    scatterPrefab: {fileID: 0}
+    scatterPercentage: 0
+    scatterInitialEffect: 0
+    scatterClusterCount: 0
+    scatterClusterMinRadius: 1
+    scatterClusterMaxRadius: 3
+    initialEffect: 0
+  - blockPrefab: {fileID: 2106488410961741141, guid: d21bdea397d750c409bca03cfa86431a, type: 3}
+    height: 2
+    enableScattering: 0
+    scatterPrefab: {fileID: 0}
+    scatterPercentage: 0
+    scatterInitialEffect: 0
+    scatterClusterCount: 0
+    scatterClusterMinRadius: 1
+    scatterClusterMaxRadius: 3
+    initialEffect: 0
+  - blockPrefab: {fileID: 2106488410961741141, guid: 0d0cb2358a5a12e41b8919f605252346, type: 3}
+    height: 3
+    enableScattering: 0
+    scatterPrefab: {fileID: 0}
+    scatterPercentage: 0
+    scatterInitialEffect: 0
+    scatterClusterCount: 0
+    scatterClusterMinRadius: 1
+    scatterClusterMaxRadius: 3
+    initialEffect: 0
+  - blockPrefab: {fileID: 7768746031248934290, guid: c8bcc1f6242299d46a60e65a9c499d18, type: 3}
+    height: 2
+    enableScattering: 0
+    scatterPrefab: {fileID: 0}
+    scatterPercentage: 0
+    scatterInitialEffect: 0
+    scatterClusterCount: 0
+    scatterClusterMinRadius: 1
+    scatterClusterMaxRadius: 3
+    initialEffect: 0
+  - blockPrefab: {fileID: 7768746031248934290, guid: 20e058d1a9dc4e24dbcf34f118fd2c2d, type: 3}
+    height: 2
+    enableScattering: 1
+    scatterPrefab: {fileID: 7768746031248934290, guid: 20e058d1a9dc4e24dbcf34f118fd2c2d, type: 3}
+    scatterPercentage: 10
+    scatterInitialEffect: 4
+    scatterClusterCount: 5
+    scatterClusterMinRadius: 1
+    scatterClusterMaxRadius: 3
+    initialEffect: 0
+  - blockPrefab: {fileID: 7768746031248934290, guid: 20e058d1a9dc4e24dbcf34f118fd2c2d, type: 3}
+    height: 2
+    enableScattering: 1
+    scatterPrefab: {fileID: 7768746031248934290, guid: 20e058d1a9dc4e24dbcf34f118fd2c2d, type: 3}
+    scatterPercentage: 30
+    scatterInitialEffect: 4
+    scatterClusterCount: 10
+    scatterClusterMinRadius: 2
+    scatterClusterMaxRadius: 5
+    initialEffect: 0
+  randomSeed: 0

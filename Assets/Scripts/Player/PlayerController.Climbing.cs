@@ -1,4 +1,5 @@
 using UnityEngine;
+using Core.Miscellaneous; // Cần cho ConveyorBelt
 
 namespace Player
 {
@@ -141,7 +142,7 @@ namespace Player
                     {
                         // Kết hợp lực đẩy ra khỏi tường (_climbJumpForce) và lực nhảy lên trên (_jumpSpeed).
                         // Phải thực hiện trước khi reset normal.
-                        Vector3 jumpOffMomentum = (_climbableSurfaceNormal * _climbJumpForce) + (tr.up * _jumpSpeed);
+                        Vector3 jumpOffMomentum = (_climbableSurfaceNormal * _climbJumpForce) + (tr.up * _jumpForce);
                         AddMomentum(jumpOffMomentum);
                     }
 
@@ -179,98 +180,6 @@ namespace Player
 
             // Nếu không, sử dụng logic của lớp cha
             return base.DetermineControllerState();
-        }
-
-        /// <summary>
-        /// Ghi đè để thêm logic di chuyển khi đang leo.
-        /// </summary>
-        protected override void HandleMomentum()
-        {
-            if (currentControllerState == ControllerState.Climbing)
-            {
-                // Xóa hết vận tốc hiện tại để không bị trượt/rơi
-                momentum = Vector3.zero;
-
-                // Lấy hướng di chuyển của người chơi
-                Vector3 moveDirection = CalculateMovementDirection();
-
-                _climbingDirection = 0f;
-
-                // Chỉ tính toán hướng leo khi có input di chuyển
-                if (moveDirection.magnitude > 0.1f)
-                {
-                    // --- LOGIC TỔNG QUÁT HÓA ---
-                    // Logic này hoạt động cho mọi góc camera.
-                    // Định nghĩa "leo xuống" là bất kỳ di chuyển nào có ý định rõ ràng là "hướng ra khỏi tường".
-                    // Mọi di chuyển khác (vào tường, song song tường) đều được hiểu là "leo lên".
-
-                    // Tính toán thành phần "hướng ra khỏi tường" của vector di chuyển.
-                    float awayComponent = Vector3.Dot(moveDirection.normalized, _climbableSurfaceNormal);
-
-                    // Ngưỡng để xác định ý định "leo xuống".
-                    // Giá trị 0.5f tương ứng với việc người chơi phải di chuyển trong một góc 60 độ so với hướng ra khỏi tường.
-                    const float climbDownThreshold = 0.5f;
-
-                    if (awayComponent > climbDownThreshold)
-                    {
-                        _climbingDirection = -1f; // Leo xuống
-                    }
-                    else
-                    {
-                        _climbingDirection = 1f; // Leo lên
-                    }
-                }
-
-                // Tạo vận tốc leo trên mặt phẳng tường
-                Vector3 climbVelocity = Vector3.ProjectOnPlane(tr.up, _climbableSurfaceNormal).normalized * _climbingDirection;
-
-                // Áp dụng vận tốc leo
-                momentum = climbVelocity * _climbSpeed;
-            }
-            else
-            {
-                // Nếu không leo, sử dụng logic của lớp cha
-                base.HandleMomentum();
-
-                 // --- LOGIC CHỐNG DÍNH TƯỜNG (WALL STICK PREVENTION) ---
-                // Khi người chơi nhảy vào tường và giữ input di chuyển, họ có thể bị "dính" lại do ma sát.
-                // Logic này sẽ loại bỏ phần vận tốc hướng vào tường khi người chơi ở trên không,
-                // cho phép họ trượt dọc theo tường một cách tự nhiên.
-
-                // Chỉ áp dụng khi ở trên không.
-                if (!IsGrounded)
-                {
-                    Vector3 horizontalMomentum = momentum;
-                    horizontalMomentum.y = 0;
-
-                    // Chỉ kiểm tra khi có vận tốc ngang (người chơi đang cố di chuyển trên không).
-                    if (horizontalMomentum.magnitude > 0.01f)
-                    {
-                        var capsule = _mainCollider as CapsuleCollider; // Lấy capsule collider chính.
-                        if (capsule != null) // Đảm bảo có collider để lấy thông số.
-                        {
-                            // CẢI TIẾN: Sử dụng SphereCast thay vì Raycast.
-                            // Raycast quá chính xác và có thể "trượt" ở các góc nhọn, gây ra lỗi ma sát mà bạn gặp phải.
-                            // SphereCast có thể tích, đại diện cho chiều rộng của người chơi tốt hơn, giúp phát hiện va chạm đáng tin cậy ở mọi góc độ.
-                            float castRadius = capsule.radius * 0.9f; // Dùng bán kính nhỏ hơn một chút để tránh dương tính giả với mặt đất.
-                            float castDistance = 0.2f; // Một khoảng cách ngắn là đủ để phát hiện tường đang tiếp xúc.
-                            Vector3 castOrigin = transform.position + capsule.center;
-
-                            // Bắn một SphereCast theo hướng di chuyển ngang.
-                            if (Physics.SphereCast(castOrigin, castRadius, horizontalMomentum.normalized, out RaycastHit hit, castDistance, ~0, QueryTriggerInteraction.Ignore))
-                            {
-                                // Chỉ xử lý nếu va chạm với một bức tường (bề mặt gần như thẳng đứng).
-                                if (Mathf.Abs(hit.normal.y) < 0.707f) // Ngưỡng 45 độ.
-                                {
-                                    // Chiếu vận tốc ngang lên mặt phẳng của tường để loại bỏ lực đẩy vào tường.
-                                    Vector3 projectedHorizontal = Vector3.ProjectOnPlane(horizontalMomentum, hit.normal);
-                                    momentum = new Vector3(projectedHorizontal.x, momentum.y, projectedHorizontal.z);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
 
         #endregion

@@ -16,10 +16,8 @@ namespace Core.Interfaces
 
         /// <summary>
         /// Kích hoạt animation của text nổi.
-        /// Animation (di chuyển, mờ dần) được xử lý nội bộ bởi controller.
+        /// Text chỉ cần biết nội dung và tự chạy animation trên UI.
         /// </summary>
-        /// <param name="text">Nội dung để hiển thị.</param>
-        /// <param name="color">Màu sắc của text.</param>
-        void Trigger(string text, Color color);
+        void Trigger(string text, Color color, bool showIcon);
     }
 }

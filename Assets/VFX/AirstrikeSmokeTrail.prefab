@@ -11,7 +11,8 @@ GameObject:
   - component: {fileID: 7881090352264231650}
   - component: {fileID: 2146397865091444451}
   - component: {fileID: 6929326773253304241}
-  m_Layer: 0
+  - component: {fileID: 1080469496644118504}
+  m_Layer: 14
   m_Name: AirstrikeSmokeTrail
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -106,7 +107,7 @@ ParticleSystem:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-  moveWithTransform: 0
+  moveWithTransform: 1
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
   randomSeed: 0
@@ -286,8 +287,8 @@ ParticleSystem:
         m_NumAlphaKeys: 2
     startSize:
       serializedVersion: 2
-      minMaxState: 0
-      scalar: 1
+      minMaxState: 3
+      scalar: 1.2
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -339,7 +340,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeY:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 1
       maxCurve:
@@ -392,7 +393,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeZ:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 1
       maxCurve:
@@ -553,7 +554,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       scalar: 0
-      minScalar: 0
+      minScalar: -0.5235988
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -869,9 +870,9 @@ ParticleSystem:
     serializedVersion: 4
     rateOverTime:
       serializedVersion: 2
-      minMaxState: 0
-      scalar: 1.5
-      minScalar: 10
+      minMaxState: 3
+      scalar: 4
+      minScalar: 2
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -1248,8 +1249,8 @@ ParticleSystem:
     curve:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.7853982
-      minScalar: -0.7853981
+      scalar: 1.5707963
+      minScalar: -1.5707963
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -1368,10 +1369,10 @@ ParticleSystem:
         m_NumAlphaKeys: 2
   UVModule:
     serializedVersion: 2
-    enabled: 1
-    mode: 1
-    timeMode: 0
-    fps: 30
+    enabled: 0
+    mode: 0
+    timeMode: 2
+    fps: 4
     frameOverTime:
       serializedVersion: 2
       minMaxState: 1
@@ -1479,15 +1480,17 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     speedRange: {x: 0, y: 1}
-    tilesX: 1
+    tilesX: 12
     tilesY: 1
-    animationType: 0
+    animationType: 1
     rowIndex: 0
     cycles: 1
     uvChannelMask: -1
     rowMode: 1
     sprites:
-    - sprite: {fileID: 21300000, guid: 59598e2802371ca44afa3d4ce04f0423, type: 3}
+    - sprite: {fileID: 21300000, guid: 08421cc88a430c14f8ff42f3dfa12b35, type: 3}
+    - sprite: {fileID: 21300000, guid: 620856546820f854e8c9e517e77262bb, type: 3}
+    - sprite: {fileID: 21300000, guid: 8d63c6f09bfa0df4897e7ef95f879a9f, type: 3}
     flipU: 0
     flipV: 0
   VelocityModule:
@@ -4782,7 +4785,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: e823cd5b5d27c0f4b8256e7c12ee3e6d, type: 2}
+  - {fileID: 2100000, guid: 8fd48841607055e498a1e8db7bbeb4d5, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -4836,3 +4839,21 @@ ParticleSystemRenderer:
   m_MeshWeighting1: 1
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
+--- !u!114 &1080469496644118504
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3632386489981309391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d32f934f0591ee540bdaf682b8cb2d48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Core::MaterialEffectController
+  _applyMaterialOverrides: 1
+  _customBaseColor: {r: 1, g: 0.60055935, b: 0.081131995, a: 1}
+  _customDecalColor: {r: 1, g: 0.17911099, b: 0, a: 1}
+  _customAlpha: 1
+  _customEmissionIntensity: 0
+  _statusEffectProfiles: []

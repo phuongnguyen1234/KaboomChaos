@@ -1,0 +1,95 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &6641977113224558202
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3552440995606686632, guid: 156335b22685d2c469acb8a21fd904da, type: 3}
+      propertyPath: ShapeModule.type
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3552440995606686632, guid: 156335b22685d2c469acb8a21fd904da, type: 3}
+      propertyPath: ShapeModule.radius.value
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3552440995606686632, guid: 156335b22685d2c469acb8a21fd904da, type: 3}
+      propertyPath: ShapeModule.radiusThickness
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3552440995606686632, guid: 156335b22685d2c469acb8a21fd904da, type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 3552440995606686632, guid: 156335b22685d2c469acb8a21fd904da, type: 3}
+      propertyPath: InitialModule.startColor.maxGradient.key0.g
+      value: 0.24085334
+      objectReference: {fileID: 0}
+    - target: {fileID: 3552440995606686632, guid: 156335b22685d2c469acb8a21fd904da, type: 3}
+      propertyPath: InitialModule.startColor.maxGradient.key0.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3552440995606686632, guid: 156335b22685d2c469acb8a21fd904da, type: 3}
+      propertyPath: InitialModule.startColor.maxGradient.key1.b
+      value: 0.070141554
+      objectReference: {fileID: 0}
+    - target: {fileID: 3552440995606686632, guid: 156335b22685d2c469acb8a21fd904da, type: 3}
+      propertyPath: InitialModule.startColor.maxGradient.key1.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3552440995606686632, guid: 156335b22685d2c469acb8a21fd904da, type: 3}
+      propertyPath: InitialModule.startColor.maxGradient.key1.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4765232474173958962, guid: 156335b22685d2c469acb8a21fd904da, type: 3}
+      propertyPath: m_Name
+      value: LandmineFuseVFX
+      objectReference: {fileID: 0}
+    - target: {fileID: 7331552797054181827, guid: 156335b22685d2c469acb8a21fd904da, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7331552797054181827, guid: 156335b22685d2c469acb8a21fd904da, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7331552797054181827, guid: 156335b22685d2c469acb8a21fd904da, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7331552797054181827, guid: 156335b22685d2c469acb8a21fd904da, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 7331552797054181827, guid: 156335b22685d2c469acb8a21fd904da, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 7331552797054181827, guid: 156335b22685d2c469acb8a21fd904da, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7331552797054181827, guid: 156335b22685d2c469acb8a21fd904da, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7331552797054181827, guid: 156335b22685d2c469acb8a21fd904da, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 7331552797054181827, guid: 156335b22685d2c469acb8a21fd904da, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7331552797054181827, guid: 156335b22685d2c469acb8a21fd904da, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 156335b22685d2c469acb8a21fd904da, type: 3}

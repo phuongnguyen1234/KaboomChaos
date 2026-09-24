@@ -1,6 +1,6 @@
 using UnityEngine;
 using Core.Interfaces;
-using Core; // Để có thể tham chiếu đến DestructibleBlock
+using Core;
 
 namespace Managers
 {
@@ -48,6 +48,11 @@ namespace Managers
             if (instance.TryGetComponent<DestructibleBlock>(out var destructibleBlock))
             {
                 destructibleBlock.ResetState();
+            }
+            // Yêu cầu 1: Reset lại hiệu ứng trạng thái của khối khi nó được lấy ra từ pool.
+            if (instance.TryGetComponent<StatusEffectReceiver>(out var statusReceiver))
+            {
+                statusReceiver.ResetState();
             }
         }
 

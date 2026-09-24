@@ -17,14 +17,14 @@ TagManager:
   - Bombs
   - Collectibles
   - Terrain
-  - MapObject
+  - MapPart
   - Lava
   - Environment
   - Trigger
   - VFX
   - TransparentObjects
-  - 
-  - 
+  - TopBorder
+  - BubbleBarrier
   - 
   - 
   - 

@@ -10,8 +10,11 @@ namespace Core.Interfaces
     public interface IExplosionReactable
     {
         /// <summary>
-        /// Được gọi bởi nguồn nổ, truyền vào lực và điểm tác động.
+        /// Được gọi bởi nguồn nổ, truyền vào các thông số của vụ nổ.
         /// </summary>
-        void OnExplosionHit(Vector3 force, Vector3 point);
+        /// <param name="force">Vector lực tác động.</param>
+        /// <param name="point">Điểm tác động của lực.</param>
+        /// <param name="bombData">Dữ liệu của quả bom gây ra vụ nổ.</param>
+        void OnExplosionHit(Vector3 force, Vector3 point, IBaseBombData bombData);
     }
 }

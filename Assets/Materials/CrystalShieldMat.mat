@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-2662382880323036628
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Editor::UnityEditor.Rendering.Universal.AssetVersion
+  version: 10
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: CrystalShieldMat
+  m_Shader: {fileID: -6465566751694194690, guid: f86b3615339d8f44d8542082b386def4, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 1
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses:
+  - MOTIONVECTORS
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _SampleTexture2D_21d09f026c364249a3399af7a8620312_Texture_1_Texture2D:
+        m_Texture: {fileID: 2800000, guid: ea9e76fe1e1284f46bcc118a66113f08, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleTexture2D_431bc95184304104a7cc70c0e0e6d769_Texture_1_Texture2D:
+        m_Texture: {fileID: 2800000, guid: ea9e76fe1e1284f46bcc118a66113f08, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleTexture2D_c647e0e026ba48f18aec8f396988acff_Texture_1_Texture2D:
+        m_Texture: {fileID: 2800000, guid: ea9e76fe1e1284f46bcc118a66113f08, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleTexture2D_f7b25af82be541858478d381f6805846_Texture_1_Texture2D:
+        m_Texture: {fileID: 2800000, guid: ea9e76fe1e1284f46bcc118a66113f08, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Triplanar_25d3099659a34c408048411d44a51f43_Texture_1_Texture2D:
+        m_Texture: {fileID: 2800000, guid: ea9e76fe1e1284f46bcc118a66113f08, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _FresnelPower: 4
+    - _QueueControl: 0
+    - _QueueOffset: 0
+    - _Speed: 1
+    - _Width: 0.2
+    m_Colors:
+    - _HexagonColor: {r: 1, g: 1, b: 1, a: 1}
+    - _ShieldColor: {r: 0, g: 1, b: 0.94505316, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

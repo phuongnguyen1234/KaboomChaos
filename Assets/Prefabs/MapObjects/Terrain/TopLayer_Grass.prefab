@@ -64,6 +64,26 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6036855656442103476, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
+      propertyPath: _customDecalColor.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6036855656442103476, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
+      propertyPath: _customDecalColor.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6036855656442103476, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
+      propertyPath: _customDecalColor.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6036855656442103476, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
+      propertyPath: _customDecalColor.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6036855656442103476, guid: 182451889ece5af44b58a8f4e8eda608, type: 3}
+      propertyPath: _applyMaterialOverrides
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

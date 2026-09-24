@@ -2,30 +2,44 @@ using UnityEngine;
 
 namespace Core
 {
-    [RequireComponent(typeof(MeshCollider))] // Đảm bảo đối tượng luôn có MeshCollider
+    [RequireComponent(typeof(BoxCollider))] // Đảm bảo đối tượng luôn có BoxCollider
     public class PlayerSpawn : MonoBehaviour
     {
-        private MeshCollider _meshCollider;
+        [Header("Spawn Orientation")]
+        [Tooltip("Huong quay mat (facing direction) cua nguoi choi khi spawn. Mac dinh huong facing -X (Vector3.left).")]
+        [SerializeField] private Vector3 _facingDirection = new Vector3(-1f, 0f, 0f);
+
+        private BoxCollider _boxCollider;
 
         private void Awake()
         {
-            _meshCollider = GetComponent<MeshCollider>();
+            _boxCollider = GetComponent<BoxCollider>();
         }
 
-        // Trả về vị trí đỉnh giữa (top-center) của AABB của MeshCollider trong không gian thế giới
+        /// <summary>
+        /// Huong quay mat (facing direction) cua nguoi choi khi spawn (mac dinh -X).
+        /// </summary>
+        public Vector3 FacingDirection => _facingDirection.sqrMagnitude > 0.001f ? _facingDirection.normalized : Vector3.left;
+
+        /// <summary>
+        /// Goc quay Quaternion cua nguoi choi dua tren FacingDirection (mac dinh facing -X).
+        /// </summary>
+        public Quaternion SpawnRotation => Quaternion.LookRotation(FacingDirection);
+
+        // Trả về vị trí đỉnh giữa (top-center) của AABB của BoxCollider trong không gian thế giới
         public Vector3 SpawnPoint
         {
             get
             {
-                if (_meshCollider == null)
+                if (_boxCollider == null)
                 {
-                    Debug.LogError("PlayerSpawn requires a MeshCollider!", this);
+                    Debug.LogError("PlayerSpawn requires a BoxCollider!", this);
                     return transform.position;
                 }
 
-                // Bounds của MeshCollider đã ở trong không gian thế giới (world space).
+                // Bounds của BoxCollider đã ở trong không gian thế giới (world space).
                 // Lấy điểm trung tâm trên cùng của bounding box để làm điểm spawn.
-                return _meshCollider.bounds.center + Vector3.up * _meshCollider.bounds.extents.y;
+                return _boxCollider.bounds.center + Vector3.up * _boxCollider.bounds.extents.y;
             }
         }
 
@@ -33,24 +47,28 @@ namespace Core
         private void OnDrawGizmos()
         {
             // Lấy component trong OnDrawGizmos để thay đổi được thấy ngay trong Editor
-            if (_meshCollider == null)
+            if (_boxCollider == null)
             {
-                _meshCollider = GetComponent<MeshCollider>();
+                _boxCollider = GetComponent<BoxCollider>();
             }
 
-            if (_meshCollider != null && _meshCollider.sharedMesh != null)
+            if (_boxCollider != null)
             {
-                // Vẽ khung dây của Bounding Box (AABB) của MeshCollider
+                // Vẽ khung dây của Bounding Box (AABB) của BoxCollider
                 Gizmos.color = new Color(0f, 1f, 0f, 0.5f); // Màu xanh lá, hơi trong suốt
-                Gizmos.DrawWireCube(_meshCollider.bounds.center, _meshCollider.bounds.size);
+                Gizmos.DrawWireCube(_boxCollider.bounds.center, _boxCollider.bounds.size);
 
                 // Vẽ điểm SpawnPoint thực tế
                 Gizmos.color = Color.yellow;
                 Gizmos.DrawSphere(SpawnPoint, 0.2f);
+
+                // Ve huong quay mat facing direction (mac dinh -X)
+                Gizmos.color = Color.blue;
+                Gizmos.DrawRay(SpawnPoint, FacingDirection * 1.2f);
             }
             else
             {
-                // Cảnh báo nếu không có MeshCollider hoặc mesh chưa được gán
+                // Cảnh báo nếu không có BoxCollider
                 Gizmos.color = Color.red;
                 Gizmos.DrawWireCube(transform.position, Vector3.one);
             }
@@ -59,15 +77,14 @@ namespace Core
         // Phương thức Reset được gọi khi thêm component lần đầu hoặc click Reset trong Inspector
         private void Reset()
         {
-            _meshCollider = GetComponent<MeshCollider>();
-            if (_meshCollider == null)
+            _boxCollider = GetComponent<BoxCollider>();
+            if (_boxCollider == null)
             {
-                _meshCollider = gameObject.AddComponent<MeshCollider>();
+                _boxCollider = gameObject.AddComponent<BoxCollider>();
             }
 
-            // Một MeshCollider để làm trigger thì bắt buộc phải là 'convex'.
-            _meshCollider.convex = true;
-            _meshCollider.isTrigger = true; // Thường thì điểm spawn nên là trigger
+            _boxCollider.isTrigger = true; // Thường thì điểm spawn nên là trigger
+            _facingDirection = new Vector3(-1f, 0f, 0f);
         }
     }
 }

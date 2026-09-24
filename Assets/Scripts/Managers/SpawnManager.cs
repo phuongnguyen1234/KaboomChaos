@@ -18,8 +18,7 @@ namespace Managers
         #endregion
 
         #region Fields
-        [Tooltip("Danh sách các điểm spawn người chơi. Sẽ tự động tìm và đăng ký khi khởi động.")]
-        [SerializeField] private List<PlayerSpawn> _spawnPoints = new();
+        private readonly List<PlayerSpawn> _spawnPoints = new();
         #endregion
 
         #region Unity Lifecycle
@@ -34,8 +33,19 @@ namespace Managers
             {
                 Instance = this;
                 DontDestroyOnLoad(gameObject); // Giữ Manager tồn tại khi chuyển đổi giữa các scene.
-                FindAndRegisterAllSpawnPoints();
             }
+        }
+
+        private void Start()
+        {
+            // Lấy danh sách các điểm spawn từ registry trung tâm.
+            var registry = SceneObjectRegistry.Instance;
+            if (registry != null && registry.PlayerSpawnPoints != null)
+            {
+                _spawnPoints.AddRange(registry.PlayerSpawnPoints);
+                Debug.Log($"[SpawnManager] Registered {_spawnPoints.Count} spawn points from registry.");
+            }
+            else Debug.LogError("[SpawnManager] SceneObjectRegistry.Instance is null or has no spawn points assigned!", this);
         }
         #endregion
 
@@ -52,6 +62,7 @@ namespace Managers
 
         /// <summary>
         /// Đăng ký một điểm spawn vào danh sách quản lý.
+        /// Hữu ích nếu các điểm spawn được tạo ra một cách linh động trong quá trình chơi.
         /// </summary>
         /// <param name="spawnPoint">Điểm spawn cần đăng ký.</param>
         public void RegisterSpawnPoint(PlayerSpawn spawnPoint)
@@ -59,38 +70,20 @@ namespace Managers
             if (spawnPoint != null && !_spawnPoints.Contains(spawnPoint))
             {
                 _spawnPoints.Add(spawnPoint);
+                Debug.Log($"[SpawnManager] Dynamically registered spawn point: {spawnPoint.name}", spawnPoint);
             }
         }
 
         /// <summary>
         /// Hủy đăng ký một điểm spawn khỏi danh sách.
-        /// Thường được gọi từ OnDestroy() của PlayerSpawn.
         /// </summary>
         /// <param name="spawnPoint">Điểm spawn cần hủy đăng ký.</param>
         public void UnregisterSpawnPoint(PlayerSpawn spawnPoint)
         {
-            if (spawnPoint != null)
+            if (spawnPoint != null && _spawnPoints.Remove(spawnPoint))
             {
-                _spawnPoints.Remove(spawnPoint);
+                Debug.Log($"[SpawnManager] Unregistered spawn point: {spawnPoint.name}", spawnPoint);
             }
-        }
-        #endregion
-
-        #region Private Methods
-        /// <summary>
-        /// Tìm và đăng ký tất cả các đối tượng PlayerSpawn có trong scene khi khởi động.
-        /// </summary>
-        private void FindAndRegisterAllSpawnPoints()
-        {
-            // Sử dụng FindObjectsByType để lấy tất cả các thể hiện của PlayerSpawn trong scene.
-            // FindObjectsSortMode.None có thể nhanh hơn một chút nếu không cần sắp xếp.
-            var foundSpawnPoints = FindObjectsByType<PlayerSpawn>();
-            _spawnPoints.Clear(); // Xóa danh sách cũ để tránh trùng lặp khi tải lại scene.
-            foreach (var spawnPoint in foundSpawnPoints) 
-            { 
-                RegisterSpawnPoint(spawnPoint); 
-            }
-            Debug.Log($"[SpawnManager] Found and registered {foundSpawnPoints.Length} spawn points.");
         }
         #endregion
     }

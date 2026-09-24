@@ -1,14 +1,16 @@
 using UnityEngine;
 using Core.Interfaces;
+using Core;
 
 namespace Player
 {
     /// <summary>
     /// Điều khiển các tham số của Animator dựa trên trạng thái của người chơi.
+    /// Đồng thời lắng nghe các sự kiện game để phản ứng với các thay đổi trạng thái (ví dụ: đóng băng).
     /// Lớp này hoạt động như một cầu nối giữa IPlayer và Animator Controller.
     /// </summary>
     [RequireComponent(typeof(Animator))]
-    public class PlayerAnimator : MonoBehaviour
+    public class PlayerAnimator : MonoBehaviour, ISkillAnimationBridge
     {
         #region Fields
 
@@ -22,6 +24,12 @@ namespace Player
         private static readonly int ResetTriggerHash = Animator.StringToHash("Reset");
         private static readonly int IsClimbingHash = Animator.StringToHash("IsClimbing");
         private static readonly int ClimbingSpeedHash = Animator.StringToHash("ClimbingSpeed");
+
+        // Skill-related Animator trigger/bool parameters
+        private static readonly int SuperJumpTriggerHash = Animator.StringToHash("SuperJump");
+        private static readonly int SummonTriggerHash = Animator.StringToHash("Summon");
+        private static readonly int ChargeBoolHash = Animator.StringToHash("Charge");
+        private static readonly int IsForcefieldOnBoolHash = Animator.StringToHash("IsForcefieldOn");
 
         #endregion
 
@@ -40,12 +48,28 @@ namespace Player
             }
         }
 
+        private void OnEnable()
+        {
+            // Đăng ký lắng nghe sự kiện hiệu ứng trạng thái
+            GameEvents.OnPlayerStatusEffectApplied += HandleStatusEffectApplied;
+            GameEvents.OnPlayerStatusEffectReverted += HandleStatusEffectReverted;
+        }
+
+        private void OnDisable()
+        {
+            // Hủy đăng ký để tránh lỗi
+            GameEvents.OnPlayerStatusEffectApplied -= HandleStatusEffectApplied;
+            GameEvents.OnPlayerStatusEffectReverted -= HandleStatusEffectReverted;
+        }
+
         private void Update()
         {
             if (_player == null) return;
 
             // Cập nhật các tham số cơ bản
-            UpdateMovementParameters();
+            // Chỉ cập nhật nếu animator đang hoạt động (không bị đóng băng)
+            if (_animator != null && _animator.speed > 0)
+                UpdateMovementParameters();
         }
 
         #endregion
@@ -60,6 +84,48 @@ namespace Player
         public void TriggerReset()
         {
             if (_animator != null) _animator.SetTrigger(ResetTriggerHash);
+        }
+
+        /// <summary>
+        /// Đặt tốc độ của Animator.
+        /// Hữu ích để đóng băng hoặc làm chậm animation.
+        /// </summary>
+        /// <param name="speed">Tốc độ mới (1.0 là bình thường, 0.0 là đóng băng).</param>
+        public void SetAnimationSpeed(float speed)
+        {
+            if (_animator != null) _animator.speed = speed;
+        }
+
+        /// <summary>
+        /// Kich hoat trigger 'SuperJump' tren Animator khi player dung skill SuperJump.
+        /// </summary>
+        public void TriggerSuperJumpAnimation()
+        {
+            if (_animator != null) _animator.SetTrigger(SuperJumpTriggerHash);
+        }
+
+        /// <summary>
+        /// Kich hoat trigger 'Summon' tren Animator khi player dung skill Platform, BubbleBarrier sau Heal.
+        /// </summary>
+        public void TriggerSummonAnimation()
+        {
+            if (_animator != null) _animator.SetTrigger(SummonTriggerHash);
+        }
+
+        /// <summary>
+        /// Sat bool 'Charge' tren Animator: true in thoi gian duration cua skill Disarm, false khi ket thuc.
+        /// </summary>
+        public void SetDisarmCharging(bool charging)
+        {
+            if (_animator != null) _animator.SetBool(ChargeBoolHash, charging);
+        }
+
+        /// <summary>
+        /// Sat bool 'IsForcefieldOn' tren Animator: true khi skill Forcefield dang hoat dong, false khi ket thuc.
+        /// </summary>
+        public void SetForcefieldActive(bool active)
+        {
+            if (_animator != null) _animator.SetBool(IsForcefieldOnBoolHash, active);
         }
 
         #endregion
@@ -88,6 +154,33 @@ namespace Player
             _animator.SetFloat(ClimbingSpeedHash, _player.ClimbingSpeed);
         }
 
+        #endregion
+
+        #region Event Handlers
+
+        /// <summary>
+        /// Xử lý khi một hiệu ứng trạng thái được áp dụng lên người chơi.
+        /// </summary>
+        private void HandleStatusEffectApplied(IPlayer player, StatusEffectType effect)
+        {
+            // Chỉ phản hồi nếu sự kiện này dành cho chính người chơi này.
+            if (player != _player) return;
+
+            if (effect == StatusEffectType.Frozen)
+                SetAnimationSpeed(0f);
+        }
+
+        /// <summary>
+        /// Xử lý khi một hiệu ứng trạng thái trên người chơi được hoàn tác.
+        /// </summary>
+        private void HandleStatusEffectReverted(IPlayer player, StatusEffectType effect)
+        {
+            // Chỉ phản hồi nếu sự kiện này dành cho chính người chơi này.
+            if (player != _player) return;
+
+            if (effect == StatusEffectType.Frozen)
+                SetAnimationSpeed(1f);
+        }
         #endregion
     }
 }

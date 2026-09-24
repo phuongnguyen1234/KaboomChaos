@@ -50,7 +50,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _animationStages.Array.data[1].targetValue
-      value: 1.6
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4407908502679590307, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _animationStages.Array.data[2].targetValue
@@ -268,6 +268,10 @@ PrefabInstance:
       propertyPath: _animationStages.Array.data[3].easeCurve.m_Curve.Array.data[1].tangentMode
       value: 34
       objectReference: {fileID: 0}
+    - target: {fileID: 4473756658289661954, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4754107197624226471, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -322,7 +326,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customAlpha
-      value: 0.15
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customColor.b
@@ -337,8 +341,12 @@ PrefabInstance:
       value: 1.4980392
       objectReference: {fileID: 0}
     - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
+      propertyPath: _customFresnelPower
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7174302577543426420, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: _customEmissionIntensity
-      value: 0.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8365981775348852892, guid: 6b11a1e9318818c4cbdea9d66aa0d042, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'

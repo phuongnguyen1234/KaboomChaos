@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09a28969c92b7fe4ab2377a19a2de6de, type: 3}
+  m_Name: CollectibleDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::Collectibles.Data.CollectibleDatabase
+  _collectibleMappings:
+  - _data: {fileID: 11400000, guid: 968a4b1565986b948b2fdc34584b475a, type: 2}
+    _prefab: {fileID: 4403988211876011557, guid: e66aa4da1ae35d243b746daf0332a007, type: 3}
+  - _data: {fileID: 11400000, guid: 4263c31eeee9fc14db9795591df8d7ce, type: 2}
+    _prefab: {fileID: 4034946444322627251, guid: 84a169e2b0df1c44a967f59de7a268d1, type: 3}
+  - _data: {fileID: 11400000, guid: a1665dfd0fceb414d8f3bc6d042cf9e5, type: 2}
+    _prefab: {fileID: 5998102396772073907, guid: 56e87193da51d3a40b90b8d302cfb6cb, type: 3}
+  - _data: {fileID: 11400000, guid: 77f459ac5aebed44680732c8761901d0, type: 2}
+    _prefab: {fileID: 1984149584101812583, guid: 77b2ff95e16648f4a9cd3c9c5e2d889c, type: 3}
+  - _data: {fileID: 11400000, guid: b50f792b3b4b335439403ac55a21695e, type: 2}
+    _prefab: {fileID: 1984149584101812583, guid: b57b79f6ec833034bbf93e57c9746c2e, type: 3}
+  - _data: {fileID: 11400000, guid: 49b85221a95d0c64aa9803a42d436363, type: 2}
+    _prefab: {fileID: 1984149584101812583, guid: 457038702feefed43a2cd3c611479e27, type: 3}
+  - _data: {fileID: 11400000, guid: 77335ba064496a042ae986e20770e250, type: 2}
+    _prefab: {fileID: 6761095570391251787, guid: c20dae7c5eea90f4684657adce5a5e9d, type: 3}
+  - _data: {fileID: 11400000, guid: 1a2e97af67592ff43888e2c2e6d1a403, type: 2}
+    _prefab: {fileID: 6633388566357021968, guid: 329715dc8e97a8c46a171e7c4831fad8, type: 3}
+  - _data: {fileID: 11400000, guid: 406d9e08aed2e714eaab68707b6bd4e4, type: 2}
+    _prefab: {fileID: 2776505026653287883, guid: 95e8de6ac62bac943a72cd52512e61b4, type: 3}
+  - _data: {fileID: 11400000, guid: d5b66b58c57f2db4bb015b850d95b8c9, type: 2}
+    _prefab: {fileID: 3652887139486375335, guid: 7952e67c615b53544bf7a6eb5fe7f6b4, type: 3}
+  - _data: {fileID: 11400000, guid: 79ae884c6e2651c4f8e646ffd2e2dbe7, type: 2}
+    _prefab: {fileID: 4629431325791448477, guid: 0a56c56abb672ea47abd646bbcfe34c8, type: 3}
+  - _data: {fileID: 11400000, guid: 34eb12596f5036d4194a78bdaa43eefd, type: 2}
+    _prefab: {fileID: 6466514744014136793, guid: 6994d71ad5c67164ea4075d5b19472ca, type: 3}
+  - _data: {fileID: 11400000, guid: 8366c12a28b9a2742a1d76178b5c734e, type: 2}
+    _prefab: {fileID: 7705609366092609127, guid: 5d6be4a5f27e856449479f7f256ff0e7, type: 3}

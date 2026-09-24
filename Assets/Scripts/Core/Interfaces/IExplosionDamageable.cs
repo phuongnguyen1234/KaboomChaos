@@ -11,6 +11,7 @@ namespace Core.Interfaces
         /// <summary>
         /// Áp dụng sát thương và lực từ một vụ nổ.
         /// </summary>
-        void TakeExplosionDamage(float amount, Vector3 force, Vector3 point);
+        /// <param name="bombData">Dữ liệu của quả bom gây ra vụ nổ, để có thể xử lý các hiệu ứng đặc biệt.</param>
+        void TakeExplosionDamage(float amount, Vector3 force, Vector3 point, IBaseBombData bombData);
     }
 }

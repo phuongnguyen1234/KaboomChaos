@@ -1,0 +1,240 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0a4cd6aac081ef4081f5292be9be07c, type: 3}
+  m_Name: MatryoshkaBomb
+  m_EditorClassIdentifier: Assembly-CSharp::Bombs.Data.MatryoshkaBombData
+  id: matryoshka-bomb
+  displayName: Matryoshka Bomb
+  description: Matryoshka Bomb
+  radius: 9
+  damage: 15
+  damageFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  effect: 0
+  effectDuration: 0
+  statusEffectLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  applyForce: 1
+  force: 25
+  forceMode: 1
+  forceFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: -1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  upwardsModifier: 0.5
+  affectedLayers:
+    serializedVersion: 2
+    m_Bits: 1984
+  triggerLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  canDestroyTerrain: 1
+  terrainDestructionPowerFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 5.5
+      inSlope: -3
+      outSlope: -3
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 2.5
+      inSlope: -3
+      outSlope: -3
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  explodeMultipleTimes: 0
+  minNumberOfExplosions: 1
+  maxNumberOfExplosions: 3
+  spawnSound: {fileID: 0}
+  delayBetweenExplosions: 0.5
+  explosionSpreadRadius: 2
+  subExplosionDamage: 25
+  subExplosionDamageFalloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: -1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  explosionVFX: {fileID: 7387641680929074750, guid: 7b5a52ed286cb3841b13916a4ae5a9d5, type: 3}
+  explosionSoundPitch: 1
+  explosionSound: {fileID: 8300000, guid: eab69fb4f6ca94f4683b79b9d916d72f, type: 3}
+  minPlayerSpawnChance: 40
+  maxPlayerSpawnChance: 65
+  playerSpawnRadius: 3
+  possibleVariants: []
+  spawnWeightByIntensity:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 1
+      value: 30
+      inSlope: 2.5
+      outSlope: 2.5
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 5
+      value: 40
+      inSlope: 2.5
+      outSlope: 2.5
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  maxPerSpawnWave: 2
+  maxActiveInstances: 5
+  fuseTime: 7.5
+  isActivatedOnContact: 0
+  changeColorOnFuse: 0
+  fuseColor: {r: 1, g: 0, b: 0, a: 1}
+  persistentFuseVFX: {fileID: 0}
+  fuseStages:
+  - startTime: 2.5
+    visualEffect: {fileID: 2093962717956073349, guid: 13d363993d817804e859cd6492b53f0e, type: 3}
+    stageSoundPitch: 0
+    stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
+    vfxRadius: 1.2
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 0.41568628, g: 0.45490196, b: 1.8666667, a: 1}
+    basePulseDuration: 0.2
+    enableDecalColorPulse: 1
+    decalPulseColor: {r: 0.8784314, g: 0.85490197, b: 1.772549, a: 1}
+    decalPulseDuration: 0.2
+    enableScalePulse: 0
+    pulseScaleMultiplier: 0
+    pulseScaleDuration: 0
+  - startTime: 4.5
+    visualEffect: {fileID: 2093962717956073349, guid: 13d363993d817804e859cd6492b53f0e, type: 3}
+    stageSoundPitch: 0
+    stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
+    vfxRadius: 1.2
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 0.41568628, g: 0.45490196, b: 1.8666667, a: 1}
+    basePulseDuration: 0.2
+    enableDecalColorPulse: 1
+    decalPulseColor: {r: 0.8784314, g: 0.85490197, b: 1.772549, a: 1}
+    decalPulseDuration: 0.2
+    enableScalePulse: 0
+    pulseScaleMultiplier: 0
+    pulseScaleDuration: 0
+  - startTime: 6
+    visualEffect: {fileID: 2093962717956073349, guid: 13d363993d817804e859cd6492b53f0e, type: 3}
+    stageSoundPitch: 0
+    stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
+    vfxRadius: 1.2
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 0.41568628, g: 0.45490196, b: 1.8666667, a: 1}
+    basePulseDuration: 0.2
+    enableDecalColorPulse: 1
+    decalPulseColor: {r: 0.8784314, g: 0.85490197, b: 1.772549, a: 1}
+    decalPulseDuration: 0.2
+    enableScalePulse: 0
+    pulseScaleMultiplier: 0
+    pulseScaleDuration: 0
+  - startTime: 7
+    visualEffect: {fileID: 2093962717956073349, guid: 13d363993d817804e859cd6492b53f0e, type: 3}
+    stageSoundPitch: 0
+    stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
+    vfxRadius: 1.2
+    enableBaseColorPulse: 1
+    basePulseColor: {r: 0.41568628, g: 0.45490196, b: 1.8666667, a: 1}
+    basePulseDuration: 0.2
+    enableDecalColorPulse: 1
+    decalPulseColor: {r: 0.8784314, g: 0.85490197, b: 1.772549, a: 1}
+    decalPulseDuration: 0.2
+    enableScalePulse: 0
+    pulseScaleMultiplier: 0
+    pulseScaleDuration: 0
+  tickingSoundPitch: 1
+  tickingSound: {fileID: 0}
+  maxGenerations: 3
+  scaleMultiplier: 0.8
+  radiusMultiplier: 0.6666667
+  damageMultiplier: 1
+  forceMultiplier: 0.6666667

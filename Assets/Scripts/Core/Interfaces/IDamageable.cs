@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace Core.Interfaces
 {
     /// <summary>
@@ -11,8 +9,22 @@ namespace Core.Interfaces
         /// Áp dụng một lượng sát thương lên đối tượng.
         /// </summary>
         /// <param name="amount">Lượng sát thương.</param>
-        void TakeDamage(float amount);
+        /// <param name="damageSource">Loại sát thương</param>
+        void TakeDamage(float amount, DamageSourceType sourceType = DamageSourceType.Generic, StatusEffectType effectContext = StatusEffectType.None);
 
+        /// <summary>
+        /// Kiểm tra nếu đối tượng còn sống
+        /// </summary>
         bool IsAlive { get; }
+
+        /// <summary>
+        /// Mau hien tai cua doi tuong.
+        /// </summary>
+        float CurrentHealth { get; }
+
+        /// <summary>
+        /// Mau toi da cua doi tuong.
+        /// </summary>
+        float MaxHealth { get; }
     }
 }

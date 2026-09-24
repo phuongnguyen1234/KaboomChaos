@@ -58,9 +58,66 @@ namespace Core.Interfaces
         /// Di chuyển người chơi đến một vị trí mới một cách an toàn, đồng thời reset lại các lực tác động.
         /// </summary>
         /// <param name="position">Vị trí thế giới mới.</param>
-        void Teleport(Vector3 position);
+        /// <param name="rotation">Góc quay mới (tùy chọn).</param>
+        void Teleport(Vector3 position, Quaternion? rotation = null);
+
+        /// <summary>
+        /// Them luc quan tinh (momentum) vao nguoi choi de day hoac hất tung ho.
+        /// </summary>
+        /// <param name="momentum">Vector luc momentum muon add.</param>
+        void AddMomentum(Vector3 momentum);
+
+        /// <summary>
+        /// Dat luc quan tinh thang dung (truc Y) cho nguoi choi trong khi van giu nguyen quan tinh di chuyen ngang (X, Z).
+        /// </summary>
+        /// <param name="verticalForce">Luc thang dung moi theo truc Y.</param>
+        void SetVerticalMomentum(float verticalForce);
+
+        /// <summary>
+        /// Bật hoặc tắt khả năng di chuyển của người chơi.
+        /// </summary>
+        /// <param name="enabled">True để bật di chuyển, False để tắt.</param>
+        void SetMovementEnabled(bool enabled);
         // Bạn có thể thêm các phương thức hoặc thuộc tính khác vào đây
-        // Ví dụ: Vector3 GetPosition();
-        // Ví dụ: void TakeDamage(float amount);
+
+        /// <summary>
+        /// Áp dụng một hệ số nhân vào tốc độ di chuyển của người chơi.
+        /// </summary>
+        void ApplySpeedMultiplier(float multiplier);
+
+        /// <summary>
+        /// Gỡ bỏ một hệ số nhân khỏi tốc độ di chuyển của người chơi.
+        /// </summary>
+        void RemoveSpeedMultiplier(float multiplier);
+
+        /// <summary>
+        /// Áp dụng một hệ số nhân vào lực nhảy của người chơi.
+        /// </summary>
+        void ApplyJumpMultiplier(float multiplier);
+
+        /// <summary>
+        /// Gỡ bỏ một hệ số nhân khỏi lực nhảy của người chơi.
+        /// </summary>
+        void RemoveJumpMultiplier(float multiplier);
+        
+        /// <summary>
+        /// Cho biết người chơi có đang bị đóng băng hay không.
+        /// </summary>
+        bool IsFrozen { get; }
+
+        /// <summary>
+        /// Reset toàn bộ chỉ số cộng dồn về trạng thái gốc.
+        /// </summary>
+        void ResetModifiers();
+
+        /// <summary>
+        /// Container Transform cho floating text liên quan đến HP.
+        /// </summary>
+        Transform HPTextContainer { get; }
+
+        /// <summary>
+        /// Container Transform cho floating text liên quan đến Coin.
+        /// </summary>
+        Transform CoinTextContainer { get; }
     }
 }

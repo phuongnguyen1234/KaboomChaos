@@ -1,0 +1,17 @@
+{
+    "name": "Skills",
+    "rootNamespace": "Skills",
+    "references": [
+        "GUID:7858c6ece110871498abcf8af34aa8ff",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

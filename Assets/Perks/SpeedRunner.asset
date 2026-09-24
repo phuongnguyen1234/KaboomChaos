@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 854ac1fe9f5bf9b4881610ebb15ed63a, type: 3}
+  m_Name: SpeedRunner
+  m_EditorClassIdentifier: Perks::Perks.Data.SpeedRunnerPerkData
+  _id: speed-runner
+  _displayName: Speed Runner
+  _description: Improves your base walking speed.
+  _icon: {fileID: 21300000, guid: 34d11ac43dcb4194cbe4b76d3d43c3b6, type: 3}
+  _price: 1000
+  _moveSpeedMultiplier: 2.5

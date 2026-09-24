@@ -1,4 +1,4 @@
-﻿﻿using UnityEngine;
+﻿using UnityEngine;
 
 namespace Player
 {
@@ -22,7 +22,7 @@ namespace Player
 		//Movement speed;
 		[Header("Movement")]
 		[Tooltip("Tốc độ di chuyển của nhân vật trên mặt đất.")]
-		[SerializeField] private float _movementSpeed = 7f;
+		[SerializeField] protected float _movementSpeed = 7f;
 
 		//How fast the controller can change direction while in the air;
 		//Higher values result in more air control;
@@ -32,7 +32,7 @@ namespace Player
 		//Jump speed;
 		[Header("Jumping")]
 		[Tooltip("Lực nhảy ban đầu của nhân vật.")]
-		[SerializeField] protected float _jumpSpeed = 10f;
+		[SerializeField] protected float _jumpForce = 10f;
 
 		[Tooltip("Khoảng thời gian ngắn (tính bằng giây) sau khi rời khỏi mặt đất mà người chơi vẫn có thể nhảy. Giúp tăng 'game feel' khi nhảy ở rìa.")]
 		[SerializeField] private float _coyoteTimeDuration = 0.1f;
@@ -40,7 +40,7 @@ namespace Player
 		//Jump duration variables;
 		[Tooltip("Thời gian tối đa có thể giữ nút nhảy để đạt chiều cao tối đa. Cho phép thay đổi chiều cao nhảy.")]
 		[SerializeField] protected float _jumpDuration = 0.2f;
-		float currentJumpStartTime = 0f;
+		protected float currentJumpStartTime = 0f;
 
 		private float _groundContactLostTime;
 
@@ -51,6 +51,12 @@ namespace Player
 		[SerializeField] private float _airFriction = 0.5f;
 		[Tooltip("'GroundFriction' được sử dụng thay thế khi nhân vật ở trên mặt đất. Giá trị cao giúp nhân vật dừng lại nhanh hơn.")]
 		[SerializeField] private float _groundFriction = 100f;
+		[Tooltip("Vật liệu vật lý được coi là trơn trượt. Khi đứng trên bề mặt có vật liệu này, ma sát sẽ giảm đáng kể.")]
+		[SerializeField] private PhysicsMaterial _slipperyPhysicsMaterial;
+		[Tooltip("Ma sát sẽ được sử dụng khi đứng trên bề mặt trơn trượt.")]
+		[SerializeField] private float _slipperyFriction = 1f;
+		[Tooltip("Tốc độ nhân vật có thể thay đổi hướng khi trượt trên băng. Giá trị thấp hơn tạo cảm giác trơn trượt hơn.")]
+		[SerializeField] private float _iceControlRate = 5f;
 
 		//Current momentum;
 		protected Vector3 momentum = Vector3.zero;
@@ -92,6 +98,9 @@ namespace Player
 
 		//Saved horizontal movement velocity from last frame;
 		Vector3 savedMovementVelocity = Vector3.zero;
+
+		// Cờ để theo dõi trạng thái trên băng của frame trước, dùng để phát hiện chuyển đổi.
+		private bool _wasOnIce;
 
 		//Getters;
 		public float movementSpeed => _movementSpeed;
@@ -188,7 +197,29 @@ namespace Player
 
 			//Calculate movement velocity;
 			Vector3 _velocity = Vector3.zero;
-			if(currentControllerState == ControllerState.Grounded)
+
+			// CẢI TIẾN: Xử lý di chuyển trên băng
+			bool isOnIce = false;
+            if (currentControllerState == ControllerState.Grounded)
+            {
+                Collider groundCollider = mover.GetGroundCollider();
+                if (groundCollider != null && _slipperyPhysicsMaterial != null && groundCollider.sharedMaterial == _slipperyPhysicsMaterial)
+                {
+                    isOnIce = true;
+                }
+            }
+
+			// CẢI TIẾN: Nếu vừa bước lên băng từ mặt đất thường, chuyển vận tốc hiện tại thành momentum.
+			// Điều này bảo toàn tốc độ chạy đà của người chơi lên bề mặt băng, tạo cảm giác trượt tự nhiên.
+			if (isOnIce && !_wasOnIce)
+			{
+				// savedMovementVelocity chứa vận tốc dựa trên input từ frame trước.
+				momentum += savedMovementVelocity;
+			}
+
+			// Nếu ở trên mặt đất thông thường (không trơn trượt), áp dụng vận tốc di chuyển trực tiếp.
+			// Nếu ở trên không hoặc trên băng, việc di chuyển sẽ được xử lý thông qua 'momentum' trong HandleMomentum().
+			if(currentControllerState == ControllerState.Grounded && !isOnIce)
 				_velocity = CalculateMovementVelocity();
 			
 			//If local momentum is used, transform momentum into world space first;
@@ -211,6 +242,9 @@ namespace Player
 		
 			//Save controller movement velocity;
 			savedMovementVelocity = CalculateMovementVelocity();
+
+			// Lưu lại trạng thái trên băng cho frame tiếp theo;
+			_wasOnIce = isOnIce;
 
 			//Reset jump key booleans;
 			jumpKeyWasLetGo = false;
@@ -438,11 +472,25 @@ namespace Player
 			}
 
 			//Add gravity to vertical momentum;
+			// CẢI TIẾN: Áp dụng trọng lực một cách nhất quán trong mọi trạng thái trên không (Jumping, Rising, Falling).
+			// Bằng cách loại bỏ việc ghi đè vận tốc trong trạng thái 'Jumping', cú nhảy sẽ có một
+			// đường cong parabolic tự nhiên hơn, chịu ảnh hưởng của trọng lực ngay từ đầu.
 			_verticalMomentum -= tr.up * _gravity * Time.deltaTime;
 
 			//Remove any downward force if the controller is grounded;
 			if(currentControllerState == ControllerState.Grounded && VectorMath.GetDotProduct(_verticalMomentum, tr.up) < 0f)
 				_verticalMomentum = Vector3.zero;
+
+			// CẢI TIẾN: Kiểm tra xem có đang ở trên băng không
+			bool isOnIce = false;
+            if (currentControllerState == ControllerState.Grounded)
+            {
+                Collider groundCollider = mover.GetGroundCollider();
+                if (groundCollider != null && _slipperyPhysicsMaterial != null && groundCollider.sharedMaterial == _slipperyPhysicsMaterial)
+                {
+                    isOnIce = true;
+                }
+            }
 
 			//Manipulate momentum to steer controller in the air (if controller is not grounded or sliding);
 			if(!IsGrounded())
@@ -468,6 +516,15 @@ namespace Player
 					_horizontalMomentum = Vector3.ClampMagnitude(_horizontalMomentum, _movementSpeed);
 				}
 			}
+			// CẢI TIẾN: Nếu đang ở trên băng, áp dụng input như một lực đẩy thay vì vận tốc tức thời.
+			else if (isOnIce)
+			{
+				Vector3 _movementVelocity = CalculateMovementVelocity();
+
+				// Di chuyển momentum hiện tại về phía vận tốc mong muốn với một tốc độ giới hạn (iceControlRate).
+				// Điều này tạo ra cảm giác trơn trượt, người chơi không thể đổi hướng ngay lập tức.
+				_horizontalMomentum = Vector3.MoveTowards(_horizontalMomentum, _movementVelocity, _iceControlRate * Time.deltaTime);
+			}
 
 			//Steer controller on slopes;
 			if(currentControllerState == ControllerState.Sliding)
@@ -487,8 +544,17 @@ namespace Player
 			//Apply friction to horizontal momentum based on whether the controller is grounded;
 			if(currentControllerState == ControllerState.Grounded)
 			{
+				// Mặc định sử dụng ma sát mặt đất thông thường.
+				float currentFriction = _groundFriction;
+
+				// CẢI TIẾN: Tái sử dụng cờ 'isOnIce' đã kiểm tra ở trên.
+				if (isOnIce)
+				{
+					currentFriction = _slipperyFriction;
+				}
+
 				Vector3 _horizontalGroundMomentum = VectorMath.RemoveDotVector(groundMomentum, tr.up);
-				_horizontalMomentum = VectorMath.IncrementVectorTowardTargetVector(_horizontalMomentum, _groundFriction, Time.deltaTime, _horizontalGroundMomentum);
+				_horizontalMomentum = VectorMath.IncrementVectorTowardTargetVector(_horizontalMomentum, currentFriction, Time.deltaTime, _horizontalGroundMomentum);
 			}
 			else
 				_horizontalMomentum = VectorMath.IncrementVectorTowardTargetVector(_horizontalMomentum, _airFriction, Time.deltaTime, Vector3.zero); 
@@ -510,13 +576,6 @@ namespace Player
 				Vector3 _slideDirection = Vector3.ProjectOnPlane(-tr.up, mover.GetGroundNormal()).normalized;
 				momentum += _slideDirection * _slideGravity * Time.deltaTime;
 			}
-			
-			//If controller is jumping, override vertical velocity with jumpSpeed;
-			if(currentControllerState == ControllerState.Jumping)
-			{
-				momentum = VectorMath.RemoveDotVector(momentum, tr.up);
-				momentum += tr.up * _jumpSpeed;
-			}
 
 			if(_useLocalMomentum)
 				momentum = tr.worldToLocalMatrix * momentum;
@@ -532,7 +591,7 @@ namespace Player
 				momentum = tr.localToWorldMatrix * momentum;
 
 			//Add jump force to momentum;
-			momentum += tr.up * _jumpSpeed;
+			momentum += tr.up * _jumpForce;
 
 			//Set jump start time;
 			currentJumpStartTime = Time.time;
@@ -697,6 +756,15 @@ namespace Player
 				momentum = tr.worldToLocalMatrix * _newMomentum;
 			else
 				momentum = _newMomentum;
+		}
+
+		//Set vertical momentum directly while preserving horizontal momentum;
+		public void SetVerticalMomentum(float verticalForce)
+		{
+			Vector3 currentWorldMomentum = GetMomentum();
+			Vector3 verticalComponent = VectorMath.ExtractDotVector(currentWorldMomentum, tr.up);
+			Vector3 horizontalComponent = currentWorldMomentum - verticalComponent;
+			SetMomentum(horizontalComponent + tr.up * verticalForce);
 		}
 	}
 }
