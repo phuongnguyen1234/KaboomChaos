@@ -68,6 +68,12 @@ namespace Core.Interfaces
         void AddMomentum(Vector3 momentum);
 
         /// <summary>
+        /// Dat luc quan tinh thang dung (truc Y) cho nguoi choi trong khi van giu nguyen quan tinh di chuyen ngang (X, Z).
+        /// </summary>
+        /// <param name="verticalForce">Luc thang dung moi theo truc Y.</param>
+        void SetVerticalMomentum(float verticalForce);
+
+        /// <summary>
         /// Bật hoặc tắt khả năng di chuyển của người chơi.
         /// </summary>
         /// <param name="enabled">True để bật di chuyển, False để tắt.</param>

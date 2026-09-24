@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using Core.Interfaces;
 using Core;
 using System.Collections.Generic;
@@ -20,22 +21,26 @@ namespace Managers
         [Header("Collectible Settings")]
         [Tooltip("Database chứa tất cả các loại vật phẩm có thể thu thập.")]
         [SerializeField] private ScriptableObject _collectibleDatabaseAsset;
-        [Tooltip("Đường cong xác suất (0-100) để một đợt vật phẩm được thả sau một đợt bom, dựa trên độ khó.")]
+        [Tooltip("Đường cong xác suất (0-100) để một đợt vật phẩm được thả sau một đợt bom, dựa trên intensity.")]
         [SerializeField] private AnimationCurve _collectibleWaveSpawnChance = AnimationCurve.Linear(1, 20, 6, 80);
-        [Tooltip("Đường cong xác định số lượng vật phẩm TỐI THIỂU thả mỗi đợt (nếu đợt đó được kích hoạt), dựa trên độ khó.")]
+        [Tooltip("Đường cong xác định số lượng vật phẩm TỐI THIỂU thả mỗi đợt (nếu đợt đó được kích hoạt), dựa trên intensity.")]
         [SerializeField] private AnimationCurve _minCollectiblesPerWave = AnimationCurve.Linear(1, 1, 6, 1);
-        [Tooltip("Đường cong xác định số lượng vật phẩm TỐI ĐA thả mỗi đợt (nếu đợt đó được kích hoạt), dựa trên độ khó.")]
+        [Tooltip("Đường cong xác định số lượng vật phẩm TỐI ĐA thả mỗi đợt (nếu đợt đó được kích hoạt), dựa trên intensity.")]
         [SerializeField] private AnimationCurve _maxCollectiblesPerWave = AnimationCurve.Linear(1, 1, 6, 3);
 
         [Header("Spawning Settings")]
-        [Tooltip("Đường cong xác định khoảng thời gian TỐI THIỂU (giây) giữa mỗi lần sinh bom, dựa trên độ khó. Trục X là độ khó, trục Y là thời gian.")]
-        [SerializeField] private AnimationCurve _minSpawnIntervalByDifficulty = AnimationCurve.Linear(1, 2, 5, 0.5f);
-        [Tooltip("Đường cong xác định khoảng thời gian TỐI ĐA (giây) giữa mỗi lần sinh bom, dựa trên độ khó. Trục X là độ khó, trục Y là thời gian.")]
-        [SerializeField] private AnimationCurve _maxSpawnIntervalByDifficulty = AnimationCurve.Linear(1, 4, 5, 1.5f);
-        [Tooltip("Đường cong xác định số lượng bom TỐI THIỂU thả mỗi lần, dựa trên độ khó. Trục X là độ khó, trục Y là số lượng.")]
-        [SerializeField] private AnimationCurve _minBombsPerSpawnByDifficulty = AnimationCurve.Linear(1, 1, 5, 2);
-        [Tooltip("Đường cong xác định số lượng bom TỐI ĐA thả mỗi lần, dựa trên độ khó. Trục X là độ khó, trục Y là số lượng.")]
-        [SerializeField] private AnimationCurve _maxBombsPerSpawnByDifficulty = AnimationCurve.Linear(1, 1, 5, 5);
+        [Tooltip("Đường cong xác định khoảng thời gian TỐI THIỂU (giây) giữa mỗi lần sinh bom, dựa trên intensity. Trục X là intensity, trục Y là thời gian.")]
+        [FormerlySerializedAs("_minSpawnIntervalByDifficulty")]
+        [SerializeField] private AnimationCurve _minSpawnIntervalByIntensity = AnimationCurve.Linear(1, 2, 5, 0.5f);
+        [Tooltip("Đường cong xác định khoảng thời gian TỐI ĐA (giây) giữa mỗi lần sinh bom, dựa trên intensity. Trục X là intensity, trục Y là thời gian.")]
+        [FormerlySerializedAs("_maxSpawnIntervalByDifficulty")]
+        [SerializeField] private AnimationCurve _maxSpawnIntervalByIntensity = AnimationCurve.Linear(1, 4, 5, 1.5f);
+        [Tooltip("Đường cong xác định số lượng bom TỐI THIỂU thả mỗi lần, dựa trên intensity. Trục X là intensity, trục Y là số lượng.")]
+        [FormerlySerializedAs("_minBombsPerSpawnByDifficulty")]
+        [SerializeField] private AnimationCurve _minBombsPerSpawnByIntensity = AnimationCurve.Linear(1, 1, 5, 2);
+        [Tooltip("Đường cong xác định số lượng bom TỐI ĐA thả mỗi lần, dựa trên intensity. Trục X là intensity, trục Y là số lượng.")]
+        [FormerlySerializedAs("_maxBombsPerSpawnByDifficulty")]
+        [SerializeField] private AnimationCurve _maxBombsPerSpawnByIntensity = AnimationCurve.Linear(1, 1, 5, 5);
 
         [Header("Naval Mine Settings")]
         [Tooltip("Khoảng cách dọc (theo trục Y) mà thủy lôi được đặt lệch lên phía trên BỀ MẶT TRÊN CÙNG của block điểm neo. Thủy lôi sẽ được đặt tại (bề mặt trên cùng của block) + offset này để có thể trôi nổi nhẹ nhàng mà không chạm vào khối.")]
@@ -166,16 +171,16 @@ namespace Managers
 
             while (true)
             {
-                float currentDifficulty = _gameloopManager.CurrentIntensity;
+                float currentIntensity = _gameloopManager.CurrentIntensity;
                 // 1. Chờ một khoảng thời gian ngẫu nhiên cho đợt spawn tiếp theo
-                float minInterval = _minSpawnIntervalByDifficulty.Evaluate(currentDifficulty);
-                float maxInterval = _maxSpawnIntervalByDifficulty.Evaluate(currentDifficulty);
+                float minInterval = _minSpawnIntervalByIntensity.Evaluate(currentIntensity);
+                float maxInterval = _maxSpawnIntervalByIntensity.Evaluate(currentIntensity);
                 float randomInterval = Random.Range(minInterval, maxInterval);
                 yield return new WaitForSeconds(randomInterval);
 
                 // 2. Xác định số lượng bom sẽ thả trong đợt này
-                int minBombs = Mathf.RoundToInt(_minBombsPerSpawnByDifficulty.Evaluate(currentDifficulty));
-                int maxBombs = Mathf.RoundToInt(_maxBombsPerSpawnByDifficulty.Evaluate(currentDifficulty));
+                int minBombs = Mathf.RoundToInt(_minBombsPerSpawnByIntensity.Evaluate(currentIntensity));
+                int maxBombs = Mathf.RoundToInt(_maxBombsPerSpawnByIntensity.Evaluate(currentIntensity));
                 // Đảm bảo min không lớn hơn max nếu cấu hình curve bị lỗi
                 if (minBombs > maxBombs) minBombs = maxBombs;
                 int bombsToSpawn = Random.Range(minBombs, maxBombs + 1); // max của Range(int, int) là exclusive
@@ -189,7 +194,7 @@ namespace Managers
                     IBombMapping selectedMapping = GetRandomBombMapping(waveSpawnCount);
                     if (selectedMapping?.Data == null || selectedMapping.Prefab == null)
                     {
-                        Debug.LogWarning("[BombSpawnerManager] Could not select a valid bomb to spawn (check weights and limits for current difficulty). Skipping this bomb.");
+                        Debug.LogWarning("[BombSpawnerManager] Could not select a valid bomb to spawn (check weights and limits for current intensity). Skipping this bomb.");
                         continue; // Bỏ qua quả bom này, nhưng vẫn tiếp tục vòng lặp của đợt thả
                     }
 
@@ -229,7 +234,7 @@ namespace Managers
                 }
 
                 // 4. Thử thả collectibles
-                SpawnCollectibles(currentDifficulty);
+                SpawnCollectibles(currentIntensity);
             }
         }
 
@@ -256,21 +261,21 @@ namespace Managers
         }
 
         /// <summary>
-        /// Thử sinh ra các vật phẩm thu thập dựa trên độ khó hiện tại.
+        /// Thử sinh ra các vật phẩm thu thập dựa trên intensity hiện tại.
         /// </summary>
-        private void SpawnCollectibles(float currentDifficulty)
+        private void SpawnCollectibles(float currentIntensity)
         {
             if (_collectibleDatabase == null || _collectibleDatabase.Mappings.Count == 0) return;
 
             // --- LOGIC MỚI: Quyết định xem có nên thả đợt vật phẩm này không ---
-            if (Random.Range(0f, 100f) >= _collectibleWaveSpawnChance.Evaluate(currentDifficulty))
+            if (Random.Range(0f, 100f) >= _collectibleWaveSpawnChance.Evaluate(currentIntensity))
             {
                 return; // Không may mắn, không có vật phẩm nào được thả lần này.
             }
 
             // --- LOGIC MỚI: Xác định số lượng vật phẩm sẽ thả trong đợt này ---
-            int minCollectibles = Mathf.RoundToInt(_minCollectiblesPerWave.Evaluate(currentDifficulty));
-            int maxCollectibles = Mathf.RoundToInt(_maxCollectiblesPerWave.Evaluate(currentDifficulty));
+            int minCollectibles = Mathf.RoundToInt(_minCollectiblesPerWave.Evaluate(currentIntensity));
+            int maxCollectibles = Mathf.RoundToInt(_maxCollectiblesPerWave.Evaluate(currentIntensity));
             if (minCollectibles > maxCollectibles) minCollectibles = maxCollectibles;
             int collectiblesToSpawn = Random.Range(minCollectibles, maxCollectibles + 1);
 
@@ -282,7 +287,7 @@ namespace Managers
             for (int i = 0; i < collectiblesToSpawn; i++)
             {
                 // Lấy một mapping vật phẩm ngẫu nhiên dựa trên trọng số (Rarity)
-                ICollectibleMapping selectedMapping = GetRandomCollectibleMapping(currentDifficulty);
+                ICollectibleMapping selectedMapping = GetRandomCollectibleMapping(currentIntensity);
                 if (selectedMapping != null)
                 {
                     SpawnSingleCollectible(selectedMapping);
@@ -314,10 +319,10 @@ namespace Managers
         /// <summary>
         /// Chon mot loai vat pham ngau nhien tu database dua tren trong so.
         /// Neu vat pham goc duoc chon co khai bao bien the ma khong bien the nao qua duoc
-        /// phep tung xuc xac theo do kho thi tra ve null (khong fallback ve vat pham goc,
+        /// phep tung xuc xac theo intensity thi tra ve null (khong fallback ve vat pham goc,
         /// coi nhu khong spawn duoc vat pham do trong luot nay).
         /// </summary>
-        private ICollectibleMapping GetRandomCollectibleMapping(float currentDifficulty)
+        private ICollectibleMapping GetRandomCollectibleMapping(float currentIntensity)
         {
             // --- Bước 1: Chọn một vật phẩm cơ bản dựa trên trọng số ---
             var weightedList = new List<(ICollectibleMapping mapping, float weight)>();
@@ -330,7 +335,7 @@ namespace Managers
                 // Bỏ qua các vật phẩm được định nghĩa là biến thể của một vật phẩm khác.
                 if (_variantCollectibles.Contains(mapping.Data)) continue;
 
-                float weight = mapping.Data.RarityByDifficulty.Evaluate(currentDifficulty);
+                float weight = mapping.Data.RarityByIntensity.Evaluate(currentIntensity);
                 if (weight > 0)
                 {
                     weightedList.Add((mapping, weight));
@@ -373,7 +378,7 @@ namespace Managers
                         continue;
                     }
 
-                    float variantChance = variantInfo.SpawnChanceByDifficulty.Evaluate(currentDifficulty);
+                    float variantChance = variantInfo.SpawnChanceByIntensity.Evaluate(currentIntensity);
                     if (Random.Range(0f, 100f) < variantChance)
                     {
                         return variantMapping; // Tra ve bien the va dung lai.
@@ -392,7 +397,7 @@ namespace Managers
 
         private IBombMapping GetRandomBombMapping(Dictionary<IBaseBombData, int> waveSpawnCount)
         {
-            float currentDifficulty = _gameloopManager.CurrentIntensity;
+            float currentIntensity = _gameloopManager.CurrentIntensity;
             // --- Bước 1: Chọn một loại bom cơ bản dựa trên trọng số ---
             var weightedList = new List<(IBombMapping mapping, float weight)>();
             float totalWeight = 0f;
@@ -419,7 +424,7 @@ namespace Managers
                 }
                 // --- KẾT THÚC KIỂM TRA ---
 
-                float weight = bombData.SpawnWeightByDifficulty.Evaluate(currentDifficulty);
+                float weight = bombData.SpawnWeightByIntensity.Evaluate(currentIntensity);
                 if (weight > 0)
                 {
                     weightedList.Add((mapping, weight));
@@ -473,8 +478,8 @@ namespace Managers
                     }
                     // --- KẾT THÚC KIỂM TRA ---
 
-                    // Lấy xác suất xuất hiện của biến thể này dựa trên độ khó hiện tại.
-                    float variantChance = variantInfo.SpawnChanceByDifficulty.Evaluate(currentDifficulty);
+                    // Lấy xác suất xuất hiện của biến thể này dựa trên intensity hiện tại.
+                    float variantChance = variantInfo.SpawnChanceByIntensity.Evaluate(currentIntensity);
                     
                     // Tung xúc xắc (0-100)
                     if (Random.Range(0f, 100f) < variantChance)
@@ -644,7 +649,7 @@ namespace Managers
             var candidates = new List<(DestructibleBlock block, float dist)>();
             float sqrMinPlayerDist = minPlayerHorizontalDist * minPlayerHorizontalDist;
 
-            foreach (var block in FindObjectsByType<DestructibleBlock>(FindObjectsInactive.Exclude))
+            foreach (var block in FindObjectsByType<DestructibleBlock>(FindObjectsSortMode.None))
             {
                 if (block == null || block.gameObject == null || !block.gameObject.activeInHierarchy) continue;
                 if (!IsTopSurfaceBlock(block)) continue; // Chỉ giữ khối nằm ở bề mặt trên cùng

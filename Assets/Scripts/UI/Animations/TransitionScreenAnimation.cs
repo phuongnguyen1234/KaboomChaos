@@ -25,6 +25,9 @@ namespace UI.Animations
         [Tooltip("Thoi gian thay doi size cua CircleMask.")]
         [SerializeField] private float _maskSizeDuration = 0.5f;
 
+        [Tooltip("Thoi gian cho giu man hinh che kin truoc khi CircleMask scale down.")]
+        [SerializeField] private float _holdCoveredDuration = 0.1f;
+
         [Tooltip("Kich thuoc 2 chieu toi da cua CircleMask khi che phu man hinh.")]
         [SerializeField] private float _targetMaskSize = 3000f;
 
@@ -41,6 +44,17 @@ namespace UI.Animations
         private Action _onCoveredCallbacks;
         private Action _onCompleteCallbacks;
         private bool _isCovered = false;
+        #endregion
+
+        #region Properties
+        /// <summary>
+        /// Thoi gian giu man hinh che kin truoc khi CircleMask scale down.
+        /// </summary>
+        public float HoldCoveredDuration
+        {
+            get => _holdCoveredDuration;
+            set => _holdCoveredDuration = Mathf.Max(0f, value);
+        }
         #endregion
 
         #region Unity Lifecycle
@@ -94,9 +108,10 @@ namespace UI.Animations
         /// <summary>
         /// Chay hieu ung transition chuyen canh. Neu dang co transition chay, gop callback vao sequence hien tai.
         /// </summary>
-        /// <param name="onCovered">Callback duoc goi khi CircleMask da phong to 3000 (man hinh da che hoàn toan).</param>
+        /// <param name="onCovered">Callback duoc goi khi CircleMask da phong to 3000 (man hinh da che hoan toan).</param>
         /// <param name="onComplete">Callback duoc goi khi qua trinh transition hoan tat.</param>
-        public void PlayTransition(Action onCovered = null, Action onComplete = null)
+        /// <param name="holdDurationOverride">Thoi gian giu man hinh che kin tuy chon (neu null se dung _holdCoveredDuration).</param>
+        public void PlayTransition(Action onCovered = null, Action onComplete = null, float? holdDurationOverride = null)
         {
             // Neu sequence dang chay, gop callback thay vi kill lam treo caller khac
             if (_activeSequence != null && _activeSequence.IsActive() && _activeSequence.IsPlaying())
@@ -159,8 +174,12 @@ namespace UI.Animations
                 coveredCb?.Invoke();
             });
 
-            // Tam hoan nho 0.1s de callback xu ly xong
-            _activeSequence.AppendInterval(0.1f);
+            // Tam hoan giu man hinh che kin theo thoi gian cau hinh
+            float holdDuration = holdDurationOverride ?? _holdCoveredDuration;
+            if (holdDuration > 0f)
+            {
+                _activeSequence.AppendInterval(holdDuration);
+            }
 
             // 3. Giam size CircleMask ve 0 dong thoi Logo scale down ve 0
             if (_circleMask != null)

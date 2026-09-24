@@ -133,8 +133,16 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6218514415918611256, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6218514415918611256, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
+      propertyPath: m_LengthScale
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6218514415918611256, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
       propertyPath: m_VelocityScale
-      value: 0
+      value: 0.02
       objectReference: {fileID: 0}
     - target: {fileID: 7504134495120266603, guid: 22131f5e7cb7b7047a9c132fe4878edb, type: 3}
       propertyPath: _bombData

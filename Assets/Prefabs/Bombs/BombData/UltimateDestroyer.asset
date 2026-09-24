@@ -108,10 +108,10 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   explodeMultipleTimes: 1
-  minNumberOfExplosions: 10
-  maxNumberOfExplosions: 13
+  minNumberOfExplosions: 12
+  maxNumberOfExplosions: 15
   spawnSound: {fileID: 0}
-  delayBetweenExplosions: 0.5
+  delayBetweenExplosions: 0.3
   explosionSpreadRadius: 9
   subExplosionDamage: 80
   subExplosionDamageFalloff:
@@ -145,7 +145,7 @@ MonoBehaviour:
   maxPlayerSpawnChance: 5
   playerSpawnRadius: 4
   possibleVariants: []
-  spawnWeightByDifficulty:
+  spawnWeightByIntensity:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3

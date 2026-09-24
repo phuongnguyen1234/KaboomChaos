@@ -40,5 +40,22 @@ namespace Core.Interfaces
         /// thời điểm bắt đầu round và trạng thái Extreme Mode.
         /// </summary>
         PlayerRoundData GetPlayerRoundData(IPlayer player);
+
+        /// <summary>
+        /// Bat hoac tat trang thai bat tu cho tat ca nguoi choi con song trong round.
+        /// Dung khi round ket thuc de tranh sat thuong trong thoi gian chuyen giao ve lobby.
+        /// </summary>
+        void SetRoundSurvivorsInvincible(bool invincible);
+
+        /// <summary>
+        /// Nap day ngay lap tuc nang luong (energy) skill cho tat ca nguoi choi tham gia round.
+        /// </summary>
+        void ChargeRoundPlayersSkills();
+
+        /// <summary>
+        /// Khoa hoac mo khoa su dung skill cho tat ca nguoi choi tham gia round.
+        /// </summary>
+        /// <param name="locked">True de khoa khong cho dung skill, False de mo khoa.</param>
+        void SetRoundPlayersSkillLock(bool locked);
     }
 }

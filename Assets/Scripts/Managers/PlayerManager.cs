@@ -234,8 +234,59 @@ namespace Managers
             return newData;
         }
 
+        /// <inheritdoc/>
+        public void SetRoundSurvivorsInvincible(bool invincible)
+        {
+            foreach (var player in _playersInRound)
+            {
+                if (player != null && player.GameObject != null)
+                {
+                    if (player.GameObject.TryGetComponent<IInvincible>(out var inv))
+                    {
+                        inv.IsInvincible = invincible;
+                    }
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public void ChargeRoundPlayersSkills()
+        {
+            foreach (var player in _playersInRound)
+            {
+                if (player != null && player.GameObject != null)
+                {
+                    ISkillController skillController = player.GameObject.GetComponentInChildren<ISkillController>();
+                    skillController?.ChargeSkill();
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public void SetRoundPlayersSkillLock(bool locked)
+        {
+            foreach (var player in _playersInRound)
+            {
+                if (player != null && player.GameObject != null)
+                {
+                    ISkillController skillController = player.GameObject.GetComponentInChildren<ISkillController>();
+                    skillController?.SetSkillLock(locked);
+                }
+            }
+        }
+
         public void EndRound()
         {
+            // Mo khoa skill cho tat ca active players khi ve lobby
+            foreach (var player in _activePlayers)
+            {
+                if (player?.GameObject != null)
+                {
+                    ISkillController skillController = player.GameObject.GetComponentInChildren<ISkillController>();
+                    skillController?.SetSkillLock(false);
+                }
+            }
+
             _playersInRound.Clear();
             // Kích hoạt lại tất cả người chơi (nếu cần) và reset trạng thái của họ cho vòng mới.
             foreach (var player in _activePlayers)
@@ -345,6 +396,7 @@ namespace Managers
                         WinMultiplier = winMultiplier,
                         TotalCredits = totalCredits,
                         IsWinner = false,
+                        WinStreak = 0,
                         IsExtremeMode = hasRoundRecord && roundData.IsExtremeModeEnabled
                     };
                 }
@@ -357,7 +409,7 @@ namespace Managers
                 _playerData.Remove(player);
                 _playersInRound.Remove(player);
 
-                // Bat dau quy trinh chet trong round: cho 1 giay de xem Death VFX va ragdoll -> Transition Screen + Score Card -> ve Lobby
+                // Bat dau quy trinh chet trong round: cho 2 giay de xem Death VFX va ragdoll -> Transition Screen + Score Card -> ve Lobby
                 StartCoroutine(RoundPlayerDeathSequenceCoroutine(player, defeatScoreCard, totalCredits));
             }
             else
@@ -370,17 +422,25 @@ namespace Managers
 
         /// <summary>
         /// Coroutine xu ly quy trinh khi player chet trong round:
-        /// 1. Cho 1 giay de xem Death VFX va shatter ragdoll tai vi tri chet.
-        /// 2. Chay Transition Screen va hien thi Score Card ca nhan.
+        /// 1. Cho 1 giay tai vi tri chet.
+        /// 2. Hien thi Score Card bat dau chay len dong thoi voi Transition Screen bat dau chay.
         /// 3. Khi man hinh duoc che kin (onCovered), teleport player ve diem spawn o lobby.
-        /// 4. Huy GameObject player cu va sinh player moi tai lobby.
+        /// 4. Huy GameObject player cu va sinh player moi tai lobby khi transition hoan tat.
         /// </summary>
         private IEnumerator RoundPlayerDeathSequenceCoroutine(IPlayer playerToDestroy, ScoreCardData? defeatScoreCard, int totalCredits)
         {
-            // B1: Cho 1 giay tai vi tri chet de hien thi ro VFX va hieu ung vo vun
+            // B1: Cho 1 giay tai vi tri chet truoc khi bat dau Score Card va Transition Screen
             yield return new WaitForSeconds(1.0f);
 
-            // B2: Kich hoat Transition Screen ca nhan
+            // B2: Hien thi Score Card ca nhan cho nguoi choi (Score Card bat dau truot len)
+            if (defeatScoreCard.HasValue)
+            {
+                GameEvents.TriggerAddCreditsRequest(totalCredits);
+                IUIManager.Instance?.ShowScoreCard(defeatScoreCard.Value);
+                Debug.Log($"[PlayerManager] Hien thi Score Card ca nhan cho nguoi thua {playerToDestroy?.GameObject.name}: Survival {defeatScoreCard.Value.SurvivalScore}, Credits {totalCredits}.");
+            }
+
+            // B3: Kich hoat Transition Screen dong thoi voi Score Card
             bool transitionCovered = false;
             bool transitionCompleted = false;
 
@@ -391,18 +451,10 @@ namespace Managers
                     {
                         transitionCovered = true;
 
-                        // Teleport nguoi choi ve diem spawn o sảnh
+                        // Teleport nguoi choi ve diem spawn o sanh cho khi man hinh da duoc che kin
                         if (playerToDestroy != null)
                         {
                             RespawnPlayer(playerToDestroy);
-                        }
-
-                        // Trao credits va hien thi Score Card ca nhan
-                        if (defeatScoreCard.HasValue)
-                        {
-                            GameEvents.TriggerAddCreditsRequest(totalCredits);
-                            IUIManager.Instance.ShowScoreCard(defeatScoreCard.Value);
-                            Debug.Log($"[PlayerManager] Hien thi Score Card ca nhan cho nguoi thua {playerToDestroy?.GameObject.name}: Survival {defeatScoreCard.Value.SurvivalScore}, Credits {totalCredits}.");
                         }
                     },
                     onComplete: () =>
@@ -417,10 +469,6 @@ namespace Managers
                 if (playerToDestroy != null)
                 {
                     RespawnPlayer(playerToDestroy);
-                }
-                if (defeatScoreCard.HasValue)
-                {
-                    GameEvents.TriggerAddCreditsRequest(totalCredits);
                 }
                 transitionCovered = true;
                 transitionCompleted = true;

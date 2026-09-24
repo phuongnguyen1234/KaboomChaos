@@ -21,13 +21,13 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: CrystalShieldMat
-  m_Shader: {fileID: -6465566751694194690, guid: 3d6a3e9c4fe52ac4aa1647baedfea6f0, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: f86b3615339d8f44d8542082b386def4, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
+  m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
@@ -37,7 +37,23 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _SampleTexture2D_21d09f026c364249a3399af7a8620312_Texture_1_Texture2D:
+        m_Texture: {fileID: 2800000, guid: ea9e76fe1e1284f46bcc118a66113f08, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleTexture2D_431bc95184304104a7cc70c0e0e6d769_Texture_1_Texture2D:
+        m_Texture: {fileID: 2800000, guid: ea9e76fe1e1284f46bcc118a66113f08, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _SampleTexture2D_c647e0e026ba48f18aec8f396988acff_Texture_1_Texture2D:
+        m_Texture: {fileID: 2800000, guid: ea9e76fe1e1284f46bcc118a66113f08, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleTexture2D_f7b25af82be541858478d381f6805846_Texture_1_Texture2D:
+        m_Texture: {fileID: 2800000, guid: ea9e76fe1e1284f46bcc118a66113f08, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Triplanar_25d3099659a34c408048411d44a51f43_Texture_1_Texture2D:
         m_Texture: {fileID: 2800000, guid: ea9e76fe1e1284f46bcc118a66113f08, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -62,6 +78,6 @@ Material:
     - _Width: 0.2
     m_Colors:
     - _HexagonColor: {r: 1, g: 1, b: 1, a: 1}
-    - _ShieldColor: {r: 0, g: 0.4629385, b: 0.5, a: 1}
+    - _ShieldColor: {r: 0, g: 1, b: 0.94505316, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

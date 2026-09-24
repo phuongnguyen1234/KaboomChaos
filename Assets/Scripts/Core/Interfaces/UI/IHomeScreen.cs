@@ -29,6 +29,11 @@ namespace Core.Interfaces.UI
         void Show(bool skipLoading = false);
 
         /// <summary>
+        /// Cho biet man hinh Home hien co dang hien thi hay khong.
+        /// </summary>
+        bool IsVisible { get; }
+
+        /// <summary>
         /// Ẩn toàn bộ màn hình Home.
         /// </summary>
         void Hide();

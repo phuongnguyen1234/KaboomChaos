@@ -5,6 +5,7 @@ using Core.Interfaces;
 using Core.Utilities;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Serialization;
 using Core.Interfaces.UI;
 
 namespace Managers
@@ -19,8 +20,6 @@ namespace Managers
         private static WaitForSeconds _waitForSeconds3 = new(3f);
         private static readonly WaitForSeconds _waitForSeconds2 = new(2f);
         private static readonly WaitForSeconds _waitForSeconds1 = new(1f);
-        // Khoảng thời gian chờ giữa các Score Card cá nhân liên tiếp (thời gian hiển thị 5s + thời gian trượt xuống 0.4s).
-        private static readonly WaitForSeconds _scoreCardDisplayInterval = new(5.5f);
         #region Properties
 
         /// <summary>
@@ -88,14 +87,15 @@ namespace Managers
         private Coroutine _gameLoopCoroutine;
         // Tracks the currently-running stage coroutine so it can be stopped too.
         // Stopping only the main loop left nested stages running, causing parallel
-        // coroutines (e.g. two voting timers) after returning Home and pressing Play again.
+        // coroutines (e.g. two intermission timers) after returning Home and pressing Play again.
         private Coroutine _activeStageCoroutine;
 
         [Header("Game Loop Settings")]
         [Tooltip("Thời gian (giây) cho giai đoạn chào mừng 'Welcome to Kaboom Chaos!' khi bấm Play. Player đã được spawn, đồng hồ hiển thị 0:00 trong giai đoạn này.")]
         [SerializeField] private float _welcomeDuration = 5f;
-        [Tooltip("Thời gian (giây) cho giai đoạn bỏ phiếu map.")]
-        [SerializeField] private int _votingDuration = 15;
+        [Tooltip("Thoi gian (giay) cho giai doan nghi giua cac round / intermission.")]
+        [FormerlySerializedAs("_votingDuration")]
+        [SerializeField] private int _intermissionDuration = 15;
         [Tooltip("Thời gian (giây) hiển thị tên map đã được chọn.")]
         [SerializeField] private int _mapRevealDuration = 3;
         [Tooltip("Thời gian (giây) chờ để ổn định FPS sau khi xây map.")]
@@ -109,16 +109,16 @@ namespace Managers
         [Tooltip("Thời gian (giây) chờ để ổn định FPS sau khi dọn dẹp map.")]
         [SerializeField] private int _postCleanupStabilizationDuration = 2;
 
-        [Header("Difficulty Settings")]
-        [Tooltip("Độ khó tối thiểu.")]
+        [Header("Intensity Settings")]
+        [Tooltip("Intensity toi thieu.")]
         [SerializeField] private float _minIntensity = 1f;
-        [Tooltip("Độ khó tối đa.")]
+        [Tooltip("Intensity toi da.")]
         [SerializeField] private float _maxIntensity = 6f;
-        [Tooltip("Độ khó khởi tạo cho round đấu đầu tiên của một phiên chơi mới (thay vì luôn bắt đầu từ minIntensity).")]
+        [Tooltip("Intensity khoi tao cho round dau tien cua mot phien choi moi.")]
         [SerializeField] private float _initialIntensity = 1f;
-        [Tooltip("Mức tăng độ khó cố định cho round kế tiếp sau một round đã diễn ra (không phụ thuộc số player).")]
+        [Tooltip("Muc tang intensity co dinh cho round ke tiep sau mot round co nguoi song sot.")]
         [SerializeField] private float _intensityIncrementPerRound = 0.25f;
-        [Tooltip("Mức giảm độ khó tối đa khi toàn bộ player thất bại trong round. Giảm thực tế = giá trị này * (số người chết / tổng số người tham gia round).")]
+        [Tooltip("Muc giam intensity toi da khi toan bo player that bai trong round.")]
         [SerializeField] private float _intensityMaxDeathPenalty = 0.3f;
 
         [Header("Dynamic Positioning Offsets")]
@@ -287,7 +287,7 @@ namespace Managers
             while (_gameLoopActive)
             {
                 // Track each stage so StopGameLoop() can cancel it if the player leaves mid-stage.
-                _activeStageCoroutine = StartCoroutine(MapVotingStage());
+                _activeStageCoroutine = StartCoroutine(IntermissionStage());
                 yield return _activeStageCoroutine;
                 _activeStageCoroutine = null;
                 if (!_gameLoopActive) break;
@@ -334,7 +334,7 @@ namespace Managers
         /// <summary>
         /// Giai đoạn chào mừng (chạy 1 lần sau khi bấm Play): hiển thị thông báo
         /// "Welcome to Kaboom Chaos!" và đồng hồ 0:00 trong khoảng _welcomeDuration giây,
-        /// sau đó mới bước vào vòng lặp map (voting/build/round) thực sự.
+        /// sau đó mới bước vào vòng lặp map (intermission/build/round) thực sự.
         /// Player đã được spawn bởi StartGame() trước khi stage này chạy.
         /// </summary>
         /// <returns>IEnumerator để chạy như một coroutine.</returns>
@@ -351,34 +351,34 @@ namespace Managers
         }
 
         /// <summary>
-        /// Giai đoạn 1: Xử lý việc bỏ phiếu cho map. Hiển thị timer, chọn map ngẫu nhiên và thông báo kết quả.
+        /// Giai doan 1: Giai doan nghi giua cac round (Intermission). Hien thi timer, chon map ngau nhien va thong bao ket qua.
         /// </summary>
         /// <returns>IEnumerator để chạy như một coroutine.</returns>
-        private IEnumerator MapVotingStage()
+        private IEnumerator IntermissionStage()
         {
-            // --- Giai đoạn 1: Bỏ phiếu Map ---
-            CurrentState = GameState.MapVoting;
-            Debug.Log("[GameloopManager] Giai đoạn 1: Chuẩn bị (Tạm thay thế vote map)");
+            // --- Giai doan 1: Intermission ---
+            CurrentState = GameState.Intermission;
+            Debug.Log("[GameloopManager] Giai doan 1: Intermission");
             _uiManager?.ShowPersistentNotification("Intermission");
 
-            // Bắt đầu vòng lặp đếm ngược cho giai đoạn voting, đồng thời hiển thị timer.
-            float votingTimer = _votingDuration;
-            int lastDisplayedSecondForVote = Mathf.CeilToInt(votingTimer);
-            _uiManager?.UpdateTimer(lastDisplayedSecondForVote); // Hiển thị timer ngay lập tức
+            // Bat dau vong lap dem nguoc cho giai doan intermission, dong thoi hien thi timer.
+            float intermissionTimer = _intermissionDuration;
+            int lastDisplayedSecondForIntermission = Mathf.CeilToInt(intermissionTimer);
+            _uiManager?.UpdateTimer(lastDisplayedSecondForIntermission); // Hien thi timer ngay lap tuc
 
-            while (votingTimer > 0f)
+            while (intermissionTimer > 0f)
             {
-                votingTimer -= Time.deltaTime;
-                int currentSecond = Mathf.CeilToInt(votingTimer);
+                intermissionTimer -= Time.deltaTime;
+                int currentSecond = Mathf.CeilToInt(intermissionTimer);
 
-                if (currentSecond < lastDisplayedSecondForVote)
+                if (currentSecond < lastDisplayedSecondForIntermission)
                 {
-                    lastDisplayedSecondForVote = currentSecond;
-                    _uiManager?.UpdateTimer(lastDisplayedSecondForVote);
+                    lastDisplayedSecondForIntermission = currentSecond;
+                    _uiManager?.UpdateTimer(lastDisplayedSecondForIntermission);
                 }
                 yield return null;
             }
-            // Chọn map ngẫu nhiên (logic voting thực tế sẽ được thêm vào sau)
+            // Chon map ngau nhien
             _selectedMapIndex = -1;
             _selectedUndergroundIndex = -1;
             string selectedMapName = "Unknown Map";
@@ -391,14 +391,14 @@ namespace Managers
                 {
                     _selectedMapIndex = Random.Range(0, mapCount);
                     _selectedUndergroundIndex = Random.Range(0, undergroundCount);
-                    // Lấy tên map được chọn để hiển thị thông báo.
-                    // Cần ép kiểu vì IMapManager có thể chưa được cập nhật.
+                    // Lay ten map duoc chon de hien thi thong bao.
+                    // Can ep kieu vi IMapManager co the chua duoc cap nhat.
                     selectedMapName = (_mapManager as MapManager)?.GetMapNameByIndex(_selectedMapIndex) ?? "Invalid Map";
                 }
             }
 
-            // Thông báo map đã được chọn
-            _uiManager?.HideTimer(); // Ẩn timer của voting trước khi hiện thông báo map
+            // Thong bao map da duoc chon
+            _uiManager?.HideTimer(); // An timer cua intermission truoc khi hien thong bao map
             _uiManager?.ShowPersistentNotification($"Map selected: {selectedMapName}");
             yield return new WaitForSeconds(_mapRevealDuration);
         }
@@ -454,6 +454,8 @@ namespace Managers
                     onCovered: () =>
                     {
                         TeleportPlayersToArena();
+                        _playerManager?.ChargeRoundPlayersSkills();
+                        _playerManager?.SetRoundPlayersSkillLock(true);
                     },
                     onComplete: () =>
                     {
@@ -469,6 +471,8 @@ namespace Managers
             else
             {
                 TeleportPlayersToArena();
+                _playerManager?.ChargeRoundPlayersSkills();
+                _playerManager?.SetRoundPlayersSkillLock(true);
             }
 
             // Nhạc nền của sảnh chờ đã được dừng bên trong TeleportPlayersToArena().
@@ -495,6 +499,9 @@ namespace Managers
             // --- Giai đoạn 4: Đếm ngược & Bắt đầu ---
             Debug.Log("[GameloopManager] Giai đoạn 4: Đếm ngược và Bắt đầu");
             if (_uiManager != null) yield return StartCoroutine(_uiManager.ShowCountdown());
+
+            // Mo khoa su dung skill cho tat ca nguoi choi sau khi hoan tat dem nguoc 3 2 1 GO
+            _playerManager?.SetRoundPlayersSkillLock(false);
 
             // Bắt đầu phát nhạc gameplay sau khi đếm ngược kết thúc
             BGMController.Instance?.PlayGameplayMusic(CurrentIntensity);
@@ -556,20 +563,54 @@ namespace Managers
             _uiManager?.HideTimer();
             _uiManager?.HideCurrentIntensity(); // Ẩn panel text độ khó của round vừa kết thúc.
 
+            // Bat trang thai bat tu ngay lap tuc cho tat ca nguoi choi con song de khong nhan bat ky sat thuong nao trong thoi gian chuyen giao
+            _playerManager?.SetRoundSurvivorsInvincible(true);
+
             // Phat SFX tieng coi + tieng chuong khi round ket thuc
             _uiManager?.PlayRoundEndSfx();
 
             var survivors = _playerManager?.GetSurvivors();
 
-            // Dua nhung nguoi choi con song ve lobby va reset round trong PlayerManager
-            _playerManager?.ReturnRoundSurvivorsToLobby();
-            _playerManager?.EndRound();
-
-            // Hien thi Score Card cho nguoi song sot doc lap (khong block gameloop)
+            // 1. Tinh toan diem va hien thi Score Card dong thoi voi Transition Screen
             if (survivors != null && survivors.Count > 0)
             {
-                StartCoroutine(ShowScoreCardForSurvivors(survivors));
+                ProcessSurvivorScoresAndShowScoreCard(survivors);
             }
+
+            // 2. Chay Transition Screen va Teleport nguoi choi thang/song sot ve lobby khi man hinh che kin
+            if (survivors != null && survivors.Count > 0)
+            {
+                bool transitionDone = false;
+                if (_uiManager != null)
+                {
+                    _uiManager.PlayTransition(
+                        onCovered: () =>
+                        {
+                            _playerManager?.ReturnRoundSurvivorsToLobby();
+                        },
+                        onComplete: () =>
+                        {
+                            transitionDone = true;
+                        }
+                    );
+
+                    while (!transitionDone)
+                    {
+                        yield return null;
+                    }
+                }
+                else
+                {
+                    _playerManager?.ReturnRoundSurvivorsToLobby();
+                }
+            }
+            else
+            {
+                _playerManager?.ReturnRoundSurvivorsToLobby();
+            }
+
+            // Dua nguoi choi ve lobby va reset round trong PlayerManager
+            _playerManager?.EndRound();
 
             // --- Intensity Adjustment Logic ---
             // Công thức: NextIntensity = CurrentIntensity + (có người sống sót ? +0.25 : +0) - (0.3 * số người chết / tổng số người tham gia round ban đầu)
@@ -577,7 +618,7 @@ namespace Managers
             // 1. Chỉ cộng +0.25 khi round có ÍT NHẤT MỘT người sống sót (thắng hoặc hòa do hết giờ).
             // 2. Khi toàn bộ người tham gia round đều chết (thất bại toàn bộ): KHÔNG cộng +0.25, chỉ trừ penalty
             //    theo tỷ lệ người chết (all-dead -> trừ đủ -0.3).
-            // 3. Player reset khi KHÔNG trong round (lobby/voting/building) không ảnh hưởng intensity vì
+            // 3. Player reset khi KHÔNG trong round (lobby/intermission/building) không ảnh hưởng intensity vì
             //    HandlePlayerDeath chỉ đếm khi CurrentState == RoundActive.
             // 4. Nếu round bị hủy (không có ai tham gia ban đầu): giữ nguyên intensity, không tăng/giảm.
             // 5. Kết quả luôn được kẹp trong khoảng [minIntensity, maxIntensity].
@@ -626,7 +667,7 @@ namespace Managers
             yield return new WaitForSeconds(_postCleanupStabilizationDuration);
 
             // Yeu cau: giu nguyen notification panel hien thi xuyen suot vong lap game,
-            // khong an o day; vong lap moi se tu cap nhat noi dung moi o MapVotingStage.
+            // khong an o day; vong lap moi se tu cap nhat noi dung moi o IntermissionStage.
         }
 
         #endregion
@@ -731,7 +772,8 @@ namespace Managers
             if (players == null) return;
 
             // Fade out nhac nen sanh cho (Lobby BGM) khi teleport vao arena.
-            BGMController.Instance?.FadeOutMusic(1.0f);
+            if (BGMController.Instance != null)
+                BGMController.Instance.FadeOutMusic(1.0f);
 
             foreach (var player in players)
             {
@@ -757,23 +799,22 @@ namespace Managers
         }
 
         /// <summary>
-        /// Tính điểm, tặng credits và hiển thị Score Card CÁ NHÂN cho TỪNG người chơi sống sót khi round kết thúc.
-        /// Áp dụng đúng quy tắc ScoreRules.md:
-        /// - Nếu chỉ có 1 người sống sót (round thắng): tăng win streak, áp dụng Win Multiplier, IsWinner = true.
-        /// - Nếu nhiều người sống sót (round kết thúc do hết giờ): không ai được tính là người thắng,
-        ///   win streak được reset thành 0 và IsWinner = false.
-        /// Mỗi người chơi có một Score Card RIÊNG và được hiển thị tuần tự để không chồng lấn UI.
+        /// Tinh toan, tang credits va hien thi Score Card doc lap cho tat ca nhung nguoi choi song sot khi round ket thuc.
+        /// - Neu chi co 1 nguoi song sot: duoc tinh la nguoi thang, win streak tang 1, ap dung Win Multiplier va IsWinner = true.
+        /// - Neu nhieu nguoi song sot (round ket thuc do het gio): khong ai duoc tinh la thang, win streak reset ve 0 va IsWinner = false.
+        /// Score Card duoc hien thi truc tiep tren client cua player ma khong phai cho doi tuan tu giua cac player.
         /// </summary>
-        /// <param name="survivors">Danh sách người chơi còn sống khi round kết thúc (đã lấy trước EndRound).</param>
-        private IEnumerator ShowScoreCardForSurvivors(List<IPlayer> survivors)
+        /// <param name="survivors">Danh sach nguoi choi con song khi round ket thuc (da lay truoc EndRound).</param>
+        private void ProcessSurvivorScoresAndShowScoreCard(List<IPlayer> survivors)
         {
             if (survivors == null || survivors.Count == 0)
             {
-                Debug.Log("[GameloopManager] Không có người chơi nào sống sót trong round. Không hiển thị Score Card dạng thắng.");
-                yield break;
+                Debug.Log("[GameloopManager] Khong co nguoi choi nao song sot trong round. Khong hien thi Score Card dang thang.");
+                return;
             }
 
             bool isVictory = survivors.Count == 1;
+            IPlayer currentPlayer = _playerManager?.GetCurrentPlayer();
 
             for (int i = 0; i < survivors.Count; i++)
             {
@@ -783,26 +824,26 @@ namespace Managers
                 PlayerRoundData roundData = _playerManager?.GetPlayerRoundData(survivor);
                 if (roundData == null) continue;
 
-                // a. Cập nhật win streak: tăng 1 nếu là người thắng duy nhất, ngược lại reset về 0.
+                // a. Cap nhat win streak: tang 1 neu la nguoi thang duy nhat, nguoc lai reset ve 0.
                 roundData.WinStreak = isVictory ? roundData.WinStreak + 1 : 0;
 
-                // b. Survival Score: sống sót cả round → điểm tối đa theo phân khúc intensity.
+                // b. Survival Score: song sot ca round -> diem toi da theo phan khuc intensity.
                 int survivalScore = ScoreCalculator.GetMaxSurvivalScore(CurrentIntensity);
 
-                // c. Multiplier: x1.0 mặc định, x1.25 nếu bật Extreme Mode.
+                // c. Multiplier: x1.0 mac dinh, x1.25 neu bat Extreme Mode.
                 float baseMultiplier = ScoreCalculator.GetMultiplier(roundData.IsExtremeModeEnabled);
 
-                // d. Win Multiplier dựa trên win streak (chỉ áp dụng khi có người thắng duy nhất).
+                // d. Win Multiplier dua tren win streak (chi ap dung khi co nguoi thang duy nhat).
                 float winMultiplier = isVictory ? ScoreCalculator.GetWinMultiplier(roundData.WinStreak) : ScoreCalculator.DefaultMultiplier;
 
-                // e. Tổng credits = Survival Score x Multiplier x Win Multiplier.
+                // e. Tong credits = Survival Score x Multiplier x Win Multiplier.
                 int totalCredits = ScoreCalculator.GetTotalCredits(survivalScore, baseMultiplier, winMultiplier);
 
-                // f. Tặng credits cho người chơi (PlayerDataManager lắng nghe và tự lưu).
+                // f. Tang credits cho nguoi choi (PlayerDataManager lang nghe va tu luu).
                 GameEvents.TriggerAddCreditsRequest(totalCredits);
-                Debug.Log($"[GameloopManager] Trao {totalCredits} credits cho {survivor.GameObject.name} (Survival: {survivalScore}, Base: x{baseMultiplier:0.##}, Win: x{winMultiplier:0.##}).", survivor.GameObject);
+                Debug.Log($"[GameloopManager] Trao {totalCredits} credits cho {survivor.GameObject.name} (Survival: {survivalScore}, Base: x{baseMultiplier:0.##}, Win: x{winMultiplier:0.##}, Streak: {roundData.WinStreak}).", survivor.GameObject);
 
-                // g. Hiển thị Score Card CÁ NHÂN của từng người chơi, lần lượt (mỗi card tự ẩn trong 5 giây).
+                // g. Tao du lieu Score Card cho nguoi choi
                 ScoreCardData scoreCard = new()
                 {
                     SurvivalScore = survivalScore,
@@ -810,12 +851,15 @@ namespace Managers
                     WinMultiplier = winMultiplier,
                     TotalCredits = totalCredits,
                     IsWinner = isVictory,
+                    WinStreak = isVictory ? roundData.WinStreak : 0,
                     IsExtremeMode = roundData.IsExtremeModeEnabled
                 };
-                _uiManager?.ShowScoreCard(scoreCard);
 
-                // Chờ Score Card hiện tại hiển thị đủ rồi mới chuyển sang Score Card của người tiếp theo.
-                yield return _scoreCardDisplayInterval;
+                // Neu co local/current player, hien thi Score Card cho current player
+                if (currentPlayer == null || survivor == currentPlayer)
+                {
+                    _uiManager?.ShowScoreCard(scoreCard);
+                }
             }
         }
         #endregion

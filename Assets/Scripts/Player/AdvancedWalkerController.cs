@@ -1,4 +1,4 @@
-﻿﻿using UnityEngine;
+﻿using UnityEngine;
 
 namespace Player
 {
@@ -756,6 +756,15 @@ namespace Player
 				momentum = tr.worldToLocalMatrix * _newMomentum;
 			else
 				momentum = _newMomentum;
+		}
+
+		//Set vertical momentum directly while preserving horizontal momentum;
+		public void SetVerticalMomentum(float verticalForce)
+		{
+			Vector3 currentWorldMomentum = GetMomentum();
+			Vector3 verticalComponent = VectorMath.ExtractDotVector(currentWorldMomentum, tr.up);
+			Vector3 horizontalComponent = currentWorldMomentum - verticalComponent;
+			SetMomentum(horizontalComponent + tr.up * verticalForce);
 		}
 	}
 }

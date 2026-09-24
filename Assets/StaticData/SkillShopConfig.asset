@@ -18,4 +18,4 @@ MonoBehaviour:
     _growthFactor: 1.2
   - _skillType: 1
     _basePrice: 500
-    _growthFactor: 1.25
+    _growthFactor: 1.2

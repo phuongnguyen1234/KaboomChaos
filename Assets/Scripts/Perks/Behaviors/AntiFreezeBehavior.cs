@@ -65,7 +65,11 @@ namespace Perks.Behaviors
 
             // Tang Max HP va heal 10 HP moi lan trung vu no bang, bat ke khien hay bat tu.
             healable.IncreaseMaxHealth(_data.MaxHealthBonus);
-            healable.Heal(_data.HealBonus);
+            float healed = healable.Heal(_data.HealBonus);
+            if (healed > 0f)
+            {
+                GameEvents.TriggerFloatingTextRequested(player.GameObject.transform, Vector3.up * 2.2f, $"+{Mathf.RoundToInt(healed)}", Color.green, player.HPTextContainer, false);
+            }
             Debug.Log($"[AntiFreezeBehavior] Trung vu no bang: +{_data.MaxHealthBonus} Max HP va hoi {_data.HealBonus} HP.");
         }
     }

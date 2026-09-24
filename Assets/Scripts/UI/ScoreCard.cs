@@ -30,6 +30,10 @@ namespace UI
         [SerializeField] private TextMeshProUGUI _baseMultiplierText;
         [Tooltip("Text hien thi Win Multiplier (dua tren win streak).")]
         [SerializeField] private TextMeshProUGUI _winMultiplierText;
+        [Tooltip("Text hien thi tieu de cua Win Multiplier (vi du: 'Win Multiplier' hoac 'Win Multiplier (Streak 3)').")]
+        [SerializeField] private TextMeshProUGUI _winMultiplierTitleText;
+        [Tooltip("Tieu de mac dinh cho Win Multiplier khi khong co win streak.")]
+        [SerializeField] private string _defaultWinMultiplierTitle = "Win Multiplier";
         [Tooltip("Text hien thi tong credits nhan duoc.")]
         [SerializeField] private TextMeshProUGUI _totalCreditsText;
 
@@ -46,8 +50,14 @@ namespace UI
         [SerializeField] private Vector2 _slideOffset = new(0, -350f);
         [Tooltip("Thoi gian hien thi (giay) truoc khi Score Card tu dong truot xuong an di. Mac dinh 5 giay.")]
         [SerializeField] private float _displayDuration = 5f;
-        [Tooltip("Do tre (giay) truoc khi Score Card bat dau xuat hien sau khi Show() duoc goi. Mac dinh 1 giay.")]
-        [SerializeField] private float _showDelay = 1f;
+        [Tooltip("Do tre (giay) truoc khi Score Card bat dau xuat hien sau khi Show() duoc goi. Mac dinh 0 giay.")]
+        [SerializeField] private float _showDelay = 0f;
+
+        [Header("Total Credits Animation")]
+        [Tooltip("Thoi gian (giay) chay so Total Credits tang dan nhanh sau khi slide in xong.")]
+        [SerializeField] private float _creditCountDuration = 0.4f;
+        [Tooltip("Ease type cho hieu ung so Total Credits tang dan.")]
+        [SerializeField] private Ease _creditCountEase = Ease.OutQuad;
 
         [Header("Pop / Pulse Animation")]
         [Tooltip("He so phong to khi nhay scale (vi du: 1.08).")]
@@ -62,16 +72,21 @@ namespace UI
         [Header("Star Particles")]
         [Tooltip("Danh sach cac object StarUIParticle phat sau khi truot vao xong.")]
         [SerializeField] private List<StarUIParticle> _starParticles = new();
+        [Tooltip("Khoang thoi gian tre (giay) giua cac StarUIParticle duoc kich hoat tuan tu.")]
+        [SerializeField] private float _starParticleInterval = 0.15f;
 
         // Vi tri goc cua panel khi hien thi binh thuong (thuong la giua man hinh).
         private Vector3 _originalLocalPosition;
 
         // Co danh dau da cache vi tri goc hay chua
         private bool _isOriginalPositionCached;
+        private int _targetTotalCredits;
         private Coroutine _autoHideCoroutine;
         private Coroutine _showDelayCoroutine;
+        private Coroutine _starParticlesCoroutine;
         private Tween _slideTween;
         private Tween _popTween;
+        private Tween _creditCountTween;
 
         #endregion
 
@@ -100,6 +115,7 @@ namespace UI
         {
             _slideTween?.Kill();
             _popTween?.Kill();
+            _creditCountTween?.Kill();
         }
 
         #endregion
@@ -166,7 +182,26 @@ namespace UI
             if (_survivalScoreText != null) _survivalScoreText.text = data.SurvivalScore.ToString();
             if (_baseMultiplierText != null) _baseMultiplierText.text = $"x{data.BaseMultiplier:0.##}";
             if (_winMultiplierText != null) _winMultiplierText.text = $"x{data.WinMultiplier:0.##}";
-            if (_totalCreditsText != null) _totalCreditsText.text = data.TotalCredits.ToString();
+
+            // 1. Cap nhat tieu de Win Multiplier (chi hien thi Streak tu streak 3 tro di)
+            if (_winMultiplierTitleText != null)
+            {
+                if (data.WinStreak >= 3)
+                {
+                    _winMultiplierTitleText.text = $"{_defaultWinMultiplierTitle} (Streak {data.WinStreak})";
+                }
+                else
+                {
+                    _winMultiplierTitleText.text = _defaultWinMultiplierTitle;
+                }
+            }
+
+            // 2. Luu tong credits va dat text ban dau la 0 de chuan bi cho hieu ung tang dan nhanh sau slide in
+            _targetTotalCredits = data.TotalCredits;
+            if (_totalCreditsText != null)
+            {
+                _totalCreditsText.text = "0";
+            }
 
             if (_extremeModeIcon != null)
             {
@@ -185,7 +220,7 @@ namespace UI
         }
 
         /// <summary>
-        /// Thuc hien hieu ung truot LEN de hien thi panel, nhay scale, chay VFX/SFX va len lich tu an sau _displayDuration giay.
+        /// Thuc hien hieu ung truot LEN de hien thi panel. Sau khi truot xong se kich hoat chay so Total Credits.
         /// </summary>
         private void BeginSlideIn()
         {
@@ -196,25 +231,72 @@ namespace UI
 
             _slideTween?.Kill();
             _popTween?.Kill();
+            _creditCountTween?.Kill();
 
             _slideTween = _panelRect
                 .DOLocalMove(_originalLocalPosition, _slideInDuration)
                 .SetEase(Ease.OutCubic)
                 .OnComplete(() =>
                 {
-                    // 1. Phat SFX khi truot len xong
-                    if (_popSfx != null && SfxService.Instance != null)
-                    {
-                        SfxService.Instance.PlaySfx(_popSfx);
-                    }
-
-                    // 2. Chay cac particle sao da gan
-                    PlayStarParticles();
-
-                    // 3. Nhay scale up va down 1 lan
-                    PlayPopAnimation();
+                    // Sau khi slide in xong, bat dau chay so Total Credits tang dan nhanh
+                    PlayCreditCountAnimation();
                 });
+        }
 
+        /// <summary>
+        /// Chay hieu ung so Total Credits tang dan nhanh tu 0 den gia tri cuoi cung.
+        /// </summary>
+        private void PlayCreditCountAnimation()
+        {
+            _creditCountTween?.Kill();
+
+            if (_targetTotalCredits <= 0)
+            {
+                if (_totalCreditsText != null) _totalCreditsText.text = "0";
+                OnCreditCountFinished();
+                return;
+            }
+
+            int currentCredits = 0;
+            _creditCountTween = DOTween.To(() => currentCredits, x =>
+            {
+                currentCredits = x;
+                if (_totalCreditsText != null)
+                {
+                    _totalCreditsText.text = currentCredits.ToString();
+                }
+            }, _targetTotalCredits, _creditCountDuration)
+            .SetEase(_creditCountEase)
+            .SetUpdate(true)
+            .OnComplete(() =>
+            {
+                if (_totalCreditsText != null)
+                {
+                    _totalCreditsText.text = _targetTotalCredits.ToString();
+                }
+                OnCreditCountFinished();
+            });
+        }
+
+        /// <summary>
+        /// Duoc goi khi so Total Credits da chay den gia tri cuoi cung.
+        /// Kich hoat SFX pop, pulse scale score card, chay animation star particle va bat dau dem thoi gian tu dong an.
+        /// </summary>
+        private void OnCreditCountFinished()
+        {
+            // 1. Phat SFX khi truot len va chay so xong
+            if (_popSfx != null && SfxService.Instance != null)
+            {
+                SfxService.Instance.PlaySfx(_popSfx);
+            }
+
+            // 2. Chay cac particle sao da gan
+            PlayStarParticles();
+
+            // 3. Nhay scale up va down (Pulse Scale)
+            PlayPopAnimation();
+
+            // 4. Bat dau dem thoi gian tu dong an Score Card
             _autoHideCoroutine = StartCoroutine(AutoHideCoroutine(_displayDuration));
         }
 
@@ -237,24 +319,43 @@ namespace UI
         }
 
         /// <summary>
-        /// Kich hoat va phat tat ca cac doi tuong StarUIParticle da gan.
+        /// Kich hoat va phat cac doi tuong StarUIParticle da gan theo thu tu trong list, cach nhau mot khoang thoi gian.
         /// </summary>
         private void PlayStarParticles()
         {
             if (_starParticles == null || _starParticles.Count == 0) return;
 
-            foreach (var star in _starParticles)
+            if (_starParticlesCoroutine != null)
             {
+                StopCoroutine(_starParticlesCoroutine);
+                _starParticlesCoroutine = null;
+            }
+
+            _starParticlesCoroutine = StartCoroutine(PlayStarParticlesCoroutine());
+        }
+
+        private IEnumerator PlayStarParticlesCoroutine()
+        {
+            for (int i = 0; i < _starParticles.Count; i++)
+            {
+                var star = _starParticles[i];
                 if (star != null)
                 {
                     star.gameObject.SetActive(true);
                     star.Play();
                 }
+
+                if (i < _starParticles.Count - 1 && _starParticleInterval > 0f)
+                {
+                    yield return new WaitForSeconds(_starParticleInterval);
+                }
             }
+
+            _starParticlesCoroutine = null;
         }
 
         /// <summary>
-        /// Huy moi coroutine/tween dang treo (delay hien thi, auto-hide, tween truot, pop).
+        /// Huy moi coroutine/tween dang treo (delay hien thi, auto-hide, tween truot, pop, credit count, star particles).
         /// </summary>
         private void CancelPendingAnimations()
         {
@@ -268,8 +369,14 @@ namespace UI
                 StopCoroutine(_autoHideCoroutine);
                 _autoHideCoroutine = null;
             }
+            if (_starParticlesCoroutine != null)
+            {
+                StopCoroutine(_starParticlesCoroutine);
+                _starParticlesCoroutine = null;
+            }
             _slideTween?.Kill();
             _popTween?.Kill();
+            _creditCountTween?.Kill();
         }
 
         /// <summary>

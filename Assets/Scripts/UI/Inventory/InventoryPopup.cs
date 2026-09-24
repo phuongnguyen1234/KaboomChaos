@@ -509,7 +509,7 @@ namespace UI
         /// </summary>
         private void OnEquipButtonClicked()
         {
-            // Viec trang bi skill/perk chi duoc phep o giai doan binh chon map (MapVoting),
+            // Viec trang bi skill/perk chi duoc phep o giai doan nghi (Intermission),
             // xay map (Building) va sau khi round ket thuc (PostRound). Khi da dua vao arena
             // (PreRound/RoundActive) thi khong duoc phep -> hien panel thong bao va khong thuc hien.
             if (!IsEquipAllowed())
@@ -697,7 +697,7 @@ namespace UI
         #region Private Methods - Restricted Equip
         /// <summary>
         /// Cho biet hien tai co duoc phep trang bi skill/perk hay khong.
-        /// Chi duoc phep o: MapVoting (binh chon map), Building (xay map), PostRound (sau round)
+        /// Chi duoc phep o: Intermission (giai doan nghi), Building (xay map), PostRound (sau round)
         /// va None (chua co vong choi, vi du dang o Home). Khong duoc phep khi da dua vao arena
         /// (PreRound, RoundActive). Neu khong co IGameStateProvider thi khong chan (de phong).
         /// </summary>
@@ -712,7 +712,7 @@ namespace UI
             switch (provider.CurrentState)
             {
                 case GameState.None:
-                case GameState.MapVoting:
+                case GameState.Intermission:
                 case GameState.Building:
                 case GameState.PostRound:
                     return true;

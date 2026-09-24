@@ -24,8 +24,8 @@ namespace Skills.Behaviors
             var animBridge = player.GameObject.GetComponent<ISkillAnimationBridge>();
             if (animBridge != null) animBridge.TriggerSuperJumpAnimation();
 
-            // Ap dung luc bay len selon truc dung Y
-            player.AddMomentum(Vector3.up * _data.JumpForce);
+            // Dat luc bay len theo truc dung Y (giu nguyen quan tinh ngang X, Z de luc nhay luon co dinh)
+            player.SetVerticalMomentum(_data.JumpForce);
             Debug.Log($"[SuperJumpBehavior] Player {_data.DisplayName} da nhay cao voi luc: {_data.JumpForce}");
         }
 

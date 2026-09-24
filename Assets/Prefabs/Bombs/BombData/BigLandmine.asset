@@ -138,12 +138,12 @@ MonoBehaviour:
     m_RotationOrder: 4
   explosionVFX: {fileID: 2096552461435851326, guid: 0370a55c632d008479e1f08df1cd39f1, type: 3}
   explosionSoundPitch: 1
-  explosionSound: {fileID: 8300000, guid: 65dd13b9c43d18642a90c2d556bc15a9, type: 3}
+  explosionSound: {fileID: 8300000, guid: eab69fb4f6ca94f4683b79b9d916d72f, type: 3}
   minPlayerSpawnChance: 20
   maxPlayerSpawnChance: 30
   playerSpawnRadius: 3
   possibleVariants: []
-  spawnWeightByDifficulty:
+  spawnWeightByIntensity:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
@@ -173,7 +173,7 @@ MonoBehaviour:
   isActivatedOnContact: 1
   changeColorOnFuse: 0
   fuseColor: {r: 2, g: 0, b: 0, a: 1}
-  persistentFuseVFX: {fileID: 0}
+  persistentFuseVFX: {fileID: 2165258689983634760, guid: 992a834b9916860449b6be9ca587693f, type: 3}
   fuseStages:
   - startTime: 0.25
     visualEffect: {fileID: 0}

@@ -144,7 +144,7 @@ MonoBehaviour:
   playerSpawnRadius: 3
   possibleVariants:
   - variantBombData: {fileID: 11400000, guid: dab5587a2deb3424db094704bd841dea, type: 2}
-    spawnChanceByDifficulty:
+    spawnChanceByIntensity:
       serializedVersion: 2
       m_Curve:
       - serializedVersion: 3
@@ -177,7 +177,7 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-  spawnWeightByDifficulty:
+  spawnWeightByIntensity:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
@@ -207,7 +207,7 @@ MonoBehaviour:
   isActivatedOnContact: 1
   changeColorOnFuse: 0
   fuseColor: {r: 0.7471313, g: 2.9960785, b: 0, a: 1}
-  persistentFuseVFX: {fileID: 0}
+  persistentFuseVFX: {fileID: 4765232474173958962, guid: 156335b22685d2c469acb8a21fd904da, type: 3}
   fuseStages:
   - startTime: 0
     visualEffect: {fileID: 0}

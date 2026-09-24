@@ -143,7 +143,7 @@ MonoBehaviour:
   maxPlayerSpawnChance: 0
   playerSpawnRadius: 2
   possibleVariants: []
-  spawnWeightByDifficulty:
+  spawnWeightByIntensity:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
@@ -187,7 +187,7 @@ MonoBehaviour:
   - startTime: 5
     visualEffect: {fileID: 5432491707936817209, guid: d7242b76d53eb67439a68fdc6d9b9440, type: 3}
     stageSoundPitch: 1
-    stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
+    stageSound: {fileID: 8300000, guid: b81ddcc938c1dfb49ad296969b450a9d, type: 3}
     vfxRadius: 2
     enableBaseColorPulse: 1
     basePulseColor: {r: 0.5999999, g: 0.08943388, b: 0.08943388, a: 1}
@@ -201,7 +201,7 @@ MonoBehaviour:
   - startTime: 9
     visualEffect: {fileID: 5432491707936817209, guid: d7242b76d53eb67439a68fdc6d9b9440, type: 3}
     stageSoundPitch: 1
-    stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
+    stageSound: {fileID: 8300000, guid: b81ddcc938c1dfb49ad296969b450a9d, type: 3}
     vfxRadius: 2
     enableBaseColorPulse: 1
     basePulseColor: {r: 0.5999999, g: 0.08943388, b: 0.08943388, a: 1}
@@ -215,7 +215,7 @@ MonoBehaviour:
   - startTime: 12
     visualEffect: {fileID: 5432491707936817209, guid: d7242b76d53eb67439a68fdc6d9b9440, type: 3}
     stageSoundPitch: 1
-    stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
+    stageSound: {fileID: 8300000, guid: b81ddcc938c1dfb49ad296969b450a9d, type: 3}
     vfxRadius: 2
     enableBaseColorPulse: 1
     basePulseColor: {r: 0.5999999, g: 0.08943388, b: 0.08943388, a: 1}
@@ -229,7 +229,7 @@ MonoBehaviour:
   - startTime: 14
     visualEffect: {fileID: 5432491707936817209, guid: d7242b76d53eb67439a68fdc6d9b9440, type: 3}
     stageSoundPitch: 1
-    stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
+    stageSound: {fileID: 8300000, guid: b81ddcc938c1dfb49ad296969b450a9d, type: 3}
     vfxRadius: 2
     enableBaseColorPulse: 1
     basePulseColor: {r: 0.5999999, g: 0.08943388, b: 0.08943388, a: 1}
@@ -243,7 +243,7 @@ MonoBehaviour:
   - startTime: 15
     visualEffect: {fileID: 5432491707936817209, guid: d7242b76d53eb67439a68fdc6d9b9440, type: 3}
     stageSoundPitch: 1
-    stageSound: {fileID: 8300000, guid: ab2c43d634af16941a33e50fee533547, type: 3}
+    stageSound: {fileID: 8300000, guid: b81ddcc938c1dfb49ad296969b450a9d, type: 3}
     vfxRadius: 2
     enableBaseColorPulse: 1
     basePulseColor: {r: 0.5999999, g: 0.08943388, b: 0.08943388, a: 1}

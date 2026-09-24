@@ -40,6 +40,13 @@ namespace UI
         public event Action OnInfoClicked;
         #endregion
 
+        #region Properties
+        /// <summary>
+        /// Cho biet man hinh Home hien co dang hien thi hay khong.
+        /// </summary>
+        public bool IsVisible => gameObject.activeInHierarchy;
+        #endregion
+
         #region Unity Lifecycle
         private void Awake()
         {

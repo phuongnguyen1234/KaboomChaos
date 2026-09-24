@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using TMPro;
 using DG.Tweening;
 using Core;
@@ -8,7 +9,7 @@ namespace UI
 {
     /// <summary>
     /// Component dong bo va hien thi Next Round Intensity trong World space.
-    /// Gom mui ten (arrow) di chuyen tren thanh range va text hien thi chi so do kho.
+    /// Gom mui ten (arrow) di chuyen tren thanh range va text hien thi chi so intensity.
     /// Cap nhat vi tri arrow va text moi khi Next Round Intensity thay doi.
     /// </summary>
     public class WorldNextRoundIntensityDisplay : MonoBehaviour
@@ -35,15 +36,16 @@ namespace UI
         [SerializeField] private string _textFormat = "{0:0.##}";
 
         [Header("Range Fallback")]
-        [Tooltip("Do kho toi thieu mac dinh (neu khong dung duoc tu GameloopManager).")]
+        [Tooltip("Intensity toi thieu mac dinh (neu khong dung duoc tu GameloopManager).")]
         [SerializeField] private float _defaultMinIntensity = 1f;
 
-        [Tooltip("Do kho toi da mac dinh (neu khong dung duoc tu GameloopManager).")]
+        [Tooltip("Intensity toi da mac dinh (neu khong dung duoc tu GameloopManager).")]
         [SerializeField] private float _defaultMaxIntensity = 6f;
 
-        [Header("Difficulty Tier Colors")]
-        [Tooltip("Bat/tat doi mau text va arrow theo phan khuc do kho.")]
-        [SerializeField] private bool _enableDifficultyColors = false;
+        [Header("Intensity Tier Colors")]
+        [Tooltip("Bat/tat doi mau text va arrow theo phan khuc intensity.")]
+        [FormerlySerializedAs("_enableDifficultyColors")]
+        [SerializeField] private bool _enableIntensityColors = false;
 
         [Tooltip("Mau Text va Arrow cho Nhom 1 (Intensity < 2.0).")]
         [SerializeField] private Color _colorGroup1 = Color.white;
@@ -95,7 +97,7 @@ namespace UI
                 _intensityText.text = FormatIntensity(intensity);
             }
 
-            if (_enableDifficultyColors)
+            if (_enableIntensityColors)
             {
                 Color targetColor = intensity < 2.0f ? _colorGroup1 :
                                    intensity < 5.0f ? _colorGroup2 :

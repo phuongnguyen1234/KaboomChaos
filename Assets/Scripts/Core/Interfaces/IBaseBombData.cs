@@ -9,7 +9,7 @@ namespace Core.Interfaces
     public interface IBombVariant
     {
         IBaseBombData VariantBombData { get; }
-        AnimationCurve SpawnChanceByDifficulty { get; }
+        AnimationCurve SpawnChanceByIntensity { get; }
     }
 
     /// <summary>
@@ -58,7 +58,7 @@ namespace Core.Interfaces
 
         List<IBombVariant> PossibleVariants { get; }
 
-        AnimationCurve SpawnWeightByDifficulty { get; }
+        AnimationCurve SpawnWeightByIntensity { get; }
 
         /// <summary>Số lượng bom tối đa cùng loại được phép sinh ra trong một đợt. 0 = không giới hạn.</summary>
         int MaxPerSpawnWave { get; }

@@ -31,6 +31,15 @@ namespace Bombs.Data
         [Min(0.01f)]
         public float ascentSpeed = 4f;
 
+        [Header("Hieu Ung Bay Lo Lung (Hover)")]
+        [Tooltip("Bien do bay len xuong quanh vi tri ha canh (don vi). 0 = khong hover.")]
+        [Min(0f)]
+        public float hoverAmplitude = 0.35f;
+
+        [Tooltip("Thoi gian cho mot nhip bay len xuong (giay).")]
+        [Min(0.01f)]
+        public float hoverDuration = 1.2f;
+
         [Header("Trang Tri Copter")]
         [Tooltip("Toc do quay cua object con 'Copter' quanh truc Y (do/giay). 0 = khong quay. Cac object con khac nhung muon quay cung tuc nay co the dat ten 'Copter' hoac 'Rotor'.")]
         [Min(0f)]

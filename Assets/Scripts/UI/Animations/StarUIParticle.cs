@@ -18,7 +18,7 @@ namespace UI
 
         [Header("General Settings")]
         [Tooltip("Tu dong phat hieu ung khi GameObject duoc Enable.")]
-        [SerializeField] private bool _playOnEnable = true;
+        [SerializeField] private bool _playOnEnable = false;
 
         [Tooltip("Tu dong lap lai hieu ung lien tuc.")]
         [SerializeField] private bool _loop = false;
@@ -36,11 +36,17 @@ namespace UI
         [Tooltip("CanvasGroup cua ngoi sao lon de fade out. Neu de trong, script se tu them vao.")]
         [SerializeField] private CanvasGroup _centerStarCanvasGroup;
 
-        [Tooltip("Scale toi da cua ngoi sao lon khi xuat hien.")]
-        [SerializeField] private float _centerStarAppearScale = 1.2f;
+        [Tooltip("Scale toi thieu cua ngoi sao lon khi xuat hien.")]
+        [SerializeField] private float _minCenterStarAppearScale = 1.0f;
 
-        [Tooltip("Scale cua ngoi sao lon khi bien mat (phong to truoc khi bien mat).")]
-        [SerializeField] private float _centerStarDisappearScale = 1.8f;
+        [Tooltip("Scale toi da cua ngoi sao lon khi xuat hien.")]
+        [SerializeField] private float _maxCenterStarAppearScale = 1.4f;
+
+        [Tooltip("Scale toi thieu cua ngoi sao lon khi bien mat (phong to truoc khi bien mat).")]
+        [SerializeField] private float _minCenterStarDisappearScale = 1.6f;
+
+        [Tooltip("Scale toi da cua ngoi sao lon khi bien mat (phong to truoc khi bien mat).")]
+        [SerializeField] private float _maxCenterStarDisappearScale = 2.0f;
 
         [Tooltip("Thoi gian (giay) ngoi sao lon scale up xuat hien.")]
         [SerializeField] private float _centerAppearDuration = 0.35f;
@@ -173,9 +179,17 @@ namespace UI
             // 1. ANIMATION NGOI SAO LON O TAM
             if (_centerStar != null)
             {
-                // Giai doan 1: Xuat hien (Scale 0 -> AppearScale)
+                float minAppear = Mathf.Min(_minCenterStarAppearScale, _maxCenterStarAppearScale);
+                float maxAppear = Mathf.Max(_minCenterStarAppearScale, _maxCenterStarAppearScale);
+                float targetAppearScale = UnityEngine.Random.Range(minAppear, maxAppear);
+
+                float minDisappear = Mathf.Min(_minCenterStarDisappearScale, _maxCenterStarDisappearScale);
+                float maxDisappear = Mathf.Max(_minCenterStarDisappearScale, _maxCenterStarDisappearScale);
+                float targetDisappearScale = UnityEngine.Random.Range(minDisappear, maxDisappear);
+
+                // Giai doan 1: Xuat hien (Scale 0 -> targetAppearScale)
                 _mainSequence.Append(
-                    _centerStar.DOScale(Vector3.one * _centerStarAppearScale, _centerAppearDuration)
+                    _centerStar.DOScale(Vector3.one * targetAppearScale, _centerAppearDuration)
                                .SetEase(_centerAppearEase)
                 );
 
@@ -187,7 +201,7 @@ namespace UI
 
                 // Giai doan 3: Bien mat (Phong to tiep + Fade out ve 0)
                 _mainSequence.Append(
-                    _centerStar.DOScale(Vector3.one * _centerStarDisappearScale, _centerDisappearDuration)
+                    _centerStar.DOScale(Vector3.one * targetDisappearScale, _centerDisappearDuration)
                                .SetEase(_centerDisappearEase)
                 );
 

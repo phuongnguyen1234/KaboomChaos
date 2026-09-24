@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Managers::Managers.GameplayManager
   _welcomeDuration: 5
-  _votingDuration: 25
+  _intermissionDuration: 25
   _mapRevealDuration: 3
   _postBuildStabilizationDuration: 3
   _postTeleportWaitDuration: 1
@@ -54,7 +54,7 @@ MonoBehaviour:
   _postCleanupStabilizationDuration: 2
   _minIntensity: 1
   _maxIntensity: 6
-  _initialIntensity: 6
+  _initialIntensity: 4
   _intensityIncrementPerRound: 0.25
   _intensityMaxDeathPenalty: 0.3
   _arenaSpawnAreaYOffset: -9

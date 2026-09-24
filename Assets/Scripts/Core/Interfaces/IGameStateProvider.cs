@@ -18,7 +18,7 @@ namespace Core.Interfaces
 
         /// <summary>
         /// Trang thai hien tai cua vong lap game
-        /// (None, MapVoting, Building, PreRound, RoundActive, PostRound).
+        /// (None, Intermission, Building, PreRound, RoundActive, PostRound).
         /// </summary>
         GameState CurrentState { get; }
     }

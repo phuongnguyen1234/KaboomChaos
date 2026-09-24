@@ -31,6 +31,22 @@ namespace Core.Interfaces
         float RechargeRemaining { get; }
 
         /// <summary>
+        /// Cho biet skill co dang bi khoa (khong cho phep su dung) hay khong.
+        /// </summary>
+        bool IsSkillLocked { get; }
+
+        /// <summary>
+        /// Khoa hoac mo khoa su dung skill cho Player.
+        /// </summary>
+        /// <param name="isLocked">True de khoa, False de mo khoa.</param>
+        void SetSkillLock(bool isLocked);
+
+        /// <summary>
+        /// Nap day ngay lap tuc nang luong (energy) cua skill va huy trang thai kich hoat truoc do neu co.
+        /// </summary>
+        void ChargeSkill();
+
+        /// <summary>
         /// Trang bi mot skill moi cho Player.
         /// </summary>
         /// <param name="skillData">Du lieu cua skill can trang bi.</param>

@@ -101,7 +101,7 @@ MonoBehaviour:
   _nameText: {fileID: 6926360745678582458}
   _gridLayout: {fileID: 6107730022015896450}
   _itemCardPrefab: {fileID: 5557549005407355696, guid: b0c16217e40723e46a6cb76e90e43a6a, type: 3}
-  _skillCardSprite: {fileID: 21300000, guid: 02928ada25d820a40a3c3e16171190a1, type: 3}
+  _skillCardSprite: {fileID: 21300000, guid: 3ffabd73d13575d4e889aa608428ab2d, type: 3}
 --- !u!1 &5041868921944792949
 GameObject:
   m_ObjectHideFlags: 0

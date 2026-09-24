@@ -124,6 +124,14 @@ namespace UI
         [Tooltip("Popup Info - hien thi thong tin ve tro choi.")]
         [SerializeField] private InfoPopup _infoPopup;
 
+        [Header("Sidebar Tooltips")]
+        [Tooltip("Tooltip cho nut Shop tren Sidebar.")]
+        [SerializeField] private UISidebarTooltip _shopTooltip;
+        [Tooltip("Tooltip cho nut Inventory tren Sidebar.")]
+        [SerializeField] private UISidebarTooltip _inventoryTooltip;
+        [Tooltip("Tooltip cho nut Option tren Sidebar.")]
+        [SerializeField] private UISidebarTooltip _optionTooltip;
+
         [Header("Popup Open SFX")]
         [Tooltip("SFX phat khi mo Shop Popup.")]
         [SerializeField] private AudioClip _openShopSfx;
@@ -140,6 +148,9 @@ namespace UI
 
         // Coroutine dang chay de co the dung lai neu can
         private Coroutine _notificationCoroutine;
+
+        // Trang thai cho biet nguoi choi da vao game (sau khi an Play va ket thuc transition) hay chua
+        private bool _isInGame = false;
 
         // Dependencies
         private IHomeScreen _homeScreen;
@@ -221,6 +232,9 @@ namespace UI
             {
                 _timerSfxSource = GetComponent<AudioSource>();
             }
+
+            // Khoi tao cac tooltip hover cho Sidebar
+            SetupSidebarTooltips();
         }
 
         private void OnEnable()
@@ -279,12 +293,21 @@ namespace UI
         {
             if (_pauseAction.WasPressedThisFrame())
             {
+                // Neu co bat ky main popup nao dang mo tren UI, uu tien dong popup do truoc khi mo Pause Menu
+                if (IsAnyMainPopupOpen())
+                {
+                    CloseMainPopups(true);
+                    return;
+                }
+
                 TogglePauseMenu();
             }
         }
 
         private void Start()
         {
+            _isInGame = false;
+
             // Ẩn các panel khi bắt đầu
             if (_notificationPanel != null) _notificationPanel.SetActive(false);
             if (_timerPanel != null) _timerPanel.SetActive(false);
@@ -492,11 +515,11 @@ namespace UI
         }
 
         /// <inheritdoc/>
-        public void PlayTransition(Action onCovered, Action onComplete = null)
+        public void PlayTransition(Action onCovered, Action onComplete = null, float? holdDurationOverride = null)
         {
             if (_uiAnimation != null)
             {
-                _uiAnimation.PlayTransition(onCovered, onComplete);
+                _uiAnimation.PlayTransition(onCovered, onComplete, holdDurationOverride);
             }
             else
             {
@@ -535,12 +558,37 @@ namespace UI
             }
         }
 
+        /// <summary>
+        /// Bat / tat Pause Menu. Chi cho phep mo khi nguoi choi da thuc su vao game (sau khi an Play va ket thuc transition).
+        /// </summary>
         public void TogglePauseMenu()
         {
-            if (_pauseMenu != null)
+            if (_pauseMenu == null) return;
+
+            // Neu PauseMenu dang mo, cho phep toggle de dong
+            if (_pauseMenu.IsVisible)
             {
-                _pauseMenu.Toggle();
+                _pauseMenu.Hide();
+                return;
             }
+
+            // Chi cho phep mo Pause Menu khi da o trong game
+            if (!_isInGame)
+            {
+                return;
+            }
+
+            // Khong mo Pause Menu neu man hinh HomeScreen van dang hien thi
+            if (_homeScreen != null && _homeScreen.IsVisible)
+            {
+                return;
+            }
+            if (_homeScreenBehaviour != null && _homeScreenBehaviour.gameObject.activeInHierarchy)
+            {
+                return;
+            }
+
+            _pauseMenu.Show();
         }
 
         #endregion
@@ -607,9 +655,9 @@ namespace UI
         }
 
         /// <summary>
-        /// Mo popup Shop khi nguoi choi nhan nut Shop tren UI chinh.
+        /// Mo popup Shop khi nguoi choi nhan nut Shop hoac tuong tac voi NPC.
         /// </summary>
-        private void OpenShopPopup()
+        public void OpenShopPopup()
         {
             if (_shopPopup != null && !_shopPopup.IsVisible)
             {
@@ -680,6 +728,9 @@ namespace UI
         #region Event Handlers
         private void HandleHomeScreenPlayClicked()
         {
+            // Danh dau da thuc su vao game
+            _isInGame = true;
+
             // UIManager nhan event tu HomeScreen (HomeScreen da tu an truoc khi emit event).
             // Hien Main HUD va dam bao Pause Menu bi an khi bat dau choi.
             if (_mainHUD != null) _mainHUD.SetActive(true);
@@ -715,6 +766,7 @@ namespace UI
         /// </summary>
         private void HandleReturnToHome()
         {
+            _isInGame = false;
             Debug.Log("[UIManager] ReturnToHomeRequest received. Hiding Main HUD and showing HomeScreen.");
             HideGameplayPanels();
             _pauseMenu?.Hide();
@@ -769,6 +821,27 @@ namespace UI
             // Ẩn crosshair (dùng alpha để tránh giật lag khi bật/tắt nhanh)
             if (_shiftLockCrosshairCanvasGroup != null) _shiftLockCrosshairCanvasGroup.alpha = 0f;
             if (_firstPersonCrosshairCanvasGroup != null) _firstPersonCrosshairCanvasGroup.alpha = 0f;
+        }
+
+        /// <summary>
+        /// Khoi tao component tooltip hover cho cac nut Sidebar (Shop, Inventory, Option).
+        /// </summary>
+        private void SetupSidebarTooltips()
+        {
+            if (_shopButton != null && _shopTooltip == null)
+            {
+                _shopTooltip = _shopButton.GetComponent<UISidebarTooltip>() ?? _shopButton.gameObject.AddComponent<UISidebarTooltip>();
+            }
+
+            if (_inventoryButton != null && _inventoryTooltip == null)
+            {
+                _inventoryTooltip = _inventoryButton.GetComponent<UISidebarTooltip>() ?? _inventoryButton.gameObject.AddComponent<UISidebarTooltip>();
+            }
+
+            if (_optionButton != null && _optionTooltip == null)
+            {
+                _optionTooltip = _optionButton.GetComponent<UISidebarTooltip>() ?? _optionButton.gameObject.AddComponent<UISidebarTooltip>();
+            }
         }
         #endregion
     }

@@ -139,7 +139,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 996214176, guid: c0ef50fde3bbb9149af28b7638ed18cd, type: 3}
+  m_Sprite: {fileID: -1766737732, guid: 0386fa15034f3d542b63cf8c00a239b2, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -209,7 +209,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.34901962, g: 0.34901962, b: 0.34901962, a: 1}
+  m_Color: {r: 0.2901961, g: 0.2901961, b: 0.2901961, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -505,7 +505,7 @@ MonoBehaviour:
   m_enableAutoSizing: 1
   m_fontSizeMin: 18
   m_fontSizeMax: 40
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -773,10 +773,18 @@ PrefabInstance:
     - target: {fileID: 5734263305598910977, guid: 9c7b5dd054659a84b9afb9012bfbb843, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 1921185228, guid: 7feb5ce2e0fe28e4cbb851c9a2426998, type: 3}
+      objectReference: {fileID: -1766737732, guid: 0386fa15034f3d542b63cf8c00a239b2, type: 3}
     - target: {fileID: 5734263305598910977, guid: 9c7b5dd054659a84b9afb9012bfbb843, type: 3}
-      propertyPath: m_PixelsPerUnitMultiplier
-      value: 2
+      propertyPath: m_Color.b
+      value: 0.32941177
+      objectReference: {fileID: 0}
+    - target: {fileID: 5734263305598910977, guid: 9c7b5dd054659a84b9afb9012bfbb843, type: 3}
+      propertyPath: m_Color.g
+      value: 0.21176471
+      objectReference: {fileID: 0}
+    - target: {fileID: 5734263305598910977, guid: 9c7b5dd054659a84b9afb9012bfbb843, type: 3}
+      propertyPath: m_Color.r
+      value: 0.8509804
       objectReference: {fileID: 0}
     - target: {fileID: 9158155571287872493, guid: 9c7b5dd054659a84b9afb9012bfbb843, type: 3}
       propertyPath: m_text
@@ -985,10 +993,18 @@ PrefabInstance:
     - target: {fileID: 5734263305598910977, guid: 9c7b5dd054659a84b9afb9012bfbb843, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: -139499596, guid: a5dc2f4d9f9fc68469a0677ae169361e, type: 3}
+      objectReference: {fileID: -1766737732, guid: 0386fa15034f3d542b63cf8c00a239b2, type: 3}
     - target: {fileID: 5734263305598910977, guid: 9c7b5dd054659a84b9afb9012bfbb843, type: 3}
-      propertyPath: m_PixelsPerUnitMultiplier
-      value: 1.5
+      propertyPath: m_Color.b
+      value: 0.5254902
+      objectReference: {fileID: 0}
+    - target: {fileID: 5734263305598910977, guid: 9c7b5dd054659a84b9afb9012bfbb843, type: 3}
+      propertyPath: m_Color.g
+      value: 0.7058824
+      objectReference: {fileID: 0}
+    - target: {fileID: 5734263305598910977, guid: 9c7b5dd054659a84b9afb9012bfbb843, type: 3}
+      propertyPath: m_Color.r
+      value: 0.1254902
       objectReference: {fileID: 0}
     - target: {fileID: 9158155571287872493, guid: 9c7b5dd054659a84b9afb9012bfbb843, type: 3}
       propertyPath: m_text

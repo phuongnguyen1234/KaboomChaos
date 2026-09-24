@@ -138,12 +138,12 @@ MonoBehaviour:
     m_RotationOrder: 4
   explosionVFX: {fileID: 7387641680929074750, guid: 7b5a52ed286cb3841b13916a4ae5a9d5, type: 3}
   explosionSoundPitch: 1
-  explosionSound: {fileID: 8300000, guid: 84bc0c6ab87183a4d8ba6955f79ed2b1, type: 3}
+  explosionSound: {fileID: 8300000, guid: eab69fb4f6ca94f4683b79b9d916d72f, type: 3}
   minPlayerSpawnChance: 40
   maxPlayerSpawnChance: 65
   playerSpawnRadius: 3
   possibleVariants: []
-  spawnWeightByDifficulty:
+  spawnWeightByIntensity:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3

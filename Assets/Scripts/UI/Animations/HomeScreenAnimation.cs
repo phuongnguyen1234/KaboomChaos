@@ -53,6 +53,11 @@ namespace UI.Animations
             // Clean up DOTween
             if (_bombImage != null) _bombImage.DOKill();
             if (_logo != null) _logo.DOKill();
+            if (_exitButton != null) _exitButton.DOKill();
+            if (_settingsButton != null) _settingsButton.DOKill();
+            if (_infoButton != null) _infoButton.DOKill();
+            if (_playButton != null) _playButton.DOKill();
+            if (_transitionScreen != null) _transitionScreen.DOKill();
         }
         #endregion
 
@@ -124,26 +129,40 @@ namespace UI.Animations
             
             _homeGroup.SetActive(true);
             
+            // Cac nut exit, settings va info slide in muot ma voi Ease.OutQuad
             if (_exitButton != null) 
-                _exitButton.DOAnchorPos(_exitOriginalPos, 0.5f).SetEase(Ease.OutBack);
+            {
+                _exitButton.DOKill();
+                _exitButton.DOAnchorPos(_exitOriginalPos, 0.5f).SetEase(Ease.OutQuad);
+            }
                 
             if (_settingsButton != null) 
-                _settingsButton.DOAnchorPos(_settingsOriginalPos, 0.5f).SetEase(Ease.OutBack).SetDelay(0.1f);
+            {
+                _settingsButton.DOKill();
+                _settingsButton.DOAnchorPos(_settingsOriginalPos, 0.5f).SetEase(Ease.OutQuad).SetDelay(0.1f);
+            }
                 
             if (_infoButton != null) 
-                _infoButton.DOAnchorPos(_infoOriginalPos, 0.5f).SetEase(Ease.OutBack).SetDelay(0.2f);
+            {
+                _infoButton.DOKill();
+                _infoButton.DOAnchorPos(_infoOriginalPos, 0.5f).SetEase(Ease.OutQuad).SetDelay(0.2f);
+            }
                 
             if (_logo != null)
             {
+                _logo.DOKill();
                 _logo.DOAnchorPos(_logoOriginalPos, 0.6f).SetEase(Ease.OutBounce).SetDelay(0.3f).OnComplete(() => {
-                    // Hiệu ứng idle: Logo scale up/down và tilt nhẹ
+                    // Hieu ung idle: Logo scale up/down va tilt nhe
                     _logo.DOScale(1.05f, 2f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
                     _logo.DORotate(new Vector3(0, 0, 3f), 2f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
                 });
             }
 
             if (_playButton != null) 
+            {
+                _playButton.DOKill();
                 _playButton.DOAnchorPos(_playOriginalPos, 0.5f).SetEase(Ease.OutBack).SetDelay(0.4f);
+            }
         }
 
         /// <summary>

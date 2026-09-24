@@ -15,7 +15,6 @@ MonoBehaviour:
   id: cluster-bomb
   displayName: Cluster Bomb
   description: Cluster Bomb
-  bombPrefab: {fileID: 6871812733164867237, guid: 4f2d6170233b9ab48b17815a2de4d33e, type: 3}
   radius: 3
   damage: 5
   damageFalloff:
@@ -139,12 +138,12 @@ MonoBehaviour:
     m_RotationOrder: 4
   explosionVFX: {fileID: 7387641680929074750, guid: 7b5a52ed286cb3841b13916a4ae5a9d5, type: 3}
   explosionSoundPitch: 1
-  explosionSound: {fileID: 8300000, guid: 65dd13b9c43d18642a90c2d556bc15a9, type: 3}
+  explosionSound: {fileID: 8300000, guid: eab69fb4f6ca94f4683b79b9d916d72f, type: 3}
   minPlayerSpawnChance: 0
   maxPlayerSpawnChance: 0
   playerSpawnRadius: 0
   possibleVariants: []
-  spawnWeightByDifficulty:
+  spawnWeightByIntensity:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
@@ -176,6 +175,5 @@ MonoBehaviour:
   fuseColor: {r: 1, g: 0, b: 0, a: 1}
   persistentFuseVFX: {fileID: 0}
   fuseStages: []
-  additionalGravity: 40
   tickingSoundPitch: 1
   tickingSound: {fileID: 0}

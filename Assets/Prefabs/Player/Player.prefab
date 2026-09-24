@@ -1058,9 +1058,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2eb36ed999dd1c439fa238e5531565e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Player::Player.CMFPlayerAdapter
-  _movementSpeed: 10
+  _movementSpeed: 12
   _airControlRate: 8
-  _jumpForce: 28
+  _jumpForce: 31.5
   _coyoteTimeDuration: 0.1
   _jumpDuration: 0.1
   _airFriction: 50
@@ -1068,7 +1068,7 @@ MonoBehaviour:
   _slipperyPhysicsMaterial: {fileID: 13400000, guid: 624cc8f3fbd14344a90b69d2df285867, type: 2}
   _slipperyFriction: 0.6
   _iceControlRate: 20
-  _gravity: 80
+  _gravity: 100
   _slideGravity: 5
   _slopeLimit: 80
   _useLocalMomentum: 0

@@ -60,6 +60,7 @@ namespace Perks.Behaviors
             float healed = healable.Heal(_data.HealPerTick);
             if (healed > 0f)
             {
+                GameEvents.TriggerFloatingTextRequested(player.GameObject.transform, Vector3.up * 2.2f, $"+{Mathf.RoundToInt(healed)}", Color.green, player.HPTextContainer, false);
                 Debug.Log($"[RegenerationBehavior] Hoi phuc {healed} HP (khong nhan sat thuong trong {_data.NoDamageWindow}s).");
             }
         }

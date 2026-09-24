@@ -1047,11 +1047,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5734263305598910977, guid: 4524a0444baa47c46aecb041f1984b91, type: 3}
       propertyPath: m_Color.b
-      value: 0.36862743
+      value: 0.27450982
       objectReference: {fileID: 0}
     - target: {fileID: 5734263305598910977, guid: 4524a0444baa47c46aecb041f1984b91, type: 3}
       propertyPath: m_Color.g
-      value: 0.733643
+      value: 0.6117647
+      objectReference: {fileID: 0}
+    - target: {fileID: 5734263305598910977, guid: 4524a0444baa47c46aecb041f1984b91, type: 3}
+      propertyPath: m_Color.r
+      value: 0.9607843
       objectReference: {fileID: 0}
     - target: {fileID: 9158155571287872493, guid: 4524a0444baa47c46aecb041f1984b91, type: 3}
       propertyPath: m_text
@@ -1307,11 +1311,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5734263305598910977, guid: 4524a0444baa47c46aecb041f1984b91, type: 3}
       propertyPath: m_Color.g
-      value: 0.5743396
+      value: 0.5647059
       objectReference: {fileID: 0}
     - target: {fileID: 5734263305598910977, guid: 4524a0444baa47c46aecb041f1984b91, type: 3}
       propertyPath: m_Color.r
-      value: 0.36862743
+      value: 0.77254903
       objectReference: {fileID: 0}
     - target: {fileID: 9158155571287872493, guid: 4524a0444baa47c46aecb041f1984b91, type: 3}
       propertyPath: m_text
@@ -1335,15 +1339,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9162879802801627334, guid: 4524a0444baa47c46aecb041f1984b91, type: 3}
       propertyPath: _hoverColor.b
-      value: 0.7509433
+      value: 0.8037735
       objectReference: {fileID: 0}
     - target: {fileID: 9162879802801627334, guid: 4524a0444baa47c46aecb041f1984b91, type: 3}
       propertyPath: _hoverColor.g
-      value: 0.3831485
+      value: 0.3139266
       objectReference: {fileID: 0}
     - target: {fileID: 9162879802801627334, guid: 4524a0444baa47c46aecb041f1984b91, type: 3}
       propertyPath: _hoverColor.r
-      value: 0.16294043
+      value: 0.4871047
       objectReference: {fileID: 0}
     - target: {fileID: 9162879802801627334, guid: 4524a0444baa47c46aecb041f1984b91, type: 3}
       propertyPath: _targetGraphic

@@ -1,7 +1,11 @@
 fileFormatVersion: 2
 guid: 173d030061cb44341b80a4997ced9725
 TextureImporter:
-  internalIDToNameTable: []
+  internalIDToNameTable:
+  - first:
+      213: 304747308380640683
+    second: flash-explosion-radial-lines-comic-book-manga-style-isolated-transparent-background-black-light-strips-burst
+      (1)_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -95,7 +99,30 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites: []
+    sprites:
+    - serializedVersion: 2
+      name: flash-explosion-radial-lines-comic-book-manga-style-isolated-transparent-background-black-light-strips-burst
+        (1)_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 2000
+        height: 1333
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba5d846ff0eaa3400800000000000000
+      internalID: 304747308380640683
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []

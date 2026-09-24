@@ -68,6 +68,13 @@ namespace UI
         [Tooltip("Thoi gian tu dong thuc hien Destroy cho cac UI VFX instance (giay).")]
         [SerializeField] private float _vfxAutoDestroyDelay = 3f;
 
+        [Header("Star Particles")]
+        [Tooltip("Danh sach cac object StarUIParticle phat khi reveal ket qua quay skill.")]
+        [SerializeField] private List<StarUIParticle> _starParticles = new();
+
+        [Tooltip("Khoang thoi gian tre (giay) giua cac StarUIParticle duoc kich hoat tuan tu.")]
+        [SerializeField] private float _starParticleInterval = 0.15f;
+
         [Header("Restricted Equip")]
         [Tooltip("Panel thong bao hien thi khi nguoi choi co trang bi skill trong giai doan khong duoc phep (arena).")]
         [SerializeField] private GameObject _restrictedEquipPanel;
@@ -92,6 +99,7 @@ namespace UI
         private Coroutine _spinCoroutine;
         private AudioSource _spinAudioSource;
         private Coroutine _restrictedEquipCoroutine;
+        private Coroutine _starParticlesCoroutine;
         private int _revealPropId;
         #endregion
 
@@ -108,12 +116,14 @@ namespace UI
             }
 
             _equipButton?.onClick.AddListener(OnEquipClicked);
+            StopStarParticles();
         }
 
         protected override void OnHidden()
         {
             TryStopSpin();
             HideRestrictedEquipPanel();
+            StopStarParticles();
 
             // Ca nut Equip lan nut Close deu quay ve Shop: bao Shop lam moi lai (so huu, gia).
             OnClosed?.Invoke();
@@ -132,6 +142,7 @@ namespace UI
             if (_skillNameText != null) _skillNameText.text = string.Empty;
             if (_descriptionText != null) _descriptionText.text = string.Empty;
             if (_equipButton != null) _equipButton.interactable = false;
+            StopStarParticles();
 
             if (_buttonGroupCanvasGroup != null)
             {
@@ -248,6 +259,7 @@ namespace UI
                 winSeq.Append(_spinImage.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.InOutQuad));
 
                 SpawnWinVfxOnUI();
+                PlayStarParticles();
             }
 
             if (_winSkillSfx != null && SfxService.Instance != null)
@@ -417,6 +429,8 @@ namespace UI
                 StopCoroutine(_spinCoroutine);
                 _spinCoroutine = null;
             }
+
+            StopStarParticles();
         }
 
         /// <summary>
@@ -508,6 +522,66 @@ namespace UI
                 if (_vfxAutoDestroyDelay > 0f)
                 {
                     Destroy(vfxInstance, _vfxAutoDestroyDelay);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Kich hoat va phat cac doi tuong StarUIParticle theo thu tu trong list, cach nhau mot khoang thoi gian.
+        /// </summary>
+        private void PlayStarParticles()
+        {
+            if (_starParticles == null || _starParticles.Count == 0) return;
+
+            if (_starParticlesCoroutine != null)
+            {
+                StopCoroutine(_starParticlesCoroutine);
+                _starParticlesCoroutine = null;
+            }
+
+            _starParticlesCoroutine = StartCoroutine(PlayStarParticlesCoroutine());
+        }
+
+        private IEnumerator PlayStarParticlesCoroutine()
+        {
+            for (int i = 0; i < _starParticles.Count; i++)
+            {
+                var star = _starParticles[i];
+                if (star != null)
+                {
+                    star.gameObject.SetActive(true);
+                    star.Play();
+                }
+
+                if (i < _starParticles.Count - 1 && _starParticleInterval > 0f)
+                {
+                    yield return new WaitForSeconds(_starParticleInterval);
+                }
+            }
+
+            _starParticlesCoroutine = null;
+        }
+
+        /// <summary>
+        /// Dung va an cac doi tuong StarUIParticle da gan.
+        /// </summary>
+        private void StopStarParticles()
+        {
+            if (_starParticlesCoroutine != null)
+            {
+                StopCoroutine(_starParticlesCoroutine);
+                _starParticlesCoroutine = null;
+            }
+
+            if (_starParticles != null)
+            {
+                foreach (var star in _starParticles)
+                {
+                    if (star != null)
+                    {
+                        star.Stop();
+                        star.gameObject.SetActive(false);
+                    }
                 }
             }
         }

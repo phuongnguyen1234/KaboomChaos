@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using Core.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +16,10 @@ namespace Bombs.Data
         public BaseBombData variantBombData;
         IBaseBombData IBombVariant.VariantBombData => variantBombData; // Explicit interface implementation
 
-        [Tooltip("Đường cong xác suất (0-100) mà biến thể này sẽ xuất hiện thay cho bom gốc, dựa trên độ khó. Trục X là độ khó, trục Y là xác suất (%).")]
-        public AnimationCurve spawnChanceByDifficulty = AnimationCurve.Linear(0, 5, 1, 1);
-        AnimationCurve IBombVariant.SpawnChanceByDifficulty => spawnChanceByDifficulty; // Explicit interface implementation
+        [Tooltip("Đường cong xác suất (0-100) mà biến thể này sẽ xuất hiện thay cho bom gốc, dựa trên intensity. Trục X là intensity, trục Y là xác suất (%).")]
+        [FormerlySerializedAs("spawnChanceByDifficulty")]
+        public AnimationCurve spawnChanceByIntensity = AnimationCurve.Linear(0, 5, 1, 1);
+        AnimationCurve IBombVariant.SpawnChanceByIntensity => spawnChanceByIntensity; // Explicit interface implementation
     }
 
     /// <summary>
@@ -169,9 +171,10 @@ namespace Bombs.Data
         public List<IBombVariant> PossibleVariants => possibleVariants.Cast<IBombVariant>().ToList(); // Triển khai interface
 
         [Header("Thông tin Game & Xác suất xuất hiện")]
-        [Tooltip("Đường cong trọng số xuất hiện theo độ khó. Trục X là độ khó của game. Trục Y là trọng số tương đối (càng cao càng dễ xuất hiện). Mặc định được thiết lập cho độ khó từ 1-6, bom sẽ hiếm hơn khi độ khó tăng.")]
-        public AnimationCurve spawnWeightByDifficulty = AnimationCurve.Linear(1, 100, 6, 20);
-        public AnimationCurve SpawnWeightByDifficulty => spawnWeightByDifficulty; // Triển khai interface
+        [Tooltip("Đường cong trọng số xuất hiện theo intensity. Trục X là intensity của game. Trục Y là trọng số tương đối (càng cao càng dễ xuất hiện). Mặc định được thiết lập cho intensity từ 1-6, bom sẽ hiếm hơn khi intensity tăng.")]
+        [FormerlySerializedAs("spawnWeightByDifficulty")]
+        public AnimationCurve spawnWeightByIntensity = AnimationCurve.Linear(1, 100, 6, 20);
+        public AnimationCurve SpawnWeightByIntensity => spawnWeightByIntensity; // Triển khai interface
 
         [Header("Giới hạn Sinh (Spawning Limits)")]
         [Tooltip("Số lượng bom tối đa cùng loại được phép sinh ra trong một đợt. 0 = không giới hạn.")]

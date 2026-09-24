@@ -65,7 +65,7 @@ namespace UI.Animations
         [Tooltip("Icon (Image) hien thi tren CurrentIntensityPanel.")]
         [SerializeField] private Image _currentIntensityIcon;
 
-        [Header("Current Intensity Difficulty Colors")]
+        [Header("Current Intensity Tier Colors")]
         [Tooltip("Mau Text cho Nhom 1 (Intensity < 2.0).")]
         [SerializeField] private Color _textColorGroup1 = Color.white;
         [Tooltip("Mau Icon cho Nhom 1 (Intensity < 2.0).")]
@@ -77,9 +77,9 @@ namespace UI.Animations
         [SerializeField] private Color _iconColorGroup2 = Color.yellow;
 
         [Tooltip("Mau Text cho Nhom 3 (Intensity 5.0 - 5.99).")]
-        [SerializeField] private Color _textColorGroup3 = new Color(1f, 0.5f, 0f);
+        [SerializeField] private Color _textColorGroup3 = new(1f, 0.5f, 0f);
         [Tooltip("Mau Icon cho Nhom 3 (Intensity 5.0 - 5.99).")]
-        [SerializeField] private Color _iconColorGroup3 = new Color(1f, 0.5f, 0f);
+        [SerializeField] private Color _iconColorGroup3 = new(1f, 0.5f, 0f);
 
         [Tooltip("Mau Text cho Nhom 4 (Intensity >= 6.0).")]
         [SerializeField] private Color _textColorGroup4 = Color.red;
@@ -115,10 +115,37 @@ namespace UI.Animations
         [Header("Round Start & End SFX")]
         [Tooltip("SFX tieng coi khi round bat dau va ket thuc.")]
         [SerializeField] private AudioClip _whistleSfx;
+        [Tooltip("SFX tieng no phat dong thoi voi tieng coi khi round bat dau (chu GO).")]
+        [SerializeField] private AudioClip _roundStartExplosionSfx;
         [Tooltip("SFX tieng chuong khi round ket thuc.")]
         [SerializeField] private AudioClip _bellSfx;
 
+        [Header("Sidebar Tooltips")]
+        [Tooltip("Component tooltip cho nut Shop tren Sidebar.")]
+        [SerializeField] private UISidebarTooltip _shopTooltip;
+        [Tooltip("Component tooltip cho nut Inventory tren Sidebar.")]
+        [SerializeField] private UISidebarTooltip _inventoryTooltip;
+        [Tooltip("Component tooltip cho nut Option tren Sidebar.")]
+        [SerializeField] private UISidebarTooltip _optionTooltip;
+
         private Vector2 _intensityBarOriginalPosition;
+        #endregion
+
+        #region Properties
+        /// <summary>
+        /// Tooltip cho nut Shop.
+        /// </summary>
+        public UISidebarTooltip ShopTooltip => _shopTooltip;
+
+        /// <summary>
+        /// Tooltip cho nut Inventory.
+        /// </summary>
+        public UISidebarTooltip InventoryTooltip => _inventoryTooltip;
+
+        /// <summary>
+        /// Tooltip cho nut Option.
+        /// </summary>
+        public UISidebarTooltip OptionTooltip => _optionTooltip;
         #endregion
 
         #region Unity Lifecycle
@@ -195,7 +222,7 @@ namespace UI.Animations
             {
                 if (_currentIntensityText != null)
                 {
-                    _currentIntensityText.text = $"{currentIntensity:F1}";
+                    _currentIntensityText.text = currentIntensity.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
                 }
 
                 Color targetTextColor = Color.white;
@@ -370,11 +397,11 @@ namespace UI.Animations
         /// <summary>
         /// Chay hieu ung transition chuyen canh.
         /// </summary>
-        public void PlayTransition(Action onCovered, Action onComplete = null)
+        public void PlayTransition(Action onCovered, Action onComplete = null, float? holdDurationOverride = null)
         {
             if (_transitionScreenAnimation != null)
             {
-                _transitionScreenAnimation.PlayTransition(onCovered, onComplete);
+                _transitionScreenAnimation.PlayTransition(onCovered, onComplete, holdDurationOverride);
             }
             else
             {
@@ -384,13 +411,21 @@ namespace UI.Animations
         }
 
         /// <summary>
-        /// Phat coi khi round bat dau.
+        /// Phat coi va tieng no khi round bat dau (chu GO).
         /// </summary>
         public void PlayRoundStartSfx()
         {
-            if (_whistleSfx != null && SfxService.Instance != null)
+            if (SfxService.Instance != null)
             {
-                SfxService.Instance.PlaySfx(_whistleSfx);
+                if (_whistleSfx != null)
+                {
+                    SfxService.Instance.PlaySfx(_whistleSfx);
+                }
+
+                if (_roundStartExplosionSfx != null)
+                {
+                    SfxService.Instance.PlaySfx(_roundStartExplosionSfx);
+                }
             }
         }
 

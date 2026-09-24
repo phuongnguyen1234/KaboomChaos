@@ -119,7 +119,8 @@ namespace Core.Interfaces.UI
         /// </summary>
         /// <param name="onCovered">Callback thực hiện hành động khi màn hình đã che hết (VD: Teleport player, dọn dẹp map).</param>
         /// <param name="onComplete">Callback thực hiện khi transition hoàn tất.</param>
-        void PlayTransition(Action onCovered, Action onComplete = null);
+        /// <param name="holdDurationOverride">Thời gian giữ màn hình che kín tùy chọn (giây).</param>
+        void PlayTransition(Action onCovered, Action onComplete = null, float? holdDurationOverride = null);
 
         /// <summary>
         /// Phát tiếng còi khi round bắt đầu.
@@ -130,5 +131,10 @@ namespace Core.Interfaces.UI
         /// Phát tiếng còi + tiếng chuông khi round kết thúc.
         /// </summary>
         void PlayRoundEndSfx();
+
+        /// <summary>
+        /// Mo popup Shop.
+        /// </summary>
+        void OpenShopPopup();
     }
 }

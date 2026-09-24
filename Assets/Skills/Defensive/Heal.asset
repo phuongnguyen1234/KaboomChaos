@@ -27,4 +27,4 @@ MonoBehaviour:
   _castVfxSpawnMode: 0
   _castVfxExplosionRadius: 2
   _healAmount: 25
-  _slowMultiplier: 0.5
+  _slowMultiplier: 0.75

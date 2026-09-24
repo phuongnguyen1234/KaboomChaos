@@ -54,7 +54,7 @@ MonoBehaviour:
   _itemsContainer: {fileID: 4570734012750423647}
   _perkDatabase: {fileID: 11400000, guid: ac5f3e0f3c9b3df4a8718406e45e6985, type: 2}
   _emptyStateText: {fileID: 2826010201171113573}
-  _perkCardSprite: {fileID: 21300000, guid: 2a4eb569e4e539e479ba3aab905a24b7, type: 3}
+  _perkCardSprite: {fileID: 21300000, guid: aac614141f8b3c5468e0bade6f5ab31d, type: 3}
 --- !u!1 &1944284766328413034
 GameObject:
   m_ObjectHideFlags: 0

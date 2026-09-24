@@ -1,4 +1,5 @@
 using UnityEngine;
+using Core;
 using Core.Interfaces;
 using Skills.Data;
 
@@ -30,6 +31,10 @@ namespace Skills.Behaviors
             if (healable != null)
             {
                 float healed = healable.Heal(_data.HealAmount);
+                if (healed > 0f)
+                {
+                    GameEvents.TriggerFloatingTextRequested(player.GameObject.transform, Vector3.up * 2.2f, $"+{Mathf.RoundToInt(healed)}", Color.green, player.HPTextContainer, false);
+                }
                 Debug.Log($"[HealBehavior] Player {_data.DisplayName} da hoi phuc {healed} HP (Muc tieu: {_data.HealAmount} HP)");
             }
             else

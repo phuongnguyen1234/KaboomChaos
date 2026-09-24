@@ -16,7 +16,7 @@ namespace Core.Interfaces
         /// <summary>
         /// Đường cong xác suất (0-100) mà biến thể này sẽ xuất hiện.
         /// </summary>
-        AnimationCurve SpawnChanceByDifficulty { get; }
+        AnimationCurve SpawnChanceByIntensity { get; }
     }
     
     /// <summary>
@@ -25,7 +25,7 @@ namespace Core.Interfaces
     public interface ICollectibleData : ISpawnableData
     {
         string DisplayName { get; }
-        AnimationCurve RarityByDifficulty { get; }
+        AnimationCurve RarityByIntensity { get; }
         float Lifespan { get; }
         AudioClip CollectionSFX { get; }
 

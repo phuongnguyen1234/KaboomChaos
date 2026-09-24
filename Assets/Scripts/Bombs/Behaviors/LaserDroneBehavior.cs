@@ -99,10 +99,12 @@ namespace Bombs.Behaviors
             _copterSpinSpeed = 0f;
 
             // Reset trang thai va don dep sach VFX/Audio moi khi duoc thiet lap tu pool hoac khi despawn.
+            controller.transform.DOKill();
             CleanupSightAndAudio(controller);
             _aimTargetPosition = controller.transform.position;
             _activeCoroutine = null;
             ResetCopterRotation();
+            if (_head != null) _head.localRotation = _headDefaultLocalRotation;
         }
 
         /// <summary>
@@ -192,6 +194,15 @@ namespace Bombs.Behaviors
             Vector3 descendTo = descendFrom + Vector3.down * descend;
             float descendDuration = descend / Mathf.Max(data.descentSpeed, 0.001f);
             yield return MoveEased(controller, descendTo, descendDuration, DG.Tweening.Ease.OutBack);
+
+            // Buoc 1.1: Bay len xuong nhe quanh diem ha canh (hover).
+            Tween hoverTween = null;
+            if (data.hoverAmplitude > 0f && data.hoverDuration > 0f)
+            {
+                hoverTween = controller.transform.DOMoveY(descendTo.y + data.hoverAmplitude, data.hoverDuration * 0.5f)
+                    .SetEase(Ease.InOutSine)
+                    .SetLoops(-1, LoopType.Yoyo);
+            }
 
             // Buoc 2: Nghi truoc khi quay Head nhin muc tieu.
             yield return new WaitForSeconds(data.preAimRestDuration);
@@ -294,8 +305,8 @@ namespace Bombs.Behaviors
                 }
             }
 
-            // Buoc 7: Reset Head nhin thang truoc, bay len theo ease in back roi despawn.
-            ResetHead(controller);
+            // Buoc 7: Dung hover, bay len theo ease in back roi despawn (giu nguyen goc quay Head sau khi ban).
+            hoverTween?.Kill();
             ResetCopterRotation();
             CleanupSightAndAudio(controller);
 

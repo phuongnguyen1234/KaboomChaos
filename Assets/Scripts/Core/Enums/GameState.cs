@@ -7,8 +7,8 @@ namespace Core.Enums
     {
         /// <summary>Trạng thái không xác định hoặc khởi tạo.</summary>
         None,
-        /// <summary>Giai đoạn người chơi bỏ phiếu cho map tiếp theo.</summary>
-        MapVoting,
+        /// <summary>Giai doan nghi giua cac round / chon map tiep theo.</summary>
+        Intermission,
         /// <summary>Giai đoạn map đang được xây dựng.</summary>
         Building,
         /// <summary>Giai đoạn chuẩn bị trước round đấu (dịch chuyển, đếm ngược).</summary>

@@ -17,8 +17,8 @@ MonoBehaviour:
   _unlimitedDuration: 0
   _shieldVFX: {fileID: 7065807850240833516, guid: 641bab6a2f2adb44aa7d35a723f5f93f, type: 3}
   _shieldColor: {r: 1, g: 1, b: 1, a: 1}
-  _speedMultiplier: 2.25
-  _jumpMultiplier: 1.75
+  _speedMultiplier: 3
+  _jumpMultiplier: 2.5
   _shieldMusic: {fileID: 8300000, guid: aeddefe3afd61b845a387b7d599b5289, type: 3}
   _basePitch: 1
   _pitchPerStack: 0.1

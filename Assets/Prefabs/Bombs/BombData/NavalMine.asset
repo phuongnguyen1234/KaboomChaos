@@ -143,7 +143,7 @@ MonoBehaviour:
   maxPlayerSpawnChance: 40
   playerSpawnRadius: 2
   possibleVariants: []
-  spawnWeightByDifficulty:
+  spawnWeightByIntensity:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
@@ -285,8 +285,8 @@ MonoBehaviour:
   tickingSoundPitch: 1
   tickingSound: {fileID: 0}
   ascendSpeed: 2
-  chainMinLength: 10
-  chainMaxLength: 18
+  chainMinLength: 15
+  chainMaxLength: 24
   safeRadius: 3
   chainPrefab: {fileID: 8437196208069075511, guid: 6ad01e9d0f3e7044388f2b3c03dec187, type: 3}
   spawnVFXPrefab: {fileID: 5432491707936817209, guid: d7242b76d53eb67439a68fdc6d9b9440, type: 3}

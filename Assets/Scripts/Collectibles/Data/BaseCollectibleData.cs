@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using Core.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +16,10 @@ namespace Collectibles.Data
         public BaseCollectibleData variantCollectibleData;
         public ICollectibleData VariantCollectibleData => variantCollectibleData;
 
-        [Tooltip("Đường cong xác suất (0-100) mà biến thể này sẽ xuất hiện thay cho vật phẩm gốc, dựa trên độ khó.")]
-        public AnimationCurve spawnChanceByDifficulty = AnimationCurve.Linear(1, 5, 6, 20);
-        public AnimationCurve SpawnChanceByDifficulty => spawnChanceByDifficulty;
+        [Tooltip("Đường cong xác suất (0-100) mà biến thể này sẽ xuất hiện thay cho vật phẩm gốc, dựa trên intensity.")]
+        [FormerlySerializedAs("spawnChanceByDifficulty")]
+        public AnimationCurve spawnChanceByIntensity = AnimationCurve.Linear(1, 5, 6, 20);
+        public AnimationCurve SpawnChanceByIntensity => spawnChanceByIntensity;
     }
     
     public abstract class BaseCollectibleData : ScriptableObject, ICollectibleData
@@ -51,8 +53,9 @@ namespace Collectibles.Data
         public IReadOnlyList<ICollectibleVariant> PossibleVariants => possibleVariants.Cast<ICollectibleVariant>().ToList();
 
         [Header("Spawning")]
-        [Tooltip("Chance (0-100) to spawn this collectible in a wave, based on difficulty. X-axis: Difficulty, Y-axis: Chance %")]
-        [SerializeField] private AnimationCurve _rarityByDifficulty = AnimationCurve.Linear(1, 10, 6, 30);
-        public AnimationCurve RarityByDifficulty => _rarityByDifficulty;
+        [Tooltip("Chance (0-100) to spawn this collectible in a wave, based on intensity. X-axis: Intensity, Y-axis: Chance %")]
+        [FormerlySerializedAs("_rarityByDifficulty")]
+        [SerializeField] private AnimationCurve _rarityByIntensity = AnimationCurve.Linear(1, 10, 6, 30);
+        public AnimationCurve RarityByIntensity => _rarityByIntensity;
     }
 }

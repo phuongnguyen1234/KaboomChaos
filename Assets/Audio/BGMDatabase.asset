@@ -25,11 +25,19 @@ MonoBehaviour:
   - {fileID: 8300000, guid: f7f4f287046308a4680d94a38720e634, type: 3}
   - {fileID: 8300000, guid: ac56eaab9e9c63a498a2b11cb1057ea3, type: 3}
   - {fileID: 8300000, guid: 31b101639af218a4a875db1c56b5ab54, type: 3}
+  - {fileID: 8300000, guid: b47f8513f89dbc1498f6423391e0d683, type: 3}
+  - {fileID: 8300000, guid: 0a042a454f8e5fd49a73b90979b3beb7, type: 3}
+  - {fileID: 8300000, guid: 973d08dc967cc934797666fe5e615517, type: 3}
+  - {fileID: 8300000, guid: 07cb23d7c72baed489b41b229d626618, type: 3}
   - {fileID: 8300000, guid: 741fe69f2d36edf45affb7284022fb8a, type: 3}
   - {fileID: 8300000, guid: 6438ba1123db8a444b72b6c2d5e6c185, type: 3}
   - {fileID: 8300000, guid: cea933045bfb72e4b99ec7caba59c2ac, type: 3}
   - {fileID: 8300000, guid: 08b2db96f0338604fa82efeffe00d425, type: 3}
   - {fileID: 8300000, guid: 5aa24bac23ada7a49af981c80d35af66, type: 3}
+  - {fileID: 8300000, guid: 37c8ab606f29fce4bacd998670dee993, type: 3}
+  - {fileID: 8300000, guid: ae80347cd55e880488d8681635ad3760, type: 3}
+  - {fileID: 8300000, guid: d37eda0a42d64f049bcb4f0a1d1a0d87, type: 3}
+  - {fileID: 8300000, guid: 9f2a773188155f74aa11cd5d452b77c7, type: 3}
   Last30sNormalMusic: {fileID: 8300000, guid: 03f64c5b1da95374db824f73ce545765, type: 3}
   IntenseGameplayMusic:
   - {fileID: 8300000, guid: 91721c907a6bf95469745d42eba14f5f, type: 3}
@@ -47,4 +55,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 57745a44059247b4dbad0581febb700d, type: 3}
   - {fileID: 8300000, guid: 8164f009d05c69646b7e15bc805c454a, type: 3}
   - {fileID: 8300000, guid: 9a7d857fe6d0619439d993293bfb27c1, type: 3}
+  - {fileID: 8300000, guid: 6a377c1844f1f544e8d27aa8cf2c8c99, type: 3}
+  - {fileID: 8300000, guid: 1993f7bc8f4bd4a45860ad3b419dd9e0, type: 3}
+  - {fileID: 8300000, guid: bf13068794ec6da4fb55cd061ac1295d, type: 3}
   Last30sIntenseMusic: {fileID: 8300000, guid: 30a69050ce38af444b0544a19915ba64, type: 3}

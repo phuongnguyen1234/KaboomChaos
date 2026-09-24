@@ -4865,7 +4865,7 @@ ParticleSystemRenderer:
   m_NormalDirection: 1
   m_ShadowBias: 0
   m_RenderAlignment: 0
-  m_Pivot: {x: 0, y: 0, z: 0}
+  m_Pivot: {x: 0, y: 1, z: 0}
   m_Flip: {x: 0, y: 0, z: 0}
   m_EnableGPUInstancing: 1
   m_ApplyActiveColorSpace: 1
@@ -4914,8 +4914,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 9146944568467697005}
   - {fileID: 5637959834898158045}
@@ -5113,7 +5113,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2617127250009712100, guid: 733da82105431a74c9f9b3e5cf08fb75, type: 3}
       propertyPath: EmissionModule.rateOverTime.scalar
-      value: 8
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2617127250009712100, guid: 733da82105431a74c9f9b3e5cf08fb75, type: 3}
+      propertyPath: InitialModule.startLifetime.scalar
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2617127250009712100, guid: 733da82105431a74c9f9b3e5cf08fb75, type: 3}
       propertyPath: EmissionModule.rateOverTime.minScalar

@@ -18,5 +18,5 @@ MonoBehaviour:
   _shieldVFX: {fileID: 8428990699582233740, guid: 3f1f0a8196f12fd40b7602eb90420ae4, type: 3}
   _shieldColor: {r: 1, g: 1, b: 1, a: 1}
   _damageThreshold: 10
-  _breakVFX: {fileID: 0}
+  _breakVFX: {fileID: 605868293434577335, guid: e6f42df94042bc743afaa66059c3bc92, type: 3}
   _breakSFX: {fileID: 8300000, guid: 3c647fa08060bf6449bed121a38ce181, type: 3}

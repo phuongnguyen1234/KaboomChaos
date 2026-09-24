@@ -40,6 +40,7 @@ namespace Skills
         private IEnergyable _energyable;
         private bool _isActive;
         private float _durationRemaining;
+        private bool _isSkillLocked;
 
         // Luu danh sach cac VFX (CastVfx) duoc spawn tu pool trong luc kich hoat skill.
         // Khi skill het duration, cac VFX con hoat dong se duoc tra ve pool de tranh chong chat (stack) trong scene.
@@ -51,6 +52,7 @@ namespace Skills
 
         public ISkillData CurrentSkill => _equippedSkillData;
         public bool IsActive => _isActive;
+        public bool IsSkillLocked => _isSkillLocked;
 
         // Uy quyen viec kiem tra trang thai sac cho component Energy cua Player de tranh trung lap logic
         public bool IsRecharging => _energyable != null && _energyable.IsRecharging;
@@ -176,10 +178,42 @@ namespace Skills
         }
 
         /// <summary>
+        /// Khoa hoac mo khoa su dung skill (dung khi dem nguoc truoc round).
+        /// </summary>
+        /// <param name="isLocked">True de khoa khong cho dung, False de mo khoa.</param>
+        public void SetSkillLock(bool isLocked)
+        {
+            _isSkillLocked = isLocked;
+            Debug.Log($"[PlayerSkillController] Trang thai khoa skill thay doi: {isLocked}");
+        }
+
+        /// <summary>
+        /// Nap day ngay lap tuc nang luong (energy) cua skill va huy trang thai kich hoat truoc do neu co.
+        /// </summary>
+        public void ChargeSkill()
+        {
+            if (_isActive)
+            {
+                DeactivateSkill();
+            }
+
+            if (_energyable != null)
+            {
+                _energyable.RestoreFullEnergy();
+            }
+        }
+
+        /// <summary>
         /// Kich hoat su dung skill dang trang bi.
         /// </summary>
         public void UseActiveSkill()
         {
+            if (_isSkillLocked)
+            {
+                Debug.Log("[PlayerSkillController] Khong the su dung: Skill dang bi khoa trong giai doan dem nguoc!");
+                return;
+            }
+
             if (_equippedSkillData == null)
             {
                 Debug.LogWarning("[PlayerSkillController] Khong the su dung: Chua trang bi skill!");
@@ -327,6 +361,8 @@ namespace Skills
         /// </summary>
         private bool DetectUseSkillInput()
         {
+            if (_isSkillLocked) return false;
+
             if (Keyboard.current != null && Keyboard.current[ResolveUseSkillKey()].wasPressedThisFrame)
             {
                 return true;

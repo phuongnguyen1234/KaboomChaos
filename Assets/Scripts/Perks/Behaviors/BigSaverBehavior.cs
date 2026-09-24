@@ -50,7 +50,11 @@ namespace Perks.Behaviors
                 return;
             }
 
-            healable.Heal(healAmount);
+            float healed = healable.Heal(healAmount);
+            if (healed > 0f)
+            {
+                GameEvents.TriggerFloatingTextRequested(player.GameObject.transform, Vector3.up * 2.2f, $"+{Mathf.RoundToInt(healed)}", Color.green, player.HPTextContainer, false);
+            }
         }
     }
 }
