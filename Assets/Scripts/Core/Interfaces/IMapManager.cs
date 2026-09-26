@@ -21,6 +21,11 @@ namespace Core.Interfaces
         IEnumerator ClearCurrentMapAsync();
 
         /// <summary>
+        /// Don dep ngay lap tuc tat ca cac doi tuong map (dung khi thoat ve Home).
+        /// </summary>
+        void ClearCurrentMap();
+
+        /// <summary>
         /// Lấy tổng số map có sẵn trong database.
         /// </summary>
         /// <returns>Số lượng map.</returns>

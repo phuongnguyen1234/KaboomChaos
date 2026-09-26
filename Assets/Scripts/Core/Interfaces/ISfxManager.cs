@@ -22,6 +22,11 @@ namespace Core.Interfaces
         /// Phat mot SFX loop (tic-tac, hum, beep) va tra ve handle de stop/pitch.
         /// </summary>
         ISfxLoopHandle PlaySfxLoop(AudioClip clip, Transform parent, float volume = 1f, float pitch = 1f, bool spatial = true);
+
+        /// <summary>
+        /// Dung tat ca SFX dang phat (one-shot va loop) va tra AudioSource ve pool.
+        /// </summary>
+        void StopAllSfx();
     }
 
     /// <summary>

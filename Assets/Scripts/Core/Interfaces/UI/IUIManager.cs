@@ -98,6 +98,11 @@ namespace Core.Interfaces.UI
         IEnumerator ShowCountdown();
 
         /// <summary>
+        /// An panel dem nguoc ngay lap tuc.
+        /// </summary>
+        void HideCountdown();
+
+        /// <summary>
         /// Mở/Đóng Pause Menu.
         /// </summary>
         void TogglePauseMenu();

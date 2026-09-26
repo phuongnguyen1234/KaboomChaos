@@ -515,6 +515,12 @@ namespace UI
         }
 
         /// <inheritdoc/>
+        public void HideCountdown()
+        {
+            _uiAnimation?.HideCountdown();
+        }
+
+        /// <inheritdoc/>
         public void PlayTransition(Action onCovered, Action onComplete = null, float? holdDurationOverride = null)
         {
             if (_uiAnimation != null)
@@ -813,10 +819,20 @@ namespace UI
         /// </summary>
         private void HideGameplayPanels()
         {
+            if (_notificationCoroutine != null)
+            {
+                StopCoroutine(_notificationCoroutine);
+                _notificationCoroutine = null;
+            }
+
             if (_notificationPanel != null) _notificationPanel.SetActive(false);
             if (_timerPanel != null) _timerPanel.SetActive(false);
+            if (_timerSfxSource != null) _timerSfxSource.Stop();
             if (_mainHUD != null) _mainHUD.SetActive(false);
             if (_scoreCard != null) _scoreCard.Hide();
+            HideCountdown();
+            _uiAnimation?.HideIntensityBar();
+            _uiAnimation?.HideCurrentIntensity();
 
             // Ẩn crosshair (dùng alpha để tránh giật lag khi bật/tắt nhanh)
             if (_shiftLockCrosshairCanvasGroup != null) _shiftLockCrosshairCanvasGroup.alpha = 0f;

@@ -240,31 +240,52 @@ namespace Managers
         }
 
         /// <summary>
-        /// Stops the currently running game loop, if any.
+        /// Stops the currently running game loop and cleans up all active systems.
         /// </summary>
         private void StopGameLoop()
         {
             _gameLoopActive = false;
-            // Stop the active stage coroutine first (it may run independently of the main loop).
-            if (_activeStageCoroutine != null)
-            {
-                StopCoroutine(_activeStageCoroutine);
-                _activeStageCoroutine = null;
-            }
-            if (_gameLoopCoroutine != null)
-            {
-                StopCoroutine(_gameLoopCoroutine);
-                _gameLoopCoroutine = null;
-            }
+
+            // Dung tat ca coroutine dang chay tren GameloopManager
+            StopAllCoroutines();
+            _activeStageCoroutine = null;
+            _gameLoopCoroutine = null;
+
+            // Reset GameState ve None
+            CurrentState = GameState.None;
+            _selectedMapIndex = -1;
+
+            // Don dep bom va spawner
+            _bombSpawnerManager?.StopSpawning();
+            _bombSpawnerManager?.ClearAllBombs();
+
+            // Don dep map ngay lap tuc
+            _mapManager?.ClearCurrentMap();
+
+            // Don dep vat pham thu thap
+            _collectiblePoolManager?.ClearAllCollectibles();
+
+            // Phat event don dep chung (hazard zones, skills, VFX...)
+            GameEvents.TriggerRoundEndCleanup();
+
+            // Dung toan bo SFX
+            SfxService.Instance?.StopAllSfx();
+
+            // An cac thanh phan UI gameplay
+            _uiManager?.HideCountdown();
+            _uiManager?.HideScoreCard();
+
+            // Reset do kho
+            SetNextRoundIntensity(_initialIntensity);
         }
 
         /// <summary>
         /// Called when the player returns to the Home screen. Stops the game loop
-        /// so it does not keep running in the background.
+        /// and performs a complete state reset.
         /// </summary>
         private void HandleReturnToHome()
         {
-            Debug.Log("[GameloopManager] Return to Home requested. Stopping the game loop.");
+            Debug.Log("[GameloopManager] Return to Home requested. Stopping game loop and resetting everything.");
             StopGameLoop();
         }
 

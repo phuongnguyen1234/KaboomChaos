@@ -28,4 +28,4 @@ MonoBehaviour:
   _castVfxExplosionRadius: 2
   _platformPrefab: {fileID: 8655690492966594582, guid: 0e00f7a59e2b0df4891f89ece6c97741, type: 3}
   _spawnYOffset: 0.5
-  _playerLiftImpulse: 6
+  _playerLiftImpulse: 10
