@@ -395,6 +395,26 @@ namespace UI.Animations
         }
 
         /// <summary>
+        /// An panel dem nguoc va huy tat ca tween dang chay tren cac anh dem nguoc.
+        /// </summary>
+        public void HideCountdown()
+        {
+            if (_countdownImage != null)
+            {
+                _countdownImage.transform.DOKill();
+                if (_countdownImage.TryGetComponent<CanvasGroup>(out var cg)) cg.DOKill();
+                _countdownImage.gameObject.SetActive(false);
+            }
+            if (_goImage != null)
+            {
+                _goImage.transform.DOKill();
+                if (_goImage.TryGetComponent<CanvasGroup>(out var cgGo)) cgGo.DOKill();
+                _goImage.gameObject.SetActive(false);
+            }
+            if (_countdownPanel != null) _countdownPanel.SetActive(false);
+        }
+
+        /// <summary>
         /// Chay hieu ung transition chuyen canh.
         /// </summary>
         public void PlayTransition(Action onCovered, Action onComplete = null, float? holdDurationOverride = null)

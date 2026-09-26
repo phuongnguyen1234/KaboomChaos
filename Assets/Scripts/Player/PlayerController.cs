@@ -36,8 +36,19 @@ namespace Player
         #endregion
         private float _speedBonus = 0f;
         private float _jumpBonus = 0f;
-        private const float BaseSpeed = 1.0f; // Giả định base là 1.0
+        private float _baseMovementSpeed;
+        private float _baseJumpForce;
+        private bool _isBaseStatsInitialized = false;
 
+        private void EnsureBaseStatsInitialized()
+        {
+            if (!_isBaseStatsInitialized)
+            {
+                _baseMovementSpeed = _movementSpeed;
+                _baseJumpForce = _jumpForce;
+                _isBaseStatsInitialized = true;
+            }
+        }
 
         #region IPlayer Implementation
 
@@ -167,9 +178,10 @@ namespace Player
         /// </summary>
         public void ApplySpeedMultiplier(float multiplier)
         {
-            float bonus = multiplier - 1.0f;
+            EnsureBaseStatsInitialized();
+            float bonus = _baseMovementSpeed * (multiplier - 1.0f);
             _speedBonus += bonus;
-            _movementSpeed += bonus;
+            _movementSpeed = Mathf.Max(0f, _baseMovementSpeed + _speedBonus);
         }
 
         /// <summary>
@@ -177,9 +189,10 @@ namespace Player
         /// </summary>
         public void RemoveSpeedMultiplier(float multiplier)
         {
-            float bonus = multiplier - 1.0f;
+            EnsureBaseStatsInitialized();
+            float bonus = _baseMovementSpeed * (multiplier - 1.0f);
             _speedBonus -= bonus;
-            _movementSpeed -= bonus;
+            _movementSpeed = Mathf.Max(0f, _baseMovementSpeed + _speedBonus);
         }
 
         /// <summary>
@@ -187,9 +200,10 @@ namespace Player
         /// </summary>
         public void ApplyJumpMultiplier(float multiplier)
         {
-            float bonus = multiplier - 1.0f;
+            EnsureBaseStatsInitialized();
+            float bonus = _baseJumpForce * (multiplier - 1.0f);
             _jumpBonus += bonus;
-            _jumpForce += bonus; // Giả định _jumpForce là biến được dùng trong Controller
+            _jumpForce = Mathf.Max(0f, _baseJumpForce + _jumpBonus);
         }
 
         /// <summary>
@@ -197,9 +211,10 @@ namespace Player
         /// </summary>
         public void RemoveJumpMultiplier(float multiplier)
         {
-            float bonus = multiplier - 1.0f;
+            EnsureBaseStatsInitialized();
+            float bonus = _baseJumpForce * (multiplier - 1.0f);
             _jumpBonus -= bonus;
-            _jumpForce -= bonus;
+            _jumpForce = Mathf.Max(0f, _baseJumpForce + _jumpBonus);
         }
         /// <inheritdoc/>
         public Transform HPTextContainer => _hpTextContainer;
@@ -212,15 +227,15 @@ namespace Player
         #region BGM Control (IPlayer Implementation)
 
         /// <summary>
-        /// <summary>
         /// Reset toàn bộ chỉ số cộng dồn về trạng thái gốc.
         /// </summary>
         public void ResetModifiers()
         {
-            _movementSpeed -= _speedBonus;
-            _jumpForce -= _jumpBonus;
+            EnsureBaseStatsInitialized();
             _speedBonus = 0f;
             _jumpBonus = 0f;
+            _movementSpeed = _baseMovementSpeed;
+            _jumpForce = _baseJumpForce;
         }
 
         #endregion
@@ -247,6 +262,7 @@ namespace Player
         protected override void Setup()
         {
             base.Setup(); // Gọi hàm Setup của lớp cha
+            EnsureBaseStatsInitialized();
 
             // Gán cameraTransform từ CameraController để di chuyển theo hướng camera
             _cameraController = GetComponent<CameraController>();

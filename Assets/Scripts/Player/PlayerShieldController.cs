@@ -211,16 +211,16 @@ namespace Player
                 Destroy(shield.VfxInstance);
             }
 
-                        // Dọn dẹp đặc biệt cho Magic Shield
-            if (shield.Data is Collectibles.Data.MagicShieldData)
+            // Dọn dẹp đặc biệt cho Magic Shield
+            if (shield.Data is Collectibles.Data.MagicShieldData magicData)
             {
                 // Chỉ tiếp tục BGM toàn cục nếu không còn Magic Shield nào khác đang hoạt động.
                 if (!IsShieldTypeActive(typeof(Collectibles.Data.MagicShieldData)))
                 {
                     GameEvents.TriggerMusicResumeRequested();
-                    // Chỉ reset modifier khi không còn bất kỳ Magic Shield nào (vì toàn bộ stack
-                    // đang nằm trong cùng một ActiveShield, nên khi xóa là hết stack).
-                    _player.ResetModifiers();
+                    // Go bo he so toc do va luc nhay rieng cua Magic Shield ma khong anh huong den cac perk/skill khac.
+                    _player.RemoveSpeedMultiplier(magicData.SpeedMultiplier);
+                    _player.RemoveJumpMultiplier(magicData.JumpMultiplier);
                 }
                 if (shield.ShieldAudioSource != null)
                 {

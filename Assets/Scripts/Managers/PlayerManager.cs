@@ -679,11 +679,14 @@ namespace Managers
 
         /// <summary>
         /// Called when the player returns to the Home screen (Back to Home).
-        /// Destroys all active players so pressing Play again does not spawn a duplicate.
+        /// Destroys all active players and stops all respawn/death coroutines.
         /// </summary>
         private void HandleReturnToHome()
         {
-            Debug.Log("[PlayerManager] Return to Home requested. Clearing all active players.");
+            Debug.Log("[PlayerManager] Return to Home requested. Stopping coroutines and clearing all active players.");
+            StopAllCoroutines();
+            _playersInRound.Clear();
+            _playerData.Clear();
             ClearAllPlayers();
         }
 

@@ -72,11 +72,13 @@ namespace Managers
         {
             // Khi user doi slider SFX, cap nhat tat ca AudioSource dang phat.
             GameEvents.OnSettingsSfxVolumeChanged += HandleSfxVolumeChanged;
+            GameEvents.OnReturnToHomeRequest += HandleReturnToHome;
         }
 
         private void OnDisable()
         {
             GameEvents.OnSettingsSfxVolumeChanged -= HandleSfxVolumeChanged;
+            GameEvents.OnReturnToHomeRequest -= HandleReturnToHome;
         }
 
         #endregion
@@ -133,12 +135,39 @@ namespace Managers
         }
 
         /// <summary>
+        /// Dung tat ca cac AudioSource dang phat SFX (one-shot va loop) va tra ve pool.
+        /// </summary>
+        public void StopAllSfx()
+        {
+            StopAllCoroutines();
+
+            var activeCopy = new List<SfxPlayback>(_active);
+            foreach (var playback in activeCopy)
+            {
+                if (playback != null && playback.Source != null)
+                {
+                    playback.Source.Stop();
+                    ReturnToPool(playback.Source.gameObject);
+                }
+            }
+            _active.Clear();
+        }
+
+        /// <summary>
         /// Tra source ve pool, duoc goi tu handle.Stop().
         /// </summary>
         /// <param name="playback">Playback can dung.</param>
         private void StopLoop(SfxPlayback playback)
         {
             Release(playback);
+        }
+
+        /// <summary>
+        /// Xu ly khi nguoi choi quay ve man hinh Home: dung toan bo am thanh hieu ung.
+        /// </summary>
+        private void HandleReturnToHome()
+        {
+            StopAllSfx();
         }
 
         #endregion

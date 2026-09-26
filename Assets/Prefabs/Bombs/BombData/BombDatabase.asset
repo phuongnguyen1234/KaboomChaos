@@ -85,3 +85,5 @@ MonoBehaviour:
     _prefab: {fileID: 9193775916532799145, guid: 5c7afcbb4e2d7ff4799d67b38a019324, type: 3}
   - _data: {fileID: 11400000, guid: 5ee8a5328fe399842bc7fd927a974da7, type: 2}
     _prefab: {fileID: 9193775916532799145, guid: 47f0f122f16c5774bb42a735583c2f34, type: 3}
+  - _data: {fileID: 11400000, guid: c8f1fa9783237284f90a8ac8ce0b41d2, type: 2}
+    _prefab: {fileID: 6672793610478327848, guid: 398c00975bc18504989ca3cfeca7abe8, type: 3}

@@ -183,6 +183,44 @@ namespace Managers
             if (_undergroundContainer != null) yield return StartCoroutine(ReturnAllBlocksToPoolAsync(_undergroundContainer.gameObject, 200));
         }
 
+        /// <summary>
+        /// Don dep ngay lap tuc tat ca cac doi tuong map (dung khi thoat ve Home).
+        /// </summary>
+        public void ClearCurrentMap()
+        {
+            Debug.Log("[MapManager] Clearing current map objects immediately.");
+            StopAllCoroutines();
+
+            if (_lavaInstance != null) _lavaInstance.SetActive(false);
+
+            if (_mapContainer != null)
+            {
+                _mapContainer.transform.position = Vector3.zero;
+                _mapInstance = null;
+
+                for (int i = _mapContainer.transform.childCount - 1; i >= 0; i--)
+                {
+                    var child = _mapContainer.transform.GetChild(i);
+                    if (child != null)
+                    {
+                        Destroy(child.gameObject);
+                    }
+                }
+            }
+
+            if (_undergroundContainer != null)
+            {
+                for (int i = _undergroundContainer.childCount - 1; i >= 0; i--)
+                {
+                    var child = _undergroundContainer.GetChild(i);
+                    if (child != null)
+                    {
+                        GameEvents.TriggerBlockDespawnRequest(child.gameObject);
+                    }
+                }
+            }
+        }
+
         /// <inheritdoc/>
         public int GetMapCount()
         {
