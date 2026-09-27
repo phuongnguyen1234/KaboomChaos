@@ -1,3 +1,5 @@
+using Core.Enums;
+
 namespace Core.Interfaces
 {
     /// <summary>
@@ -9,6 +11,11 @@ namespace Core.Interfaces
         /// Instance singleton toan cuc cua IGameloopManager.
         /// </summary>
         static IGameloopManager Instance { get; set; }
+
+        /// <summary>
+        /// Trang thai hien tai cua vong lap game.
+        /// </summary>
+        GameState CurrentState { get; }
 
         float CurrentIntensity { get; }
         float NextRoundIntensity { get; }

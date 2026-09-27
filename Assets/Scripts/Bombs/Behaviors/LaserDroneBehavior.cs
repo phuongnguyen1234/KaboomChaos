@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Bombs.Data;
 using Core;
+using Core.Enums;
 using Core.Interfaces;
 using DG.Tweening;
 using UnityEngine;
@@ -195,6 +196,12 @@ namespace Bombs.Behaviors
             float descendDuration = descend / Mathf.Max(data.descentSpeed, 0.001f);
             yield return MoveEased(controller, descendTo, descendDuration, DG.Tweening.Ease.OutBack);
 
+            if (!controller.IsActive || (IGameloopManager.Instance != null && IGameloopManager.Instance.CurrentState != GameState.RoundActive))
+            {
+                CleanupSightAndAudio(controller);
+                yield break;
+            }
+
             // Buoc 1.1: Bay len xuong nhe quanh diem ha canh (hover).
             Tween hoverTween = null;
             if (data.hoverAmplitude > 0f && data.hoverDuration > 0f)
@@ -206,6 +213,13 @@ namespace Bombs.Behaviors
 
             // Buoc 2: Nghi truoc khi quay Head nhin muc tieu.
             yield return new WaitForSeconds(data.preAimRestDuration);
+
+            if (!controller.IsActive || (IGameloopManager.Instance != null && IGameloopManager.Instance.CurrentState != GameState.RoundActive))
+            {
+                hoverTween?.Kill();
+                CleanupSightAndAudio(controller);
+                yield break;
+            }
 
             // Buoc 3: Chon mot player ngau nhien dang tham gia va con song, lock muc tieu.
             IPlayer targetPlayer = PickRandomTargetPlayer(controller);
@@ -231,6 +245,13 @@ namespace Bombs.Behaviors
 
                 while (aimElapsed < data.aimDuration)
                 {
+                    // Kiem tra neu controller hoac round khong con active
+                    if (!controller.IsActive || (IGameloopManager.Instance != null && IGameloopManager.Instance.CurrentState != GameState.RoundActive))
+                    {
+                        hasValidTarget = false;
+                        break;
+                    }
+
                     // Kiem tra neu player muc tieu hien tai bi chet hoac khong con hop le trong round
                     if (!IsTargetValid(targetPlayer, controller.PlayerManager))
                     {
@@ -270,7 +291,7 @@ namespace Bombs.Behaviors
                     yield return null;
                 }
 
-                if (hasValidTarget)
+                if (hasValidTarget && controller.IsActive && (IGameloopManager.Instance == null || IGameloopManager.Instance.CurrentState == GameState.RoundActive))
                 {
                     // Audio beep rieng: play tai thoi diem ket thuc aim, loop trong 1 thoi gian ngan (beepLoopDuration).
                     PlayBeepAudio(controller, data);
@@ -284,9 +305,18 @@ namespace Bombs.Behaviors
                     float beepTime = Mathf.Min(data.postAimDelay, data.beepLoopDuration);
                     yield return new WaitForSeconds(beepTime);
                     StopBeepAudio(controller);
+
                     if (data.postAimDelay > beepTime)
                     {
                         yield return new WaitForSeconds(data.postAimDelay - beepTime);
+                    }
+
+                    // Kiem tra lai neu round ket thuc hoac drone bi tat trong thoi gian delay
+                    if (!controller.IsActive || (IGameloopManager.Instance != null && IGameloopManager.Instance.CurrentState != GameState.RoundActive))
+                    {
+                        CleanupSightAndAudio(controller);
+                        hoverTween?.Kill();
+                        yield break;
                     }
 
                     // Khi khai hoa: AN duong ngam (line renderer) nhung GIU LAI VFX cuoi.
@@ -300,7 +330,7 @@ namespace Bombs.Behaviors
                 }
                 else
                 {
-                    // Don dep duong ngam va VFX vi khong con player nao de ban
+                    // Don dep duong ngam va VFX vi khong con player nao de ban hoac round da ket thuc
                     CleanupSightAndAudio(controller);
                 }
             }
@@ -309,6 +339,11 @@ namespace Bombs.Behaviors
             hoverTween?.Kill();
             ResetCopterRotation();
             CleanupSightAndAudio(controller);
+
+            if (!controller.IsActive || (IGameloopManager.Instance != null && IGameloopManager.Instance.CurrentState != GameState.RoundActive))
+            {
+                yield break;
+            }
 
             Vector3 ascendFrom = controller.transform.position;
             Vector3 ascendTo = ascendFrom + Vector3.up * data.ascentDistance;
@@ -377,6 +412,12 @@ namespace Bombs.Behaviors
         /// <returns>True neu player hop le, con song va dang trong round.</returns>
         private static bool IsTargetValid(IPlayer player, IPlayerManager playerManager)
         {
+            // Neu round da ket thuc hoac khong o trang thai RoundActive thi khong co muc tieu nao hop le
+            if (IGameloopManager.Instance != null && IGameloopManager.Instance.CurrentState != GameState.RoundActive)
+            {
+                return false;
+            }
+
             if (player == null || player.GameObject == null || !player.GameObject.activeInHierarchy)
             {
                 return false;
@@ -454,6 +495,11 @@ namespace Bombs.Behaviors
         /// <param name="data">Du lieu cau hinh cua Laser Drone.</param>
         private IEnumerator FireBeam(BombController controller, Vector3 start, Vector3 end, LaserDroneData data)
         {
+            if (!controller.IsActive || (IGameloopManager.Instance != null && IGameloopManager.Instance.CurrentState != GameState.RoundActive))
+            {
+                yield break;
+            }
+
             Vector3 dir = end - start;
             float totalDistance = dir.magnitude;
 
@@ -473,10 +519,20 @@ namespace Bombs.Behaviors
             float travelled = spacing;
             while (travelled < totalDistance)
             {
+                if (!controller.IsActive || (IGameloopManager.Instance != null && IGameloopManager.Instance.CurrentState != GameState.RoundActive))
+                {
+                    yield break;
+                }
+
                 Vector3 center = start + dir * travelled;
                 controller.TriggerSingleExplosion(center, false);
                 travelled += spacing;
                 yield return new WaitForSeconds(data.explosionInterval);
+            }
+
+            if (!controller.IsActive || (IGameloopManager.Instance != null && IGameloopManager.Instance.CurrentState != GameState.RoundActive))
+            {
+                yield break;
             }
 
             // ĐAM BAO: fire vụ nổ cuoi XAC tai diem muc tieu. Luon co vụ nổ tai cap du.
@@ -484,7 +540,11 @@ namespace Bombs.Behaviors
             {
                 yield return new WaitForSeconds(data.explosionInterval);
             }
-            controller.TriggerSingleExplosion(end, false);
+
+            if (controller.IsActive && (IGameloopManager.Instance == null || IGameloopManager.Instance.CurrentState == GameState.RoundActive))
+            {
+                controller.TriggerSingleExplosion(end, false);
+            }
         }
 
         /// <summary>

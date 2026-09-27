@@ -580,9 +580,9 @@ namespace Managers
             // --- Giai đoạn 6: Dọn dẹp ---
             CurrentState = GameState.PostRound;
             Debug.Log("[GameloopManager] Giai đoạn 6: Dọn dẹp");
-            _bombSpawnerManager?.StopSpawning(); // Dừng sinh bom trước
+            _bombSpawnerManager?.StopSpawning(); // Dung sinh bom truoc
             _uiManager?.HideTimer();
-            _uiManager?.HideCurrentIntensity(); // Ẩn panel text độ khó của round vừa kết thúc.
+            _uiManager?.HideCurrentIntensity(); // An panel text do kho cua round vua ket thuc.
 
             // Bat trang thai bat tu ngay lap tuc cho tat ca nguoi choi con song de khong nhan bat ky sat thuong nao trong thoi gian chuyen giao
             _playerManager?.SetRoundSurvivorsInvincible(true);

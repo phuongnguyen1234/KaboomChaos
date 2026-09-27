@@ -76,7 +76,17 @@ namespace Core
             if (_instanceToPrefabMap.TryGetValue(instance, out GameObject prefab) && _poolDictionary.TryGetValue(prefab, out var queue))
             {
                 instance.SetActive(false);
-                instance.transform.SetParent(_poolContainer);
+                if (instance.transform.parent != _poolContainer)
+                {
+                    try
+                    {
+                        instance.transform.SetParent(_poolContainer);
+                    }
+                    catch (System.Exception)
+                    {
+                        // Bo qua neu parent dang trong qua trinh activating/deactivating
+                    }
+                }
                 queue.Enqueue(instance);
             }
             else
