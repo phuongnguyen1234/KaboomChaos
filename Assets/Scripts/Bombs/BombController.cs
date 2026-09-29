@@ -213,6 +213,74 @@ namespace Bombs // Thay đổi
             _behavior.OnTriggerEnter(this, other);
         }
 
+        private void OnDisable()
+        {
+            // Dung coroutine dang chay tren controller
+            if (_activeCoroutine != null)
+            {
+                StopCoroutine(_activeCoroutine);
+                _activeCoroutine = null;
+            }
+
+            // Dung tat ca tween tren transform
+            transform.DOKill();
+
+            // Dung am thanh ticking loop neu con chay
+            _tickingLoopHandle?.Stop();
+            _tickingLoopHandle = null;
+
+            // Don dep persistent fuse VFX neu con ton tai
+            if (_persistentFuseVFXInstance != null)
+            {
+                GameEvents.TriggerVFXDespawnRequest(_persistentFuseVFXInstance);
+                _persistentFuseVFXInstance = null;
+            }
+
+            // Don dep chi bao diem roi neu con ton tai
+            if (_landingIndicatorVFXInstance != null)
+            {
+                GameEvents.TriggerVFXDespawnRequest(_landingIndicatorVFXInstance);
+                _landingIndicatorVFXInstance = null;
+            }
+
+            // Reset cac phan pulse ve kich thuoc ban dau
+            if (_originalPartScales != null)
+            {
+                foreach (var entry in _originalPartScales)
+                {
+                    if (entry.Key != null)
+                    {
+                        entry.Key.DOKill();
+                        entry.Key.localScale = entry.Value;
+                    }
+                }
+            }
+
+            // Don dep cac tai nguyen phan hanh vi (sight line, audio loop)
+            _behavior?.OnSetup(this);
+        }
+
+        private void OnDestroy()
+        {
+            _tickingLoopHandle?.Stop();
+            _tickingLoopHandle = null;
+
+            if (_persistentFuseVFXInstance != null)
+            {
+                GameEvents.TriggerVFXDespawnRequest(_persistentFuseVFXInstance);
+                _persistentFuseVFXInstance = null;
+            }
+
+            if (_landingIndicatorVFXInstance != null)
+            {
+                GameEvents.TriggerVFXDespawnRequest(_landingIndicatorVFXInstance);
+                _landingIndicatorVFXInstance = null;
+            }
+
+            transform.DOKill();
+            _behavior?.OnSetup(this);
+        }
+
         #endregion
 
         #region Public Methods (IBombController)
@@ -281,11 +349,8 @@ namespace Bombs // Thay đổi
             _playerManager = null; // Null out injected manager references
 
             // Reset loop handle de ticking (neu a fost lazat de pool).
-            if (_tickingLoopHandle != null)
-            {
-                _tickingLoopHandle.Stop();
-                _tickingLoopHandle = null;
-            }
+            _tickingLoopHandle?.Stop();
+            _tickingLoopHandle = null;
 
             transform.localScale = _originalLocalScale;
             if (_activeCoroutine != null)
@@ -590,11 +655,8 @@ namespace Bombs // Thay đổi
                 _landingIndicatorVFXInstance = null;
             }
 
-            if (_tickingLoopHandle != null)
-            {
-                _tickingLoopHandle.Stop();
-                _tickingLoopHandle = null;
-            }
+            _tickingLoopHandle?.Stop();
+            _tickingLoopHandle = null;
 
             // Delegate the explosion logic to the selected strategy
             _explosionStrategy?.Execute(this);
@@ -853,10 +915,7 @@ namespace Bombs // Thay đổi
             if (clip == null) return;
 
             // Prin SfxManager central pentru a aplicara live volume SFX din Settings.
-            if (SfxService.Instance != null)
-            {
-                SfxService.Instance.PlaySfx(clip, position, volume, pitch);
-            }
+            SfxService.Instance?.PlaySfx(clip, position, volume, pitch);
         }
 
         /// <summary>

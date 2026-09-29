@@ -196,6 +196,21 @@ namespace Managers
             }
         }
 
+        private void LateUpdate()
+        {
+            for (int i = 0; i < _active.Count; i++)
+            {
+                var pb = _active[i];
+                if (pb != null && pb.Source != null && pb.FollowTarget != null)
+                {
+                    if (pb.FollowTarget.gameObject.activeInHierarchy)
+                    {
+                        pb.Source.transform.position = pb.FollowTarget.position;
+                    }
+                }
+            }
+        }
+
         #endregion
 
         #region Internal
@@ -219,19 +234,13 @@ namespace Managers
 
             EnsureSourcePrefab();
 
-            GameObject go = GetFromPool(_sourcePrefab, position, Quaternion.identity);
+            Vector3 spawnPos = parent != null ? parent.position : position;
+            GameObject go = GetFromPool(_sourcePrefab, spawnPos, Quaternion.identity);
             if (go == null) return null;
 
             AudioSource src = go.GetComponent<AudioSource>();
             src.spatialBlend = Mathf.Clamp01(spatialBlend);
             src.loop = loop;
-
-            if (parent != null)
-            {
-                // Gan transform theo object di chuyen (bomb/player) de follow vi tri cua no.
-                go.transform.SetParent(parent, false);
-                go.transform.localPosition = Vector3.zero;
-            }
 
             src.clip = clip;
             src.pitch = pitch;
@@ -240,7 +249,7 @@ namespace Managers
             src.volume = baseVolume * SfxVolume01;
             src.Play();
 
-            SfxPlayback playback = new(src, baseVolume);
+            SfxPlayback playback = new(src, baseVolume, parent);
             _active.Add(playback);
 
             // One-shot: lich ra pool sau khi clip phat xong.
@@ -333,11 +342,13 @@ namespace Managers
         {
             internal readonly AudioSource Source;
             internal readonly float BaseVolume;
+            internal readonly Transform FollowTarget;
 
-            internal SfxPlayback(AudioSource source, float baseVolume)
+            internal SfxPlayback(AudioSource source, float baseVolume, Transform followTarget = null)
             {
                 Source = source;
                 BaseVolume = baseVolume;
+                FollowTarget = followTarget;
             }
         }
 
